@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+
+# IDE (root-level project, opened as one workspace)
+.idea/
+
+# Claude Code local-only settings (per-machine permissions, not for sharing)
+**/.claude/settings.local.json
+
+# Internal planning docs — not published to GitHub
+CLAUDE.md
+wms-server/CLAUDE.md
+wms-web/CLAUDE.md
+docs/
+wms-server/docs/
+wms-web/docs/
+PROJECT_ROADMAP.md
+# Root-level env files (e.g. future docker-compose .env)
+.env
+.env.*
+!.env.example
