@@ -4,8 +4,8 @@
 # IDE (root-level project, opened as one workspace)
 .idea/
 
-# Claude Code local-only settings (per-machine permissions, not for sharing)
-**/.claude/settings.local.json
+# Claude Code folder (not published to GitHub)
+.claude/
 
 # Internal planning docs — not published to GitHub
 CLAUDE.md
