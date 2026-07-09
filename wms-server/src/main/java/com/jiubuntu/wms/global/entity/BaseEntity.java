@@ -1,4 +1,42 @@
 package com.jiubuntu.wms.global.entity;
 
-public class BaseEntity {
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
+import lombok.Getter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
+
+@Getter
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
+public abstract class BaseEntity {
+
+    @CreatedDate
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+
+    private Long createdBy;
+
+    private Long updatedBy;
+
+    private boolean active = true;
+
+    public void assignCreator(Long userId) {
+        this.createdBy = userId;
+        this.updatedBy = userId;
+    }
+
+    public void assignUpdater(Long userId) {
+        this.updatedBy = userId;
+    }
+
+    public void delete() {
+        this.active = false;
+    }
+
 }
