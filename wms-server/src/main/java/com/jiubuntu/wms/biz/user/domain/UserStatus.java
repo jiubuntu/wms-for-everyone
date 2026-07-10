@@ -1,4 +1,4 @@
-package com.jiubuntu.wms.domain.user.domain;
+package com.jiubuntu.wms.biz.user.domain;
 
 public enum UserStatus {
 
