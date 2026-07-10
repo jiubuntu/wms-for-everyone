@@ -5,6 +5,8 @@ import com.jiubuntu.wms.global.payload.response.ApiCommonResponse;
 import com.jiubuntu.wms.global.payload.constants.ResponseCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -20,6 +22,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(errorCode.getHttpCode())
                 .body(ApiCommonResponse.error(errorCode));
+    }
+
+    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
+    public ResponseEntity<ApiCommonResponse<Void>> handleValidationException(Exception e) {
+        log.warn("Validation failed: {}", e.getMessage());
+
+        return ResponseEntity
+                .status(ErrorCode.BAD_REQUEST.getHttpCode())
+                .body(ApiCommonResponse.error(ErrorCode.BAD_REQUEST));
     }
 
     @ExceptionHandler(Exception.class)

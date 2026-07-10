@@ -1,0 +1,60 @@
+package com.jiubuntu.wms.global.security;
+
+import com.jiubuntu.wms.global.security.AuthPrincipal;
+import com.jiubuntu.wms.biz.user.domain.UserRole;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
+@Component
+public class JwtProvider {
+
+    private static final String CLAIM_COMPANY_ID = "companyId";
+    private static final String CLAIM_ROLE = "role";
+
+    private final SecretKey secretKey;
+    private final long accessTokenExpiration;
+
+    public JwtProvider(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.access-token-expiration}") long accessTokenExpiration
+    ) {
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.accessTokenExpiration = accessTokenExpiration;
+    }
+
+    public String generateAccessToken(AuthPrincipal principal) {
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + accessTokenExpiration);
+
+        return Jwts.builder()
+                .subject(String.valueOf(principal.getUserId()))
+                .claim(CLAIM_COMPANY_ID, principal.getCompanyId())
+                .claim(CLAIM_ROLE, principal.getRole().name())
+                .issuedAt(now)
+                .expiration(expiration)
+                .signWith(secretKey)
+                .compact();
+    }
+
+    public AuthPrincipal parseAccessToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        Long userId = Long.valueOf(claims.getSubject());
+        Long companyId = claims.get(CLAIM_COMPANY_ID, Long.class);
+        UserRole role = UserRole.valueOf(claims.get(CLAIM_ROLE, String.class));
+
+        return new AuthPrincipal(userId, companyId, role);
+    }
+
+}

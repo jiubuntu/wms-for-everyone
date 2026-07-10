@@ -1,13 +1,17 @@
-package com.jiubuntu.wms.domain.user.domain;
+package com.jiubuntu.wms.biz.user.domain;
 
+import com.jiubuntu.wms.biz.company.domain.Company;
+import com.jiubuntu.wms.biz.warehouse.domain.Warehouse;
 import com.jiubuntu.wms.global.entity.BaseEntity;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -25,49 +29,45 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long companyId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
-    private Long warehouseId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "warehouse_id")
+    private Warehouse warehouse;
 
-    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
     private String name;
 
+    private String phone;
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
     private UserRole role;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
     private UserStatus status;
 
     private LocalDateTime emailVerifiedAt;
 
-    @Column(nullable = false)
     private int loginFailedCount;
 
     private LocalDateTime lockedUntil;
 
-    private User(Long companyId, Long warehouseId, String email, String password, String name,
-                  UserRole role, UserStatus status) {
-        this.companyId = companyId;
-        this.warehouseId = warehouseId;
+    public User(Company company, Warehouse warehouse, String email, String password, String name, String phone,
+                 UserRole role, UserStatus status) {
+        this.company = company;
+        this.warehouse = warehouse;
         this.email = email;
         this.password = password;
         this.name = name;
+        this.phone = phone;
         this.role = role;
         this.status = status;
         this.loginFailedCount = 0;
-    }
-
-    public static User create(Long companyId, Long warehouseId, String email, String password, String name,
-                               UserRole role, UserStatus status) {
-        return new User(companyId, warehouseId, email, password, name, role, status);
     }
 
     public void verifyEmail() {
@@ -91,6 +91,10 @@ public class User extends BaseEntity {
 
     public void increaseLoginFailedCount() {
         this.loginFailedCount++;
+    }
+
+    public void resetLoginFailedCount() {
+        this.loginFailedCount = 0;
     }
 
     public void changePassword(String encodedPassword) {
