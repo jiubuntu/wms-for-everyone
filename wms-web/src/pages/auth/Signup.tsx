@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
+import { AuthLayout } from "@/components/common/AuthLayout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -89,13 +90,8 @@ export function Signup() {
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center p-6">
-      <form
-        onSubmit={handleSubmit}
-        className="flex w-full max-w-md flex-col gap-4 border bg-background p-8 shadow-lg"
-      >
-        <h1 className="text-sm font-extrabold">회원가입</h1>
-
+    <AuthLayout title="회원가입" className="max-w-lg">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/*<p className="rounded bg-muted/50 p-3 text-xs text-muted-foreground">*/}
         {/*  회원가입 시 기업관리자로 등록됩니다. 가입 신청 후 시스템관리자 승인이 완료되어야 로그인할 수 있습니다.*/}
         {/*</p>*/}
@@ -217,7 +213,7 @@ export function Signup() {
           </Link>
         </p>
       </form>
-    </div>
+    </AuthLayout>
   )
 }
 

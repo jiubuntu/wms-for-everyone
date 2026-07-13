@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
+import { AuthLayout } from "@/components/common/AuthLayout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import loginBg from "@/assets/login.png"
@@ -14,18 +15,8 @@ export function Login() {
   }
 
   return (
-    <div
-      className="relative flex min-h-svh items-center justify-center overflow-hidden bg-cover bg-center p-6"
-      style={{ backgroundImage: `url(${loginBg})` }}
-    >
-      <div className="absolute inset-0 bg-black/50" />
-
-      <form
-        onSubmit={handleSubmit}
-        className="relative z-10 flex w-full max-w-xs flex-col gap-3 border bg-background p-8 shadow-lg"
-      >
-        <h1 className="mb-1 text-center text-sm font-extrabold">모두의 WMS</h1>
-
+    <AuthLayout title="로그인" backgroundImage={loginBg}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="email" className="text-xs text-muted-foreground">
             이메일
@@ -65,6 +56,6 @@ export function Login() {
           </Link>
         </div>
       </form>
-    </div>
+    </AuthLayout>
   )
 }
