@@ -1,4 +1,4 @@
-package com.jiubuntu.wms.global.security;
+package com.jiubuntu.wms.global.security.authentication;
 
 import com.jiubuntu.wms.biz.user.domain.UserRole;
 import lombok.Getter;

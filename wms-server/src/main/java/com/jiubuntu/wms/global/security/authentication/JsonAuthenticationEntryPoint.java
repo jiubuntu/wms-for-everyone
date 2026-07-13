@@ -1,4 +1,4 @@
-package com.jiubuntu.wms.global.security;
+package com.jiubuntu.wms.global.security.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jiubuntu.wms.global.payload.constants.ResponseCode;

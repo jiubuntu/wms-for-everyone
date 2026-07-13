@@ -1,6 +1,5 @@
-package com.jiubuntu.wms.global.security;
+package com.jiubuntu.wms.global.security.authentication;
 
-import com.jiubuntu.wms.global.security.AuthPrincipal;
 import com.jiubuntu.wms.biz.user.domain.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
