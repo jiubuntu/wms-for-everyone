@@ -1,9 +1,9 @@
 package com.jiubuntu.wms.global.config;
 
-import com.jiubuntu.wms.global.security.JwtProvider;
-import com.jiubuntu.wms.global.security.JsonAccessDeniedHandler;
-import com.jiubuntu.wms.global.security.JsonAuthenticationEntryPoint;
-import com.jiubuntu.wms.global.security.JwtAuthenticationFilter;
+import com.jiubuntu.wms.global.security.authentication.JwtProvider;
+import com.jiubuntu.wms.global.security.handler.JsonAccessDeniedHandler;
+import com.jiubuntu.wms.global.security.authentication.JsonAuthenticationEntryPoint;
+import com.jiubuntu.wms.global.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/refresh"
                         ).permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("SYSTEM_ADMIN")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
