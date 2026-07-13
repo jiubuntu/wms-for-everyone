@@ -1,13 +1,14 @@
-package com.jiubuntu.wms.biz.auth.presentation;
+package com.jiubuntu.wms.biz.auth.ui;
 
 import com.jiubuntu.wms.biz.auth.application.AuthService;
 import com.jiubuntu.wms.biz.auth.application.SignupService;
-import com.jiubuntu.wms.biz.auth.application.dto.LoginResult;
-import com.jiubuntu.wms.biz.auth.presentation.payload.AuthLoginRequest;
-import com.jiubuntu.wms.biz.auth.presentation.payload.AuthLoginResponse;
-import com.jiubuntu.wms.biz.auth.presentation.payload.AuthRefreshResponse;
-import com.jiubuntu.wms.biz.auth.presentation.payload.AuthSignupRequest;
-import com.jiubuntu.wms.biz.auth.presentation.payload.AuthSignupResponse;
+import com.jiubuntu.wms.biz.auth.application.dto.result.AuthLoginResult;
+import com.jiubuntu.wms.biz.auth.application.dto.command.AuthSignupCommand;
+import com.jiubuntu.wms.biz.auth.ui.payload.request.AuthLoginRequest;
+import com.jiubuntu.wms.biz.auth.ui.payload.response.AuthLoginResponse;
+import com.jiubuntu.wms.biz.auth.ui.payload.response.AuthRefreshResponse;
+import com.jiubuntu.wms.biz.auth.ui.payload.request.AuthSignupRequest;
+import com.jiubuntu.wms.biz.auth.ui.payload.response.AuthSignupResponse;
 import com.jiubuntu.wms.biz.user.domain.User;
 import com.jiubuntu.wms.global.payload.constants.ResponseCode;
 import com.jiubuntu.wms.global.payload.response.ApiCommonResponse;
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,10 +34,10 @@ public class AuthController {
     private final RefreshTokenCookieProvider refreshTokenCookieProvider;
 
     @PostMapping("/signup")
-    public ApiCommonResponse<AuthSignupResponse> signup(
+    public ResponseEntity<ApiCommonResponse<AuthSignupResponse>> signup(
             @Valid @ModelAttribute AuthSignupRequest request
     ) {
-        User user = signupService.signup(
+        AuthSignupCommand command = new AuthSignupCommand(
                 request.getEmail(),
                 request.getPassword(),
                 request.getPasswordConfirm(),
@@ -45,36 +47,40 @@ public class AuthController {
                 request.getBusinessNumber(),
                 request.getBusinessLicenseFile()
         );
+        User user = signupService.signup(command);
 
-        return ApiCommonResponse.success(AuthSignupResponse.from(user), ResponseCode.CREATED);
+        ApiCommonResponse<AuthSignupResponse> response = ApiCommonResponse.success(AuthSignupResponse.from(user), ResponseCode.CREATED);
+        return ResponseEntity.status(response.getHttpCode()).body(response);
     }
 
     @PostMapping("/login")
-    public ApiCommonResponse<AuthLoginResponse> login(
+    public ResponseEntity<ApiCommonResponse<AuthLoginResponse>> login(
             @Valid @RequestBody AuthLoginRequest request,
             HttpServletResponse response
     ) {
-        LoginResult result = authService.login(request.getEmail(), request.getPassword());
+        AuthLoginResult result = authService.login(request.getEmail(), request.getPassword());
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookieProvider.issue(result.getRefreshToken(), result.getRefreshTokenExpirationMillis()).toString());
 
-        return ApiCommonResponse.success(AuthLoginResponse.of(result.getAccessToken(), result.getUser()));
+        ApiCommonResponse<AuthLoginResponse> body = ApiCommonResponse.success(AuthLoginResponse.of(result.getAccessToken(), result.getUser()));
+        return ResponseEntity.status(body.getHttpCode()).body(body);
     }
 
     @PostMapping("/refresh")
-    public ApiCommonResponse<AuthRefreshResponse> refresh(
+    public ResponseEntity<ApiCommonResponse<AuthRefreshResponse>> refresh(
             @CookieValue(value = RefreshTokenCookieProvider.COOKIE_NAME, required = false) String refreshToken,
             HttpServletResponse response
     ) {
-        LoginResult result = authService.refresh(refreshToken);
+        AuthLoginResult result = authService.refresh(refreshToken);
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookieProvider.issue(result.getRefreshToken(), result.getRefreshTokenExpirationMillis()).toString());
 
-        return ApiCommonResponse.success(AuthRefreshResponse.of(result.getAccessToken()));
+        ApiCommonResponse<AuthRefreshResponse> body = ApiCommonResponse.success(AuthRefreshResponse.of(result.getAccessToken()));
+        return ResponseEntity.status(body.getHttpCode()).body(body);
     }
 
     @PostMapping("/logout")
-    public ApiCommonResponse<Void> logout(
+    public ResponseEntity<ApiCommonResponse<Void>> logout(
             @CookieValue(value = RefreshTokenCookieProvider.COOKIE_NAME, required = false) String refreshToken,
             HttpServletResponse response
     ) {
@@ -84,7 +90,8 @@ public class AuthController {
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookieProvider.expire().toString());
 
-        return ApiCommonResponse.success(null);
+        ApiCommonResponse<Void> body = ApiCommonResponse.success(null);
+        return ResponseEntity.status(body.getHttpCode()).body(body);
     }
 
 }

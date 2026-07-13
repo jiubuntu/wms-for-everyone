@@ -1,5 +1,6 @@
 package com.jiubuntu.wms.biz.auth.application;
 
+import com.jiubuntu.wms.biz.auth.application.dto.command.AuthSignupCommand;
 import com.jiubuntu.wms.biz.auth.application.validator.SignupValidator;
 import com.jiubuntu.wms.biz.company.application.CompanyService;
 import com.jiubuntu.wms.biz.company.domain.Company;
@@ -9,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -21,15 +21,14 @@ public class SignupService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public User signup(String email, String password, String passwordConfirm, String name, String phone,
-                        String companyName, String businessNumber, MultipartFile businessLicenseFile) {
-        signupValidator.validate(email, password, passwordConfirm, businessNumber);
+    public User signup(AuthSignupCommand command) {
+        signupValidator.validate(command);
 
-        Company company = companyService.create(companyName, businessNumber);
-        companyService.addBusinessLicenseFile(company, businessLicenseFile);
+        Company company = companyService.create(command.getCompanyName(), command.getBusinessNumber());
+        companyService.addBusinessLicenseFile(company, command.getBusinessLicenseFile());
 
-        String encodedPassword = passwordEncoder.encode(password);
-        return userService.create(company, email, encodedPassword, name, phone);
+        String encodedPassword = passwordEncoder.encode(command.getPassword());
+        return userService.create(company, command.getEmail(), encodedPassword, command.getName(), command.getPhone());
     }
 
 }
