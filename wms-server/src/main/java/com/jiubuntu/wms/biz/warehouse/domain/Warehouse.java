@@ -1,10 +1,14 @@
 package com.jiubuntu.wms.biz.warehouse.domain;
 
+import com.jiubuntu.wms.biz.company.domain.Company;
 import com.jiubuntu.wms.global.entity.BaseEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -20,12 +24,14 @@ public class Warehouse extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long companyId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     private String name;
 
-    public Warehouse(Long companyId, String name) {
-        this.companyId = companyId;
+    public Warehouse(Company company, String name) {
+        this.company = company;
         this.name = name;
     }
 
