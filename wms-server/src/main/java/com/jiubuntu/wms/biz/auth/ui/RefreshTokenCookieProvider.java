@@ -1,4 +1,4 @@
-package com.jiubuntu.wms.biz.auth.presentation;
+package com.jiubuntu.wms.biz.auth.ui;
 
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;

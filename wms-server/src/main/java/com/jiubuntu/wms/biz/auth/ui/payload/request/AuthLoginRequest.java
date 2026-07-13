@@ -1,4 +1,4 @@
-package com.jiubuntu.wms.biz.auth.presentation.payload;
+package com.jiubuntu.wms.biz.auth.ui.payload.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

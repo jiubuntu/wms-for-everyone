@@ -1,4 +1,4 @@
-package com.jiubuntu.wms.biz.auth.presentation.payload;
+package com.jiubuntu.wms.biz.auth.ui.payload.response;
 
 import com.jiubuntu.wms.biz.user.domain.User;
 import lombok.Getter;
