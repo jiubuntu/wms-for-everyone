@@ -1,10 +1,10 @@
 package com.jiubuntu.wms.biz.auth.application;
 
-import com.jiubuntu.wms.biz.auth.application.dto.LoginResult;
+import com.jiubuntu.wms.biz.auth.application.dto.result.AuthLoginResult;
 import com.jiubuntu.wms.biz.auth.application.validator.AuthValidator;
-import com.jiubuntu.wms.global.security.AuthPrincipal;
+import com.jiubuntu.wms.global.security.authentication.AuthPrincipal;
 import com.jiubuntu.wms.biz.auth.domain.RefreshToken;
-import com.jiubuntu.wms.global.security.JwtProvider;
+import com.jiubuntu.wms.global.security.authentication.JwtProvider;
 import com.jiubuntu.wms.biz.auth.infrastructure.RefreshTokenRepository;
 import com.jiubuntu.wms.biz.user.application.UserService;
 import com.jiubuntu.wms.biz.user.domain.User;
@@ -39,7 +39,7 @@ public class AuthService {
     private long lockDurationMinutes;
 
     @Transactional
-    public LoginResult login(String email, String password) {
+    public AuthLoginResult login(String email, String password) {
         User user = userService.findActiveByEmail(email)
                 .orElseThrow(() -> new CommonException(ErrorCode.INVALID_CREDENTIALS));
 
@@ -61,7 +61,7 @@ public class AuthService {
     }
 
     @Transactional
-    public LoginResult refresh(String refreshTokenValue) {
+    public AuthLoginResult refresh(String refreshTokenValue) {
         RefreshToken refreshToken = refreshTokenRepository.findActiveByToken(refreshTokenValue)
                 .orElseThrow(() -> new CommonException(ErrorCode.INVALID_REFRESH_TOKEN));
 
@@ -78,7 +78,7 @@ public class AuthService {
                 .ifPresent(RefreshToken::delete);
     }
 
-    private LoginResult issueTokens(User user) {
+    private AuthLoginResult issueTokens(User user) {
         AuthPrincipal principal = new AuthPrincipal(user.getId(), user.getCompany().getId(), user.getRole());
         String accessToken = jwtProvider.generateAccessToken(principal);
 
@@ -87,7 +87,7 @@ public class AuthService {
         RefreshToken refreshToken = new RefreshToken(user, refreshTokenValue, expiredAt);
         refreshTokenRepository.save(refreshToken);
 
-        return new LoginResult(accessToken, refreshTokenValue, refreshTokenExpiration, user);
+        return new AuthLoginResult(accessToken, refreshTokenValue, refreshTokenExpiration, user);
     }
 
 }

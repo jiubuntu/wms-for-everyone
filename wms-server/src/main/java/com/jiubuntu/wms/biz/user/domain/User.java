@@ -101,4 +101,9 @@ public class User extends BaseEntity {
         this.password = encodedPassword;
     }
 
+    public void withdraw() {
+        this.status = UserStatus.INACTIVE;
+        delete();
+    }
+
 }
