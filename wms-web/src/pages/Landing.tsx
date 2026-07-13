@@ -27,7 +27,7 @@ export function Landing() {
     <div className="flex min-h-svh flex-col">
       <header className="flex items-center justify-between border-b px-6 py-3 sm:px-10">
         <span className="text-sm font-extrabold tracking-tight">모두의 WMS</span>
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-2 text-[15px] font-medium">
           <Button variant="ghost" asChild>
             <Link to="/login">로그인</Link>
           </Button>
@@ -43,7 +43,7 @@ export function Landing() {
       >
         <div className="absolute inset-0 bg-background/55" />
         <div className="relative z-10">
-          <p className="mb-4 font-mono text-xs tracking-wider text-muted-foreground uppercase">
+          <p className="mb-4 font-mono text-xs tracking-wider text-primary uppercase">
             소규모 사업체를 위한 창고관리 솔루션
           </p>
           <h1 className="mb-8 text-4xl font-extrabold text-balance sm:text-5xl">
@@ -86,13 +86,13 @@ function FeatureSection({
         reversed && "md:flex-row-reverse"
       )}
     >
-      <div className="flex aspect-video w-full flex-1 items-center justify-center border border-dashed bg-muted/40 text-xs text-muted-foreground">
+      <div className="flex aspect-video w-full flex-1 items-center justify-center rounded-lg border border-dashed bg-muted/40 text-xs text-muted-foreground">
         이미지 자리 (추후 제작)
       </div>
       <div className="flex-1 text-center md:text-left">
-        <p className="mb-2 font-mono text-xs text-muted-foreground">0{index + 1}</p>
-        <h2 className="mb-3 text-2xl font-extrabold text-balance sm:text-3xl">{title}</h2>
-        <p className="text-muted-foreground">{description}</p>
+        <p className="mb-2 font-mono text-xs text-primary">0{index + 1}</p>
+        <h2 className="mb-3 text-2xl font-bold text-balance sm:text-3xl">{title}</h2>
+        <p className="text-base text-muted-foreground">{description}</p>
       </div>
     </div>
   )
