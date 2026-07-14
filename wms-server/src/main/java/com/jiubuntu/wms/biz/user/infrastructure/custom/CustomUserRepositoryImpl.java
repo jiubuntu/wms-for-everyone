@@ -3,6 +3,7 @@ package com.jiubuntu.wms.biz.user.infrastructure.custom;
 import com.jiubuntu.wms.biz.user.domain.QUser;
 import com.jiubuntu.wms.biz.user.domain.User;
 import com.jiubuntu.wms.biz.user.domain.UserRole;
+import com.jiubuntu.wms.biz.user.domain.UserStatus;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,15 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
                 .where(user.company.id.eq(companyId), user.role.eq(role), activeEq())
                 .fetchOne();
         return count != null ? count : 0L;
+    }
+
+    @Override
+    public Optional<User> findPendingByCompanyIdAndRole(Long companyId, UserRole role) {
+        return Optional.ofNullable(
+                queryFactory.selectFrom(user)
+                        .where(user.company.id.eq(companyId), user.role.eq(role), user.status.eq(UserStatus.PENDING), activeEq())
+                        .fetchOne()
+        );
     }
 
     private BooleanExpression activeEq() {

@@ -53,6 +53,12 @@ public class UserService {
     }
 
     @Transactional
+    public void approveCompanyAdmin(Long companyId) {
+        userRepository.findPendingByCompanyIdAndRole(companyId, UserRole.COMPANY_ADMIN)
+                .ifPresent(User::approve);
+    }
+
+    @Transactional
     public User issueAccount(UserIssueCommand command) {
         User issuer = getActiveById(command.getIssuerUserId());
         Warehouse warehouse = warehouseService.getActiveById(command.getWarehouseId());

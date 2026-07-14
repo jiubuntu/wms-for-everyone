@@ -3,6 +3,7 @@ package com.jiubuntu.wms.admin.application.company;
 import com.jiubuntu.wms.biz.company.application.CompanyService;
 import com.jiubuntu.wms.biz.company.application.dto.result.CompanyResult;
 import com.jiubuntu.wms.biz.company.domain.Company;
+import com.jiubuntu.wms.biz.user.application.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CompanyAdminService {
 
     private final CompanyService companyService;
+    private final UserService userService;
 
     public Page<CompanyResult> findPendingList(Pageable pageable) {
         return companyService.findPendingList(pageable);
@@ -30,7 +32,9 @@ public class CompanyAdminService {
 
     @Transactional
     public Company approve(Long companyId, Long updatedBy) {
-        return companyService.approve(companyId, updatedBy);
+        Company company = companyService.approve(companyId, updatedBy);
+        userService.approveCompanyAdmin(companyId);
+        return company;
     }
 
 }
