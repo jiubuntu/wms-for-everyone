@@ -49,7 +49,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/signup",
                                 "/api/auth/login",
-                                "/api/auth/refresh"
+                                "/api/auth/refresh",
+                                "/api/auth/password/reset-request",
+                                "/api/auth/password/reset-confirm"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("SYSTEM_ADMIN")
                         .anyRequest().authenticated()

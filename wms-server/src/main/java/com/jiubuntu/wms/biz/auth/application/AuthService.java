@@ -3,9 +3,10 @@ package com.jiubuntu.wms.biz.auth.application;
 import com.jiubuntu.wms.biz.auth.application.dto.result.AuthLoginResult;
 import com.jiubuntu.wms.biz.auth.application.validator.AuthValidator;
 import com.jiubuntu.wms.global.security.authentication.AuthPrincipal;
-import com.jiubuntu.wms.biz.auth.domain.RefreshToken;
+import com.jiubuntu.wms.biz.auth.domain.AuthToken;
+import com.jiubuntu.wms.biz.auth.domain.AuthTokenType;
 import com.jiubuntu.wms.global.security.authentication.JwtProvider;
-import com.jiubuntu.wms.biz.auth.infrastructure.RefreshTokenRepository;
+import com.jiubuntu.wms.biz.auth.infrastructure.AuthTokenRepository;
 import com.jiubuntu.wms.biz.user.application.UserService;
 import com.jiubuntu.wms.biz.user.domain.User;
 import com.jiubuntu.wms.global.exception.CommonException;
@@ -25,7 +26,7 @@ import java.util.UUID;
 public class AuthService {
 
     private final UserService userService;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final AuthTokenRepository authTokenRepository;
     private final JwtProvider jwtProvider;
     private final AuthValidator authValidator;
 
@@ -62,7 +63,7 @@ public class AuthService {
 
     @Transactional
     public AuthLoginResult refresh(String refreshTokenValue) {
-        RefreshToken refreshToken = refreshTokenRepository.findActiveByToken(refreshTokenValue)
+        AuthToken refreshToken = authTokenRepository.findActiveByTokenAndType(refreshTokenValue, AuthTokenType.REFRESH)
                 .orElseThrow(() -> new CommonException(ErrorCode.INVALID_REFRESH_TOKEN));
 
         authValidator.validateRefreshToken(refreshToken);
@@ -74,8 +75,8 @@ public class AuthService {
 
     @Transactional
     public void logout(String refreshTokenValue) {
-        refreshTokenRepository.findActiveByToken(refreshTokenValue)
-                .ifPresent(RefreshToken::delete);
+        authTokenRepository.findActiveByTokenAndType(refreshTokenValue, AuthTokenType.REFRESH)
+                .ifPresent(AuthToken::delete);
     }
 
     private AuthLoginResult issueTokens(User user) {
@@ -84,8 +85,8 @@ public class AuthService {
 
         String refreshTokenValue = UUID.randomUUID().toString();
         LocalDateTime expiredAt = LocalDateTime.now().plus(Duration.ofMillis(refreshTokenExpiration));
-        RefreshToken refreshToken = new RefreshToken(user, refreshTokenValue, expiredAt);
-        refreshTokenRepository.save(refreshToken);
+        AuthToken refreshToken = new AuthToken(user, refreshTokenValue, AuthTokenType.REFRESH, expiredAt);
+        authTokenRepository.save(refreshToken);
 
         return new AuthLoginResult(accessToken, refreshTokenValue, refreshTokenExpiration, user);
     }
