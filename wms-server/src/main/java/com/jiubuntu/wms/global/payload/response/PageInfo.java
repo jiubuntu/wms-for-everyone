@@ -1,7 +1,9 @@
 package com.jiubuntu.wms.global.payload.response;
 
+import lombok.Getter;
 import org.springframework.data.domain.Page;
 
+@Getter
 public class PageInfo {
 
     private final int page;
