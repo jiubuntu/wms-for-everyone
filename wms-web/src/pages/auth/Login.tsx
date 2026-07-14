@@ -1,17 +1,35 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { isAxiosError } from "axios"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from "@/contexts/AuthContext"
 import { AuthLayout } from "@/components/common/AuthLayout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import loginBg from "@/assets/login.png"
 
 export function Login() {
+  const { login } = useAuth()
+  const navigate = useNavigate()
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    // TODO: 백엔드 로그인 API 연동 (5단계 백엔드 개발 시점)
+    setError("")
+    setIsSubmitting(true)
+
+    try {
+      const user = await login(email, password)
+      navigate(user.role === "SYSTEM_ADMIN" ? "/admin/companies" : "/")
+    } catch (err) {
+      const message = isAxiosError(err) ? err.response?.data?.message : null
+      setError(message ?? "로그인에 실패했습니다.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -43,7 +61,9 @@ export function Login() {
           />
         </div>
 
-        <Button type="submit" className="mt-1">
+        {error && <p className="text-xs text-destructive">{error}</p>}
+
+        <Button type="submit" className="mt-1" disabled={isSubmitting}>
           로그인
         </Button>
 

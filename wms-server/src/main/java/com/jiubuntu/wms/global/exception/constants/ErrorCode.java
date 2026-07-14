@@ -11,6 +11,7 @@ public enum ErrorCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST.value(), "0001", "요청 파라미터가 올바르지 않습니다."),
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(), "0002", "파일 업로드에 실패했습니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN.value(), "0003", "접근 권한이 없습니다."),
+    EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(), "0004", "이메일 발송에 실패했습니다."),
 
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0101", "이미 가입된 이메일입니다."),
     BUSINESS_NUMBER_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0102", "이미 등록된 사업자등록번호입니다."),
@@ -23,6 +24,8 @@ public enum ErrorCode {
     ACCOUNT_NOT_ACTIVE(HttpStatus.FORBIDDEN.value(), "0203", "아직 사용할 수 없는 계정입니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED.value(), "0204", "유효하지 않은 리프레시 토큰입니다."),
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED.value(), "0205", "만료된 리프레시 토큰입니다."),
+    INVALID_PASSWORD_RESET_TOKEN(HttpStatus.UNAUTHORIZED.value(), "0206", "유효하지 않은 비밀번호 재설정 링크입니다."),
+    EXPIRED_PASSWORD_RESET_TOKEN(HttpStatus.UNAUTHORIZED.value(), "0207", "만료된 비밀번호 재설정 링크입니다."),
 
     COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0301", "존재하지 않는 기업입니다."),
     COMPANY_FILE_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0302", "존재하지 않는 첨부파일입니다."),

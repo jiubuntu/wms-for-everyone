@@ -1,6 +1,6 @@
 package com.jiubuntu.wms.biz.auth.application.validator;
 
-import com.jiubuntu.wms.biz.auth.domain.RefreshToken;
+import com.jiubuntu.wms.biz.auth.domain.AuthToken;
 import com.jiubuntu.wms.biz.user.domain.User;
 import com.jiubuntu.wms.biz.user.domain.UserStatus;
 import com.jiubuntu.wms.global.exception.CommonException;
@@ -22,7 +22,7 @@ public class AuthValidator {
         validatePassword(user, rawPassword);
     }
 
-    public void validateRefreshToken(RefreshToken refreshToken) {
+    public void validateRefreshToken(AuthToken refreshToken) {
         if (!refreshToken.isValid()) {
             throw new CommonException(ErrorCode.EXPIRED_REFRESH_TOKEN);
         }

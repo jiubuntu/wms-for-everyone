@@ -1,10 +1,14 @@
 package com.jiubuntu.wms.biz.auth.ui;
 
 import com.jiubuntu.wms.biz.auth.application.AuthService;
+import com.jiubuntu.wms.biz.auth.application.PasswordResetService;
 import com.jiubuntu.wms.biz.auth.application.SignupService;
+import com.jiubuntu.wms.biz.auth.application.dto.command.AuthPasswordResetConfirmCommand;
 import com.jiubuntu.wms.biz.auth.application.dto.result.AuthLoginResult;
 import com.jiubuntu.wms.biz.auth.application.dto.command.AuthSignupCommand;
 import com.jiubuntu.wms.biz.auth.ui.payload.request.AuthLoginRequest;
+import com.jiubuntu.wms.biz.auth.ui.payload.request.AuthPasswordResetConfirmRequest;
+import com.jiubuntu.wms.biz.auth.ui.payload.request.AuthPasswordResetMailRequest;
 import com.jiubuntu.wms.biz.auth.ui.payload.response.AuthLoginResponse;
 import com.jiubuntu.wms.biz.auth.ui.payload.response.AuthRefreshResponse;
 import com.jiubuntu.wms.biz.auth.ui.payload.request.AuthSignupRequest;
@@ -31,6 +35,7 @@ public class AuthController {
 
     private final SignupService signupService;
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
     private final RefreshTokenCookieProvider refreshTokenCookieProvider;
 
     @PostMapping("/signup")
@@ -89,6 +94,29 @@ public class AuthController {
         }
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookieProvider.expire().toString());
+
+        ApiCommonResponse<Void> body = ApiCommonResponse.success(null);
+        return ResponseEntity.status(body.getHttpCode()).body(body);
+    }
+
+    @PostMapping("/password/reset-request")
+    public ResponseEntity<ApiCommonResponse<Void>> requestPasswordReset(
+            @Valid @RequestBody AuthPasswordResetMailRequest request
+    ) {
+        passwordResetService.requestReset(request.getEmail());
+
+        ApiCommonResponse<Void> body = ApiCommonResponse.success(null);
+        return ResponseEntity.status(body.getHttpCode()).body(body);
+    }
+
+    @PostMapping("/password/reset-confirm")
+    public ResponseEntity<ApiCommonResponse<Void>> confirmPasswordReset(
+            @Valid @RequestBody AuthPasswordResetConfirmRequest request
+    ) {
+        AuthPasswordResetConfirmCommand command = new AuthPasswordResetConfirmCommand(
+                request.getToken(), request.getNewPassword(), request.getNewPasswordConfirm()
+        );
+        passwordResetService.confirmReset(command);
 
         ApiCommonResponse<Void> body = ApiCommonResponse.success(null);
         return ResponseEntity.status(body.getHttpCode()).body(body);

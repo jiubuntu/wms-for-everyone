@@ -15,4 +15,6 @@ public interface CustomUserRepository {
 
     long countActiveByCompanyIdAndRole(Long companyId, UserRole role);
 
+    Optional<User> findPendingByCompanyIdAndRole(Long companyId, UserRole role);
+
 }
