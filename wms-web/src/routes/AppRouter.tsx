@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom"
 import { Landing } from "@/pages/Landing"
 import { Login } from "@/pages/auth/Login"
 import { Signup } from "@/pages/auth/Signup"
+import { ResetPassword } from "@/pages/auth/ResetPassword"
 import { Forbidden } from "@/pages/Forbidden"
 import { ProtectedRoute } from "@/routes/ProtectedRoute"
 import { GuestRoute } from "@/routes/GuestRoute"
@@ -16,6 +17,7 @@ export function AppRouter() {
       <Route path="/" element={<GuestRoute><Landing /></GuestRoute>} />
       <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
       <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/forbidden" element={<Forbidden />} />
 
       <Route
