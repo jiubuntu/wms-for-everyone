@@ -4,6 +4,7 @@ import { Login } from "@/pages/auth/Login"
 import { Signup } from "@/pages/auth/Signup"
 import { Forbidden } from "@/pages/Forbidden"
 import { ProtectedRoute } from "@/routes/ProtectedRoute"
+import { GuestRoute } from "@/routes/GuestRoute"
 import { AdminLayout } from "@/components/common/AdminLayout"
 import { DashboardPage } from "@/pages/admin/DashboardPage"
 import { CompanyApprovalListPage } from "@/pages/admin/CompanyApprovalListPage"
@@ -12,9 +13,9 @@ import { CompanyApprovalDetailPage } from "@/pages/admin/CompanyApprovalDetailPa
 export function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
+      <Route path="/" element={<GuestRoute><Landing /></GuestRoute>} />
+      <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+      <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
       <Route path="/forbidden" element={<Forbidden />} />
 
       <Route

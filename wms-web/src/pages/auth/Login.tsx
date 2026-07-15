@@ -23,7 +23,7 @@ export function Login() {
 
     try {
       const user = await login(email, password)
-      navigate(user.role === "SYSTEM_ADMIN" ? "/admin/companies" : "/")
+      navigate(user.role === "SYSTEM_ADMIN" ? "/admin" : "/")
     } catch (err) {
       const message = isAxiosError(err) ? err.response?.data?.message : null
       setError(message ?? "로그인에 실패했습니다.")
