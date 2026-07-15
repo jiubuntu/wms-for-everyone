@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
+import { BrandMark } from "@/components/common/BrandMark"
 import { cn } from "@/lib/utils"
 import introBg from "@/assets/intro.png"
 
@@ -26,7 +27,7 @@ export function Landing() {
   return (
     <div className="flex min-h-svh flex-col">
       <header className="flex items-center justify-between border-b px-6 py-3 sm:px-10">
-        <span className="text-sm font-extrabold tracking-tight">모두의 WMS</span>
+        <BrandMark />
         <nav className="flex items-center gap-2 text-[15px] font-medium">
           <Button variant="ghost" asChild>
             <Link to="/login">로그인</Link>
