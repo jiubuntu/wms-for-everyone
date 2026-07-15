@@ -53,6 +53,11 @@ public class SecurityConfig {
                                 "/api/auth/password/reset-request",
                                 "/api/auth/password/reset-confirm"
                         ).permitAll()
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("SYSTEM_ADMIN")
                         .anyRequest().authenticated()
                 )
