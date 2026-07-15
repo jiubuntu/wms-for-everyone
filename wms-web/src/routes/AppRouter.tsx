@@ -5,6 +5,7 @@ import { Signup } from "@/pages/auth/Signup"
 import { Forbidden } from "@/pages/Forbidden"
 import { ProtectedRoute } from "@/routes/ProtectedRoute"
 import { AdminLayout } from "@/components/common/AdminLayout"
+import { DashboardPage } from "@/pages/admin/DashboardPage"
 import { CompanyApprovalListPage } from "@/pages/admin/CompanyApprovalListPage"
 import { CompanyApprovalDetailPage } from "@/pages/admin/CompanyApprovalDetailPage"
 
@@ -24,6 +25,7 @@ export function AppRouter() {
           </ProtectedRoute>
         }
       >
+        <Route index element={<DashboardPage />} />
         <Route path="companies" element={<CompanyApprovalListPage />} />
         <Route path="companies/:id" element={<CompanyApprovalDetailPage />} />
       </Route>
