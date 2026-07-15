@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/public-sans";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -46,6 +47,12 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-info: var(--info);
+    --color-info-foreground: var(--info-foreground);
 }
 
 :root {
@@ -64,6 +71,12 @@
     --accent: #f5f6f8;
     --accent-foreground: rgba(19, 19, 31, 0.9);
     --destructive: #dc2e47;
+    --success: #10c469;
+    --success-foreground: #ffffff;
+    --warning: #f9c851;
+    --warning-foreground: #4c4c5c;
+    --info: #35b8e0;
+    --info-foreground: #ffffff;
     --border: rgba(19, 19, 31, 0.08);
     --input: rgba(19, 19, 31, 0.08);
     --ring: #3182f6;
@@ -115,6 +128,36 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* 관리자 화면 전용 스코프 — Adminto 관리자 템플릿(admin-template/Adminto) 톤 */
+.admin-theme {
+    font-family: 'Public Sans Variable', sans-serif;
+    --background: #f0f4f7;
+    --foreground: #4c4c5c;
+    --card: #ffffff;
+    --card-foreground: #4c4c5c;
+    --popover: #ffffff;
+    --popover-foreground: #4c4c5c;
+    --primary: #188ae2;
+    --primary-foreground: #ffffff;
+    --secondary: #f6f7fb;
+    --secondary-foreground: #313a46;
+    --muted: #f6f7fb;
+    --muted-foreground: #6c757d;
+    --accent: #f6f7fb;
+    --accent-foreground: #313a46;
+    --destructive: #ff5b5b;
+    --success: #10c469;
+    --success-foreground: #ffffff;
+    --warning: #f9c851;
+    --warning-foreground: #4c4c5c;
+    --info: #35b8e0;
+    --info-foreground: #ffffff;
+    --border: #e7e9eb;
+    --input: #e7e9eb;
+    --ring: #188ae2;
+    --radius: 0.3rem;
 }
 
 @layer base {

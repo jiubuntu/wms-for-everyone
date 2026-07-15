@@ -15,3 +15,15 @@ export async function refresh(): Promise<{ accessToken: string }> {
 export async function logout(): Promise<void> {
   await api.post("/auth/logout")
 }
+
+export async function requestPasswordReset(email: string): Promise<void> {
+  await api.post("/auth/password/reset-request", { email })
+}
+
+export async function confirmPasswordReset(params: {
+  token: string
+  newPassword: string
+  newPasswordConfirm: string
+}): Promise<void> {
+  await api.post("/auth/password/reset-confirm", params)
+}

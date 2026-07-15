@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { AuthLayout } from "@/components/common/AuthLayout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import loginBg from "@/assets/login.png"
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png"]
@@ -90,7 +91,7 @@ export function Signup() {
   }
 
   return (
-    <AuthLayout title="회원가입" className="max-w-lg">
+    <AuthLayout title="회원가입" className="max-w-lg" backgroundImage={loginBg}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/*<p className="rounded bg-muted/50 p-3 text-xs text-muted-foreground">*/}
         {/*  회원가입 시 기업관리자로 등록됩니다. 가입 신청 후 시스템관리자 승인이 완료되어야 로그인할 수 있습니다.*/}

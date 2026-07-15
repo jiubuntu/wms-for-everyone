@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom"
 import {
   Card,
   CardContent,
@@ -6,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { BrandMark } from "@/components/common/BrandMark"
 import { cn } from "@/lib/utils"
 
 interface AuthLayoutProps {
@@ -33,10 +33,8 @@ export function AuthLayout({
     >
       {backgroundImage && <div className="absolute inset-0 bg-background/70" />}
 
-      <Link to="/" className="relative z-10 text-sm font-extrabold tracking-tight">
-        모두의 WMS
-      </Link>
-      <Card className={cn("relative z-10 w-full max-w-xs", className)}>
+      <BrandMark className="relative z-10" />
+      <Card className={cn("relative z-10 w-full max-w-xs bg-background", className)}>
         <CardHeader>
           <CardTitle className="text-center text-lg">{title}</CardTitle>
           {description && (
