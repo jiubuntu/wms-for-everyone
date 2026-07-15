@@ -1,5 +1,6 @@
 package com.jiubuntu.wms.biz.auth.ui.payload.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -41,6 +42,7 @@ public class AuthSignupRequest {
     private String businessNumber;
 
     @NotNull(message = "사업자등록증 파일을 첨부해주세요.")
+    @Schema(type = "string", format = "binary")
     private MultipartFile businessLicenseFile;
 
 }

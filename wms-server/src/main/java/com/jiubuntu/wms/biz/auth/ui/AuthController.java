@@ -16,10 +16,13 @@ import com.jiubuntu.wms.biz.auth.ui.payload.response.AuthSignupResponse;
 import com.jiubuntu.wms.biz.user.domain.User;
 import com.jiubuntu.wms.global.payload.constants.ResponseCode;
 import com.jiubuntu.wms.global.payload.response.ApiCommonResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -38,6 +41,9 @@ public class AuthController {
     private final PasswordResetService passwordResetService;
     private final RefreshTokenCookieProvider refreshTokenCookieProvider;
 
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE, schema = @Schema(implementation = AuthSignupRequest.class))
+    )
     @PostMapping("/signup")
     public ResponseEntity<ApiCommonResponse<AuthSignupResponse>> signup(
             @Valid @ModelAttribute AuthSignupRequest request
