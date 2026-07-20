@@ -11,7 +11,7 @@ export function GuestRoute({ children }: { children: ReactNode }) {
   }
 
   if (user) {
-    const home = user.role === "SYSTEM_ADMIN" ? "/admin" : "/"
+    const home = user.role === "SYSTEM_ADMIN" ? "/admin" : "/app"
     if (location.pathname !== home) {
       return <Navigate to={home} replace />
     }

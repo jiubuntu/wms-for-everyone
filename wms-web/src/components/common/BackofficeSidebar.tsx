@@ -1,38 +1,59 @@
 import { useState, type ComponentType } from "react"
 import { Link, NavLink, useLocation } from "react-router-dom"
-import { ChevronDown, LayoutDashboard, Users, type LucideProps } from "lucide-react"
+import { ChevronDown, type LucideProps } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/contexts/AuthContext"
+import type { UserRole } from "@/features/auth/types"
 
 type Icon = ComponentType<LucideProps>
 
-interface NavLeaf {
+export interface NavLeaf {
   type: "item"
   label: string
   to: string
   icon: Icon
+  roles?: UserRole[]
 }
 
-interface NavGroup {
+export interface NavGroup {
   type: "group"
   label: string
   icon: Icon
-  children: { label: string; to: string }[]
+  children: { label: string; to: string; roles?: UserRole[] }[]
 }
 
-const NAV: (NavLeaf | NavGroup)[] = [
-  { type: "item", label: "대시보드", to: "/admin", icon: LayoutDashboard },
-  {
-    type: "group",
-    label: "사용자",
-    icon: Users,
-    children: [{ label: "기업 승인 관리", to: "/admin/companies" }],
-  },
-]
+export type NavEntry = NavLeaf | NavGroup
 
 const SIDEBAR_SHADOW = "shadow-[0_0_15px_0_rgba(154,161,171,0.05)]"
 
-export function AdminSidebar({ collapsed }: { collapsed: boolean }) {
+function isVisible(roles: UserRole[] | undefined, role: UserRole | undefined) {
+  if (!roles) return true
+  if (!role) return false
+  return roles.includes(role)
+}
+
+export function BackofficeSidebar({
+  brandLabel,
+  homeTo,
+  nav,
+  collapsed,
+}: {
+  brandLabel: string
+  homeTo: string
+  nav: NavEntry[]
+  collapsed: boolean
+}) {
   const location = useLocation()
+  const { user } = useAuth()
+
+  const visibleNav = nav
+    .filter((entry) => (entry.type === "item" ? isVisible(entry.roles, user?.role) : true))
+    .map((entry) =>
+      entry.type === "group"
+        ? { ...entry, children: entry.children.filter((child) => isVisible(child.roles, user?.role)) }
+        : entry
+    )
+    .filter((entry) => entry.type === "item" || entry.children.length > 0)
 
   return (
     <aside
@@ -42,16 +63,14 @@ export function AdminSidebar({ collapsed }: { collapsed: boolean }) {
         collapsed ? "w-[80px]" : "w-[245px]"
       )}
     >
-      <Link to="/admin" className="flex h-[70px] shrink-0 items-center gap-2 px-4">
+      <Link to={homeTo} className="flex h-[70px] shrink-0 items-center gap-2 px-4">
         {!collapsed && (
-          <span className="truncate text-sm font-extrabold tracking-tight">
-            모두의 WMS - 관리자
-          </span>
+          <span className="truncate text-sm font-extrabold tracking-tight">{brandLabel}</span>
         )}
       </Link>
 
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-2.5 py-3">
-        {NAV.map((entry) =>
+        {visibleNav.map((entry) =>
           entry.type === "item" ? (
             <SidebarLink
               key={entry.to}
@@ -143,7 +162,7 @@ function SidebarGroup({
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
-          "flex w-full items-center gap-2.5 rounded-[0.3rem] px-[15px] py-2 text-sm text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary",
+          "flex w-full cursor-pointer items-center gap-2.5 rounded-[0.3rem] px-[15px] py-2 text-sm text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary",
           hasActiveChild && "font-medium text-primary"
         )}
       >
