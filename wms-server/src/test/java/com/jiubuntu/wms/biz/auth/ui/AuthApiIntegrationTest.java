@@ -242,6 +242,14 @@ class AuthApiIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
+    @DisplayName("리프레시 토큰 쿠키 없이 재발급을 요청하면 401 INVALID_REFRESH_TOKEN을 반환한다")
+    void refresh_withoutCookie_returnsInvalidRefreshToken() throws Exception {
+        mockMvc.perform(post("/api/auth/refresh"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value(ErrorCode.INVALID_REFRESH_TOKEN.getMessage()));
+    }
+
+    @Test
     @DisplayName("로그아웃하면 리프레시 토큰 쿠키가 만료되고 해당 토큰으로는 더 이상 재발급받을 수 없다")
     void logout_invalidatesRefreshToken() throws Exception {
         seedActiveUser("logout@test.com", "password1!");

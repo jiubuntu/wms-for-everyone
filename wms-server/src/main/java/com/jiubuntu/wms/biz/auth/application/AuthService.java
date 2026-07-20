@@ -63,6 +63,10 @@ public class AuthService {
 
     @Transactional
     public AuthLoginResult refresh(String refreshTokenValue) {
+        if (refreshTokenValue == null) {
+            throw new CommonException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
         AuthToken refreshToken = authTokenRepository.findActiveByTokenAndType(refreshTokenValue, AuthTokenType.REFRESH)
                 .orElseThrow(() -> new CommonException(ErrorCode.INVALID_REFRESH_TOKEN));
 
