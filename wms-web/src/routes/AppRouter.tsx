@@ -11,7 +11,9 @@ import { ADMIN_NAV, APP_NAV } from "@/routes/nav"
 import { DashboardPage as AdminDashboardPage } from "@/pages/admin/DashboardPage"
 import { CompanyApprovalListPage } from "@/pages/admin/CompanyApprovalListPage"
 import { CompanyApprovalDetailPage } from "@/pages/admin/CompanyApprovalDetailPage"
+import { CommonCodePage } from "@/pages/admin/CommonCodePage"
 import { DashboardPage as AppDashboardPage } from "@/pages/app/DashboardPage"
+import { ProductCategoryPage } from "@/pages/app/ProductCategoryPage"
 
 export function AppRouter() {
   return (
@@ -33,6 +35,7 @@ export function AppRouter() {
         <Route index element={<AdminDashboardPage />} />
         <Route path="companies" element={<CompanyApprovalListPage />} />
         <Route path="companies/:id" element={<CompanyApprovalDetailPage />} />
+        <Route path="common-codes" element={<CommonCodePage />} />
       </Route>
 
       <Route
@@ -44,6 +47,14 @@ export function AppRouter() {
         }
       >
         <Route index element={<AppDashboardPage />} />
+        <Route
+          path="product-categories"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN"]}>
+              <ProductCategoryPage />
+            </ProtectedRoute>
+          }
+        />
       </Route>
     </Routes>
   )
