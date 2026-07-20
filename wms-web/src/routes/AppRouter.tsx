@@ -6,10 +6,14 @@ import { ResetPassword } from "@/pages/auth/ResetPassword"
 import { Forbidden } from "@/pages/Forbidden"
 import { ProtectedRoute } from "@/routes/ProtectedRoute"
 import { GuestRoute } from "@/routes/GuestRoute"
-import { AdminLayout } from "@/components/common/AdminLayout"
-import { DashboardPage } from "@/pages/admin/DashboardPage"
+import { BackofficeLayout } from "@/components/common/BackofficeLayout"
+import { ADMIN_NAV, APP_NAV } from "@/routes/nav"
+import { DashboardPage as AdminDashboardPage } from "@/pages/admin/DashboardPage"
 import { CompanyApprovalListPage } from "@/pages/admin/CompanyApprovalListPage"
 import { CompanyApprovalDetailPage } from "@/pages/admin/CompanyApprovalDetailPage"
+import { CommonCodePage } from "@/pages/admin/CommonCodePage"
+import { DashboardPage as AppDashboardPage } from "@/pages/app/DashboardPage"
+import { ProductCategoryPage } from "@/pages/app/ProductCategoryPage"
 
 export function AppRouter() {
   return (
@@ -24,13 +28,33 @@ export function AppRouter() {
         path="/admin"
         element={
           <ProtectedRoute allowedRoles={["SYSTEM_ADMIN"]}>
-            <AdminLayout />
+            <BackofficeLayout brandLabel="모두의 WMS - 관리자" homeTo="/admin" nav={ADMIN_NAV} />
           </ProtectedRoute>
         }
       >
-        <Route index element={<DashboardPage />} />
+        <Route index element={<AdminDashboardPage />} />
         <Route path="companies" element={<CompanyApprovalListPage />} />
         <Route path="companies/:id" element={<CompanyApprovalDetailPage />} />
+        <Route path="common-codes" element={<CommonCodePage />} />
+      </Route>
+
+      <Route
+        path="/app"
+        element={
+          <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
+            <BackofficeLayout brandLabel="모두의 WMS" homeTo="/app" nav={APP_NAV} />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<AppDashboardPage />} />
+        <Route
+          path="product-categories"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN"]}>
+              <ProductCategoryPage />
+            </ProtectedRoute>
+          }
+        />
       </Route>
     </Routes>
   )

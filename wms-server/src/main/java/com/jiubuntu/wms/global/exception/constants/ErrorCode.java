@@ -38,6 +38,10 @@ public enum ErrorCode {
     LAST_COMPANY_ADMIN_CANNOT_WITHDRAW(HttpStatus.BAD_REQUEST.value(), "0406", "기업 내 유일한 기업관리자는 탈퇴할 수 없습니다."),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST.value(), "0407", "현재 비밀번호가 일치하지 않습니다."),
 
+    COMMON_CODE_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0501", "존재하지 않는 공통 코드입니다."),
+    COMMON_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0502", "이미 등록된 코드입니다."),
+    COMMON_CODE_GROUP_NOT_CUSTOMIZABLE(HttpStatus.BAD_REQUEST.value(), "0503", "회사에서 직접 추가할 수 없는 코드 그룹입니다."),
+
     ;
 
     private final int httpCode;

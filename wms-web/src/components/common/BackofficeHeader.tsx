@@ -11,12 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-const MOCK_NOTIFICATIONS = [
-  { id: 1, text: "새로운 기업 가입 신청이 도착했습니다." },
-  { id: 2, text: "새로운 기업 가입 신청이 도착했습니다." },
-]
+const MOCK_NOTIFICATIONS: { id: number; text: string }[] = []
 
-export function AdminHeader({ onToggleSidebar }: { onToggleSidebar: () => void }) {
+export function BackofficeHeader({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -38,17 +35,23 @@ export function AdminHeader({ onToggleSidebar }: { onToggleSidebar: () => void }
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative" aria-label="알림">
               <Bell className="size-4.5" />
-              <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-destructive" />
+              {MOCK_NOTIFICATIONS.length > 0 && (
+                <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-destructive" />
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-72">
             <DropdownMenuLabel>알림</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {MOCK_NOTIFICATIONS.map((notification) => (
-              <DropdownMenuItem key={notification.id} className="whitespace-normal">
-                {notification.text}
-              </DropdownMenuItem>
-            ))}
+            {MOCK_NOTIFICATIONS.length === 0 ? (
+              <p className="px-2 py-3 text-center text-sm text-muted-foreground">새로운 알림이 없습니다.</p>
+            ) : (
+              MOCK_NOTIFICATIONS.map((notification) => (
+                <DropdownMenuItem key={notification.id} className="whitespace-normal">
+                  {notification.text}
+                </DropdownMenuItem>
+              ))
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 
