@@ -51,7 +51,7 @@ export function AppRouter() {
         <Route
           path="product-categories"
           element={
-            <ProtectedRoute allowedRoles={["COMPANY_ADMIN"]}>
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER"]}>
               <ProductCategoryPage />
             </ProtectedRoute>
           }
