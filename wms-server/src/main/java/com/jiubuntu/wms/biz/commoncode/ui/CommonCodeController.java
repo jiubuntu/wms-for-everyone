@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Secure(UserRole.COMPANY_ADMIN)
+@Secure({UserRole.COMPANY_ADMIN, UserRole.WAREHOUSE_MANAGER})
 @RestController
 @RequestMapping("/api/common-code")
 @RequiredArgsConstructor

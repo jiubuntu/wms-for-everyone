@@ -89,24 +89,45 @@ class CommonCodeApiIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
-    @DisplayName("창고관리자·작업자는 공통 코드 API에 접근할 수 없다")
-    void list_deniedForNonCompanyAdminRoles() throws Exception {
-        Company company = seedCompany("권한테스트기업", "222-22-22222");
+    @DisplayName("창고관리자는 공통 코드 API를 기업관리자와 동일하게 조회할 수 있다")
+    void list_allowedForWarehouseManager() throws Exception {
+        Company company = seedCompany("창고관리자권한기업", "222-22-22222");
         seedUser(company, "manager@test.com", UserRole.WAREHOUSE_MANAGER);
-        seedUser(company, "worker@test.com", UserRole.WORKER);
-
         String managerToken = login("manager@test.com");
-        String workerToken = login("worker@test.com");
 
         mockMvc.perform(get("/api/common-code/list")
                         .header("Authorization", "Bearer " + managerToken)
                         .param("groupCode", "PRODUCT_CATEGORY"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("작업자는 공통 코드 API에 접근할 수 없다")
+    void list_deniedForWorker() throws Exception {
+        Company company = seedCompany("작업자권한테스트기업", "232-32-32323");
+        seedUser(company, "worker@test.com", UserRole.WORKER);
+        String workerToken = login("worker@test.com");
 
         mockMvc.perform(get("/api/common-code/list")
                         .header("Authorization", "Bearer " + workerToken)
                         .param("groupCode", "PRODUCT_CATEGORY"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("커스텀 허용 그룹(PRODUCT_CATEGORY)은 창고관리자도 등록할 수 있다")
+    void create_customizableGroup_warehouseManager_success() throws Exception {
+        Company company = seedCompany("창고관리자등록기업", "242-42-42424");
+        seedUser(company, "manager-create@test.com", UserRole.WAREHOUSE_MANAGER);
+        String token = login("manager-create@test.com");
+
+        mockMvc.perform(post("/api/common-code/create")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "groupCode", "PRODUCT_CATEGORY", "code", "MANAGER_CAT", "name", "창고관리자카테고리", "sortOrder", 1))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.companyId").value(company.getId()));
     }
 
     @Test
