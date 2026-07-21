@@ -42,6 +42,9 @@ public enum ErrorCode {
     COMMON_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0502", "이미 등록된 코드입니다."),
     COMMON_CODE_GROUP_NOT_CUSTOMIZABLE(HttpStatus.BAD_REQUEST.value(), "0503", "회사에서 직접 추가할 수 없는 코드 그룹입니다."),
 
+    PRODUCT_UNIT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0601", "존재하지 않는 상품 단위입니다."),
+    PRODUCT_UNIT_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0602", "이미 등록된 단위입니다."),
+
     ;
 
     private final int httpCode;

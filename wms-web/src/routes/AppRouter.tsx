@@ -14,6 +14,7 @@ import { CompanyApprovalDetailPage } from "@/pages/admin/CompanyApprovalDetailPa
 import { CommonCodePage } from "@/pages/admin/CommonCodePage"
 import { DashboardPage as AppDashboardPage } from "@/pages/app/DashboardPage"
 import { ProductCategoryPage } from "@/pages/app/ProductCategoryPage"
+import { ProductUnitPage } from "@/pages/app/ProductUnitPage"
 
 export function AppRouter() {
   return (
@@ -50,8 +51,16 @@ export function AppRouter() {
         <Route
           path="product-categories"
           element={
-            <ProtectedRoute allowedRoles={["COMPANY_ADMIN"]}>
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER"]}>
               <ProductCategoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="product-units"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER"]}>
+              <ProductUnitPage />
             </ProtectedRoute>
           }
         />
