@@ -25,6 +25,11 @@ export const APP_NAV: NavEntry[] = [
     icon: Database,
     children: [
       { label: "상품 카테고리 관리", to: "/app/product-categories", roles: ["COMPANY_ADMIN"] },
+      {
+        label: "상품 단위 관리",
+        to: "/app/product-units",
+        roles: ["COMPANY_ADMIN", "WAREHOUSE_MANAGER"],
+      },
     ],
   },
 ]
