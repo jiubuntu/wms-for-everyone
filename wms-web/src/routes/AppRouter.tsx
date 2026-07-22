@@ -15,6 +15,7 @@ import { CommonCodePage } from "@/pages/admin/CommonCodePage"
 import { DashboardPage as AppDashboardPage } from "@/pages/app/DashboardPage"
 import { ProductCategoryPage } from "@/pages/app/ProductCategoryPage"
 import { ProductUnitPage } from "@/pages/app/ProductUnitPage"
+import { ProductPage } from "@/pages/app/ProductPage"
 
 export function AppRouter() {
   return (
@@ -48,6 +49,14 @@ export function AppRouter() {
         }
       >
         <Route index element={<AppDashboardPage />} />
+        <Route
+          path="products"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER"]}>
+              <ProductPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="product-categories"
           element={
