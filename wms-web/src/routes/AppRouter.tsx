@@ -17,6 +17,7 @@ import { ProductCategoryPage } from "@/pages/app/ProductCategoryPage"
 import { ProductUnitPage } from "@/pages/app/ProductUnitPage"
 import { ProductPage } from "@/pages/app/ProductPage"
 import { WarehousePage } from "@/pages/app/WarehousePage"
+import { WarehouseDetailPage } from "@/pages/app/WarehouseDetailPage"
 
 export function AppRouter() {
   return (
@@ -79,6 +80,14 @@ export function AppRouter() {
           element={
             <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER"]}>
               <WarehousePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="warehouses/:id"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER"]}>
+              <WarehouseDetailPage />
             </ProtectedRoute>
           }
         />
