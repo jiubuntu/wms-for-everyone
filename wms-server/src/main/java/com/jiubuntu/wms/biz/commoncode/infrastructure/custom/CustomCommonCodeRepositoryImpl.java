@@ -71,6 +71,19 @@ public class CustomCommonCodeRepositoryImpl implements CustomCommonCodeRepositor
         return new PageImpl<>(content, pageable, total != null ? total : 0L);
     }
 
+    @Override
+    public List<CommonCode> findActiveByGroupVisibleTo(CommonCodeGroup groupCode, Long companyId) {
+        return queryFactory
+                .selectFrom(commonCode)
+                .where(
+                        commonCode.groupCode.eq(groupCode),
+                        companyScopeEq(companyId),
+                        activeEq()
+                )
+                .orderBy(commonCode.sortOrder.asc())
+                .fetch();
+    }
+
     private BooleanExpression companyEq(Long companyId) {
         return companyId == null ? commonCode.company.id.isNull() : commonCode.company.id.eq(companyId);
     }

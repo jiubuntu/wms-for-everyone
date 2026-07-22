@@ -88,6 +88,24 @@ class ProductUnitApiIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
+    @DisplayName("전체 목록 조회(/all)는 페이지네이션 없이 자사 단위만 반환한다")
+    void listAll_returnsOwnCompanyUnits() throws Exception {
+        Company company = seedCompany("전체목록조회기업", "161-61-61616");
+        seedUser(company, "list-all-admin@test.com", UserRole.COMPANY_ADMIN);
+        String token = login("list-all-admin@test.com");
+
+        Company otherCompany = seedCompany("다른회사2", "171-71-71717");
+        productUnitRepository.save(new ProductUnit(company, "박스2"));
+        productUnitRepository.save(new ProductUnit(otherCompany, "kg2"));
+
+        mockMvc.perform(get("/api/product-unit/all")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].name").value("박스2"));
+    }
+
+    @Test
     @DisplayName("창고관리자도 상품 단위 API에 접근할 수 있다")
     void list_allowedForWarehouseManager() throws Exception {
         Company company = seedCompany("창고관리자기업", "222-22-22222");

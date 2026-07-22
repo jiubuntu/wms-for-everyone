@@ -89,6 +89,23 @@ class CommonCodeApiIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
+    @DisplayName("전체 목록 조회(/all)는 페이지네이션 없이 시스템 코드와 자사 커스텀 코드를 함께 반환한다")
+    void listAll_returnsSystemAndOwnCompanyCodes() throws Exception {
+        Company company = seedCompany("전체목록조회기업", "121-11-11111");
+        seedUser(company, "list-all-admin@test.com", UserRole.COMPANY_ADMIN);
+        String token = login("list-all-admin@test.com");
+
+        commonCodeRepository.save(new CommonCode(null, CommonCodeGroup.PRODUCT_CATEGORY, "ELECTRONICS2", "전자제품2", 1));
+        commonCodeRepository.save(new CommonCode(company, CommonCodeGroup.PRODUCT_CATEGORY, "CUSTOM_CAT2", "우리회사카테고리2", 2));
+
+        mockMvc.perform(get("/api/common-code/all")
+                        .header("Authorization", "Bearer " + token)
+                        .param("groupCode", "PRODUCT_CATEGORY"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(2));
+    }
+
+    @Test
     @DisplayName("창고관리자는 공통 코드 API를 기업관리자와 동일하게 조회할 수 있다")
     void list_allowedForWarehouseManager() throws Exception {
         Company company = seedCompany("창고관리자권한기업", "222-22-22222");

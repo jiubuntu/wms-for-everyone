@@ -18,6 +18,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -30,6 +33,12 @@ public class CommonCodeService {
     public Page<CommonCodeResult> list(CommonCodeGroup groupCode, Long companyId, Pageable pageable) {
         return commonCodeRepository.findActiveByGroupVisibleTo(groupCode, companyId, pageable)
                 .map(this::toResult);
+    }
+
+    public List<CommonCodeResult> listAll(CommonCodeGroup groupCode, Long companyId) {
+        return commonCodeRepository.findActiveByGroupVisibleTo(groupCode, companyId).stream()
+                .map(this::toResult)
+                .toList();
     }
 
     @Transactional
@@ -62,6 +71,19 @@ public class CommonCodeService {
 
         commonCode.assignUpdater(command.getUpdatedBy());
         commonCode.delete();
+    }
+
+    public CommonCode getAccessible(Long id, CommonCodeGroup expectedGroup, Long companyId) {
+        CommonCode commonCode = getActiveById(id);
+
+        Long ownerId = commonCode.getCompany() != null ? commonCode.getCompany().getId() : null;
+        boolean groupMatches = commonCode.getGroupCode() == expectedGroup;
+        boolean scopeMatches = ownerId == null || Objects.equals(ownerId, companyId);
+
+        if (!groupMatches || !scopeMatches) {
+            throw new CommonException(ErrorCode.COMMON_CODE_NOT_FOUND);
+        }
+        return commonCode;
     }
 
     private CommonCode getActiveById(Long id) {

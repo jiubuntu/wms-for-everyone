@@ -16,6 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -28,6 +31,12 @@ public class ProductUnitService {
     public Page<ProductUnitResult> list(Long companyId, Pageable pageable) {
         return productUnitRepository.findActiveByCompany(companyId, pageable)
                 .map(this::toResult);
+    }
+
+    public List<ProductUnitResult> listAll(Long companyId) {
+        return productUnitRepository.findActiveByCompany(companyId).stream()
+                .map(this::toResult)
+                .toList();
     }
 
     @Transactional
@@ -56,6 +65,16 @@ public class ProductUnitService {
 
         productUnit.assignUpdater(command.getUpdatedBy());
         productUnit.delete();
+    }
+
+    public ProductUnit getAccessible(Long id, Long companyId) {
+        ProductUnit productUnit = getActiveById(id);
+
+        Long ownerId = productUnit.getCompany() != null ? productUnit.getCompany().getId() : null;
+        if (!Objects.equals(ownerId, companyId)) {
+            throw new CommonException(ErrorCode.PRODUCT_UNIT_NOT_FOUND);
+        }
+        return productUnit;
     }
 
     private ProductUnit getActiveById(Long id) {
