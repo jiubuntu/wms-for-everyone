@@ -45,6 +45,10 @@ public enum ErrorCode {
     PRODUCT_UNIT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0601", "존재하지 않는 상품 단위입니다."),
     PRODUCT_UNIT_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0602", "이미 등록된 단위입니다."),
 
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0701", "존재하지 않는 상품입니다."),
+    PRODUCT_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0702", "이미 등록된 SKU 코드입니다."),
+    PRODUCT_SUB_UNIT_CONVERSION_MISMATCH(HttpStatus.BAD_REQUEST.value(), "0703", "보조 단위와 변환율은 함께 입력해야 합니다."),
+
     ;
 
     private final int httpCode;

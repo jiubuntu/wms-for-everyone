@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Secure({UserRole.COMPANY_ADMIN, UserRole.WAREHOUSE_MANAGER})
 @RestController
 @RequestMapping("/api/common-code")
@@ -49,6 +51,19 @@ public class CommonCodeController {
         Page<CommonCodeResponse> mapped = results.map(CommonCodeResponse::from);
 
         ApiCommonResponse<ApiPageResponse<CommonCodeResponse>> body = ApiCommonResponse.success(ApiPageResponse.of(mapped));
+        return ResponseEntity.status(body.getHttpCode()).body(body);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiCommonResponse<List<CommonCodeResponse>>> listAll(
+            AuthPrincipal principal,
+            @RequestParam CommonCodeGroup groupCode
+    ) {
+        List<CommonCodeResponse> results = commonCodeService.listAll(groupCode, principal.getCompanyId()).stream()
+                .map(CommonCodeResponse::from)
+                .toList();
+
+        ApiCommonResponse<List<CommonCodeResponse>> body = ApiCommonResponse.success(results);
         return ResponseEntity.status(body.getHttpCode()).body(body);
     }
 

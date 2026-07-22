@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   createCommonCode,
   deleteCommonCode,
+  getAllCommonCodes,
   getCommonCodes,
   updateCommonCode,
 } from "@/features/common-codes/api"
@@ -21,6 +22,13 @@ export function useCommonCodes(
   return useQuery({
     queryKey: ["common-codes", scope, groupCode, page, limit],
     queryFn: () => getCommonCodes(scope, groupCode, page, limit),
+  })
+}
+
+export function useAllCommonCodes(scope: CommonCodeScope, groupCode: CommonCodeGroup) {
+  return useQuery({
+    queryKey: ["common-codes", scope, groupCode, "all"],
+    queryFn: () => getAllCommonCodes(scope, groupCode),
   })
 }
 

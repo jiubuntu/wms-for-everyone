@@ -25,6 +25,16 @@ export async function getCommonCodes(
   return res.data.data
 }
 
+export async function getAllCommonCodes(
+  scope: CommonCodeScope,
+  groupCode: CommonCodeGroup
+): Promise<CommonCodeItem[]> {
+  const res = await api.get<ApiCommonResponse<CommonCodeItem[]>>(`${basePath(scope)}/all`, {
+    params: { groupCode },
+  })
+  return res.data.data
+}
+
 export async function createCommonCode(
   scope: CommonCodeScope,
   input: CommonCodeCreateInput

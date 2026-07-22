@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -22,6 +24,10 @@ public class CommonCodeAdminService {
 
     public Page<CommonCodeResult> list(CommonCodeGroup groupCode, Pageable pageable) {
         return commonCodeService.list(groupCode, null, pageable);
+    }
+
+    public List<CommonCodeResult> listAll(CommonCodeGroup groupCode) {
+        return commonCodeService.listAll(groupCode, null);
     }
 
     @Transactional

@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Secure({UserRole.COMPANY_ADMIN, UserRole.WAREHOUSE_MANAGER})
 @RestController
 @RequestMapping("/api/product-unit")
@@ -46,6 +48,16 @@ public class ProductUnitController {
         Page<ProductUnitResponse> mapped = results.map(ProductUnitResponse::from);
 
         ApiCommonResponse<ApiPageResponse<ProductUnitResponse>> body = ApiCommonResponse.success(ApiPageResponse.of(mapped));
+        return ResponseEntity.status(body.getHttpCode()).body(body);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiCommonResponse<List<ProductUnitResponse>>> listAll(AuthPrincipal principal) {
+        List<ProductUnitResponse> results = productUnitService.listAll(principal.getCompanyId()).stream()
+                .map(ProductUnitResponse::from)
+                .toList();
+
+        ApiCommonResponse<List<ProductUnitResponse>> body = ApiCommonResponse.success(results);
         return ResponseEntity.status(body.getHttpCode()).body(body);
     }
 

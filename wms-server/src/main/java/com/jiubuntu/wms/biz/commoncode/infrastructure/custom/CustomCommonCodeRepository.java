@@ -5,6 +5,7 @@ import com.jiubuntu.wms.biz.commoncode.domain.CommonCodeGroup;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CustomCommonCodeRepository {
@@ -14,5 +15,7 @@ public interface CustomCommonCodeRepository {
     Optional<CommonCode> findActiveById(Long id);
 
     Page<CommonCode> findActiveByGroupVisibleTo(CommonCodeGroup groupCode, Long companyId, Pageable pageable);
+
+    List<CommonCode> findActiveByGroupVisibleTo(CommonCodeGroup groupCode, Long companyId);
 
 }

@@ -57,6 +57,15 @@ public class CustomProductUnitRepositoryImpl implements CustomProductUnitReposit
         return new PageImpl<>(content, pageable, total != null ? total : 0L);
     }
 
+    @Override
+    public List<ProductUnit> findActiveByCompany(Long companyId) {
+        return queryFactory
+                .selectFrom(productUnit)
+                .where(productUnit.company.id.eq(companyId), activeEq())
+                .orderBy(productUnit.createdAt.asc())
+                .fetch();
+    }
+
     private BooleanExpression activeEq() {
         return productUnit.active.isTrue();
     }
