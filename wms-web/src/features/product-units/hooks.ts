@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   createProductUnit,
   deleteProductUnit,
+  getAllProductUnits,
   getProductUnits,
   updateProductUnit,
 } from "@/features/product-units/api"
@@ -14,6 +15,13 @@ export function useProductUnits(page: number, limit = 20) {
   return useQuery({
     queryKey: ["product-units", page, limit],
     queryFn: () => getProductUnits(page, limit),
+  })
+}
+
+export function useAllProductUnits() {
+  return useQuery({
+    queryKey: ["product-units", "all"],
+    queryFn: () => getAllProductUnits(),
   })
 }
 

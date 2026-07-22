@@ -17,6 +17,11 @@ export async function getProductUnits(
   return res.data.data
 }
 
+export async function getAllProductUnits(): Promise<ProductUnitItem[]> {
+  const res = await api.get<ApiCommonResponse<ProductUnitItem[]>>("/product-unit/all")
+  return res.data.data
+}
+
 export async function createProductUnit(input: ProductUnitCreateInput): Promise<ProductUnitItem> {
   const res = await api.post<ApiCommonResponse<ProductUnitItem>>("/product-unit/create", input)
   return res.data.data
