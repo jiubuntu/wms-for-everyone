@@ -54,6 +54,12 @@ public enum ErrorCode {
     LOCATION_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0802", "이미 등록된 위치 코드가 포함되어 있습니다."),
     LOCATION_INVALID_RANGE(HttpStatus.BAD_REQUEST.value(), "0803", "행/열 범위와 단 수를 올바르게 입력해주세요."),
 
+    INVENTORY_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0901", "존재하지 않는 재고입니다."),
+    INSUFFICIENT_AVAILABLE_QUANTITY(HttpStatus.BAD_REQUEST.value(), "0902", "가용재고가 부족합니다."),
+
+    TRANSFER_SAME_LOCATION(HttpStatus.BAD_REQUEST.value(), "1001", "출발 위치와 도착 위치는 달라야 합니다."),
+    TRANSFER_LOCATION_DISABLED(HttpStatus.BAD_REQUEST.value(), "1002", "비활성화된 위치로는 이동할 수 없습니다."),
+
     ;
 
     private final int httpCode;
