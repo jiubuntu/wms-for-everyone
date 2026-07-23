@@ -7,6 +7,7 @@ import com.jiubuntu.wms.admin.ui.company.payload.response.CompanyAdminListItemRe
 import com.jiubuntu.wms.biz.company.application.dto.result.CompanyResult;
 import com.jiubuntu.wms.biz.company.domain.Company;
 import com.jiubuntu.wms.biz.user.domain.UserRole;
+import com.jiubuntu.wms.global.payload.constants.PageConstants;
 import com.jiubuntu.wms.global.payload.response.ApiCommonResponse;
 import com.jiubuntu.wms.global.payload.response.ApiPageResponse;
 import com.jiubuntu.wms.global.security.authentication.AuthPrincipal;
@@ -34,7 +35,7 @@ public class CompanyAdminController {
     public ResponseEntity<ApiCommonResponse<ApiPageResponse<CompanyAdminListItemResponse>>> list(
             AuthPrincipal principal,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int limit
+            @RequestParam(defaultValue = PageConstants.DEFAULT_LIMIT) int limit
     ) {
         Page<CompanyResult> pendingList = companyAdminService.findPendingList(PageRequest.of(page - 1, limit));
         Page<CompanyAdminListItemResponse> mapped = pendingList.map(CompanyAdminListItemResponse::from);
