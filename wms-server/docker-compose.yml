@@ -1,0 +1,14 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: wms-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - wms-redis-data:/data
+
+  # postgres:
+  #   PostgreSQL은 현재 로컬 설치본을 사용 중이며, 추후 이 compose로 전환 예정.
+
+volumes:
+  wms-redis-data:
