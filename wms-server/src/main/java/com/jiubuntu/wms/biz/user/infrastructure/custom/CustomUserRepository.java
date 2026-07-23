@@ -17,4 +17,6 @@ public interface CustomUserRepository {
 
     Optional<User> findPendingByCompanyIdAndRole(Long companyId, UserRole role);
 
+    boolean existsActiveByWarehouseId(Long warehouseId);
+
 }

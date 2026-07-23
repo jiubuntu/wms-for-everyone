@@ -1,5 +1,6 @@
 package com.jiubuntu.wms.biz.warehouse.domain;
 
+import com.jiubuntu.wms.biz.commoncode.domain.CommonCode;
 import com.jiubuntu.wms.biz.company.domain.Company;
 import com.jiubuntu.wms.global.entity.BaseEntity;
 import jakarta.persistence.Entity;
@@ -30,9 +31,23 @@ public class Warehouse extends BaseEntity {
 
     private String name;
 
-    public Warehouse(Company company, String name) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "storage_type_id")
+    private CommonCode storageType;
+
+    private String address;
+
+    public Warehouse(Company company, String name, CommonCode storageType, String address) {
         this.company = company;
         this.name = name;
+        this.storageType = storageType;
+        this.address = address;
+    }
+
+    public void update(String name, CommonCode storageType, String address) {
+        this.name = name;
+        this.storageType = storageType;
+        this.address = address;
     }
 
 }
