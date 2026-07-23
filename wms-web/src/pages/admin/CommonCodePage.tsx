@@ -11,7 +11,7 @@ import { CommonCodeTable } from "@/features/common-codes/components/CommonCodeTa
 import { CommonCodeFormDialog } from "@/features/common-codes/components/CommonCodeFormDialog"
 import type { CommonCodeGroup, CommonCodeItem } from "@/features/common-codes/types"
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 10
 
 const GROUP_TABS: { value: CommonCodeGroup; label: string }[] = [
   { value: "PRODUCT_CATEGORY", label: "상품 카테고리" },

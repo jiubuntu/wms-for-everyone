@@ -84,7 +84,8 @@ public class AuthService {
     }
 
     private AuthLoginResult issueTokens(User user) {
-        AuthPrincipal principal = new AuthPrincipal(user.getId(), user.getCompany().getId(), user.getRole());
+        Long warehouseId = user.getWarehouse() != null ? user.getWarehouse().getId() : null;
+        AuthPrincipal principal = new AuthPrincipal(user.getId(), user.getCompany().getId(), user.getRole(), warehouseId);
         String accessToken = jwtProvider.generateAccessToken(principal);
 
         String refreshTokenValue = UUID.randomUUID().toString();

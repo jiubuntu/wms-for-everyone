@@ -17,7 +17,7 @@ export function useCommonCodes(
   scope: CommonCodeScope,
   groupCode: CommonCodeGroup,
   page: number,
-  limit = 20
+  limit = 10
 ) {
   return useQuery({
     queryKey: ["common-codes", scope, groupCode, page, limit],

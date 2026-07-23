@@ -10,6 +10,7 @@ import com.jiubuntu.wms.biz.productunit.ui.payload.request.ProductUnitDeleteRequ
 import com.jiubuntu.wms.biz.productunit.ui.payload.request.ProductUnitUpdateRequest;
 import com.jiubuntu.wms.biz.productunit.ui.payload.response.ProductUnitResponse;
 import com.jiubuntu.wms.biz.user.domain.UserRole;
+import com.jiubuntu.wms.global.payload.constants.PageConstants;
 import com.jiubuntu.wms.global.payload.constants.ResponseCode;
 import com.jiubuntu.wms.global.payload.response.ApiCommonResponse;
 import com.jiubuntu.wms.global.payload.response.ApiPageResponse;
@@ -42,7 +43,7 @@ public class ProductUnitController {
     public ResponseEntity<ApiCommonResponse<ApiPageResponse<ProductUnitResponse>>> list(
             AuthPrincipal principal,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int limit
+            @RequestParam(defaultValue = PageConstants.DEFAULT_LIMIT) int limit
     ) {
         Page<ProductUnitResult> results = productUnitService.list(principal.getCompanyId(), PageRequest.of(page - 1, limit));
         Page<ProductUnitResponse> mapped = results.map(ProductUnitResponse::from);

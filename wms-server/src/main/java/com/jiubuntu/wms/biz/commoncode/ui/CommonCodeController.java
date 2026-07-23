@@ -12,6 +12,7 @@ import com.jiubuntu.wms.biz.commoncode.ui.payload.request.CommonCodeDeleteReques
 import com.jiubuntu.wms.biz.commoncode.ui.payload.request.CommonCodeUpdateRequest;
 import com.jiubuntu.wms.biz.commoncode.ui.payload.response.CommonCodeResponse;
 import com.jiubuntu.wms.biz.user.domain.UserRole;
+import com.jiubuntu.wms.global.payload.constants.PageConstants;
 import com.jiubuntu.wms.global.payload.constants.ResponseCode;
 import com.jiubuntu.wms.global.payload.response.ApiCommonResponse;
 import com.jiubuntu.wms.global.payload.response.ApiPageResponse;
@@ -45,7 +46,7 @@ public class CommonCodeController {
             AuthPrincipal principal,
             @RequestParam CommonCodeGroup groupCode,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int limit
+            @RequestParam(defaultValue = PageConstants.DEFAULT_LIMIT) int limit
     ) {
         Page<CommonCodeResult> results = commonCodeService.list(groupCode, principal.getCompanyId(), PageRequest.of(page - 1, limit));
         Page<CommonCodeResponse> mapped = results.map(CommonCodeResponse::from);

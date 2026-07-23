@@ -10,7 +10,7 @@ import { ProductUnitTable } from "@/features/product-units/components/ProductUni
 import { ProductUnitFormDialog } from "@/features/product-units/components/ProductUnitFormDialog"
 import type { ProductUnitItem } from "@/features/product-units/types"
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 10
 
 export function ProductUnitPage() {
   const [page, setPage] = useState(1)

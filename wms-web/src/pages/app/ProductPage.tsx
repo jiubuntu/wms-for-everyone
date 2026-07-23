@@ -12,7 +12,7 @@ import { ProductTable } from "@/features/products/components/ProductTable"
 import { ProductFormDialog } from "@/features/products/components/ProductFormDialog"
 import type { ProductItem } from "@/features/products/types"
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 10
 
 export function ProductPage() {
   const [page, setPage] = useState(1)

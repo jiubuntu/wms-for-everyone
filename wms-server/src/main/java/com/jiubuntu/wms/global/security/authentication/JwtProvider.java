@@ -16,6 +16,7 @@ public class JwtProvider {
 
     private static final String CLAIM_COMPANY_ID = "companyId";
     private static final String CLAIM_ROLE = "role";
+    private static final String CLAIM_WAREHOUSE_ID = "warehouseId";
 
     private final SecretKey secretKey;
     private final long accessTokenExpiration;
@@ -36,6 +37,7 @@ public class JwtProvider {
                 .subject(String.valueOf(principal.getUserId()))
                 .claim(CLAIM_COMPANY_ID, principal.getCompanyId())
                 .claim(CLAIM_ROLE, principal.getRole().name())
+                .claim(CLAIM_WAREHOUSE_ID, principal.getWarehouseId())
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(secretKey)
@@ -52,8 +54,9 @@ public class JwtProvider {
         Long userId = Long.valueOf(claims.getSubject());
         Long companyId = claims.get(CLAIM_COMPANY_ID, Long.class);
         UserRole role = UserRole.valueOf(claims.get(CLAIM_ROLE, String.class));
+        Long warehouseId = claims.get(CLAIM_WAREHOUSE_ID, Long.class);
 
-        return new AuthPrincipal(userId, companyId, role);
+        return new AuthPrincipal(userId, companyId, role, warehouseId);
     }
 
 }

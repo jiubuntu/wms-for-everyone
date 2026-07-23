@@ -64,6 +64,16 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
         );
     }
 
+    @Override
+    public boolean existsActiveByWarehouseId(Long warehouseId) {
+        Integer result = queryFactory
+                .selectOne()
+                .from(user)
+                .where(user.warehouse.id.eq(warehouseId), activeEq())
+                .fetchFirst();
+        return result != null;
+    }
+
     private BooleanExpression activeEq() {
         return user.active.isTrue();
     }

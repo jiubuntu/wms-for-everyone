@@ -37,6 +37,7 @@ public enum ErrorCode {
     WAREHOUSE_SCOPE_VIOLATION(HttpStatus.FORBIDDEN.value(), "0405", "담당 창고 범위를 벗어난 요청입니다."),
     LAST_COMPANY_ADMIN_CANNOT_WITHDRAW(HttpStatus.BAD_REQUEST.value(), "0406", "기업 내 유일한 기업관리자는 탈퇴할 수 없습니다."),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST.value(), "0407", "현재 비밀번호가 일치하지 않습니다."),
+    WAREHOUSE_HAS_ASSIGNED_STAFF(HttpStatus.BAD_REQUEST.value(), "0408", "재고가 있거나 담당자가 배정된 창고는 비활성화할 수 없습니다."),
 
     COMMON_CODE_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0501", "존재하지 않는 공통 코드입니다."),
     COMMON_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0502", "이미 등록된 코드입니다."),
@@ -48,6 +49,10 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0701", "존재하지 않는 상품입니다."),
     PRODUCT_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0702", "이미 등록된 SKU 코드입니다."),
     PRODUCT_SUB_UNIT_CONVERSION_MISMATCH(HttpStatus.BAD_REQUEST.value(), "0703", "보조 단위와 변환율은 함께 입력해야 합니다."),
+
+    LOCATION_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0801", "존재하지 않는 위치입니다."),
+    LOCATION_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0802", "이미 등록된 위치 코드가 포함되어 있습니다."),
+    LOCATION_INVALID_RANGE(HttpStatus.BAD_REQUEST.value(), "0803", "행/열 범위와 단 수를 올바르게 입력해주세요."),
 
     ;
 
