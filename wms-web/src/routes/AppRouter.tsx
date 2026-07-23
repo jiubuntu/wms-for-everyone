@@ -7,6 +7,7 @@ import { Forbidden } from "@/pages/Forbidden"
 import { ProtectedRoute } from "@/routes/ProtectedRoute"
 import { GuestRoute } from "@/routes/GuestRoute"
 import { BackofficeLayout } from "@/components/common/BackofficeLayout"
+import { WarehouseFilterProvider } from "@/contexts/WarehouseFilterContext"
 import { ADMIN_NAV, APP_NAV } from "@/routes/nav"
 import { DashboardPage as AdminDashboardPage } from "@/pages/admin/DashboardPage"
 import { CompanyApprovalListPage } from "@/pages/admin/CompanyApprovalListPage"
@@ -46,7 +47,14 @@ export function AppRouter() {
         path="/app"
         element={
           <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
-            <BackofficeLayout brandLabel="모두의 WMS" homeTo="/app" nav={APP_NAV} />
+            <WarehouseFilterProvider>
+              <BackofficeLayout
+                brandLabel="모두의 WMS"
+                homeTo="/app"
+                nav={APP_NAV}
+                showWarehouseSelector
+              />
+            </WarehouseFilterProvider>
           </ProtectedRoute>
         }
       >
