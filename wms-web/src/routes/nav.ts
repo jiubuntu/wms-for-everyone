@@ -64,6 +64,11 @@ export const APP_NAV: NavEntry[] = [
         roles: ["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"],
       },
       {
+        label: "재고 이동",
+        to: "/app/inventory/transfers",
+        roles: ["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"],
+      },
+      {
         label: "재고 이력",
         to: "/app/inventory/history",
         roles: ["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"],

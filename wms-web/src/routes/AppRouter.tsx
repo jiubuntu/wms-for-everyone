@@ -21,6 +21,7 @@ import { WarehousePage } from "@/pages/app/WarehousePage"
 import { WarehouseDetailPage } from "@/pages/app/WarehouseDetailPage"
 import { InventoryPage } from "@/pages/app/InventoryPage"
 import { InventoryHistoryPage } from "@/pages/app/InventoryHistoryPage"
+import { TransferPage } from "@/pages/app/TransferPage"
 
 export function AppRouter() {
   return (
@@ -106,6 +107,14 @@ export function AppRouter() {
           element={
             <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
               <InventoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="inventory/transfers"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
+              <TransferPage />
             </ProtectedRoute>
           }
         />

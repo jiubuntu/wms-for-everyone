@@ -16,6 +16,11 @@ export async function getProducts(
   return res.data.data
 }
 
+export async function getAllProducts(): Promise<ProductItem[]> {
+  const res = await api.get<ApiCommonResponse<ProductItem[]>>("/product/all")
+  return res.data.data
+}
+
 export async function createProduct(input: ProductCreateInput): Promise<ProductItem> {
   const res = await api.post<ApiCommonResponse<ProductItem>>("/product/create", input)
   return res.data.data
