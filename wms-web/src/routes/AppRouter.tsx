@@ -22,6 +22,9 @@ import { WarehouseDetailPage } from "@/pages/app/WarehouseDetailPage"
 import { InventoryPage } from "@/pages/app/InventoryPage"
 import { InventoryHistoryPage } from "@/pages/app/InventoryHistoryPage"
 import { TransferPage } from "@/pages/app/TransferPage"
+import { OutboundPage } from "@/pages/app/OutboundPage"
+import { OutboundNewPage } from "@/pages/app/OutboundNewPage"
+import { OutboundDetailPage } from "@/pages/app/OutboundDetailPage"
 
 export function AppRouter() {
   return (
@@ -99,6 +102,30 @@ export function AppRouter() {
           element={
             <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER"]}>
               <WarehouseDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="outbounds"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
+              <OutboundPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="outbounds/new"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
+              <OutboundNewPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="outbounds/:id"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
+              <OutboundDetailPage />
             </ProtectedRoute>
           }
         />
