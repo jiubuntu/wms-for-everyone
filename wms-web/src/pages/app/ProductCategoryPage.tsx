@@ -10,7 +10,7 @@ import { CommonCodeTable } from "@/features/common-codes/components/CommonCodeTa
 import { CommonCodeFormDialog } from "@/features/common-codes/components/CommonCodeFormDialog"
 import type { CommonCodeItem } from "@/features/common-codes/types"
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 10
 
 export function ProductCategoryPage() {
   const [page, setPage] = useState(1)

@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 10
 
 export function CompanyApprovalListPage() {
   const [page, setPage] = useState(1)

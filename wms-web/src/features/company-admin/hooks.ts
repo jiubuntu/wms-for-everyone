@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { approveCompany, getCompanyDetail, getPendingCompanies } from "@/features/company-admin/api"
 
-export function usePendingCompanies(page: number, limit = 20) {
+export function usePendingCompanies(page: number, limit = 10) {
   return useQuery({
     queryKey: ["companies", "pending", page, limit],
     queryFn: () => getPendingCompanies(page, limit),
