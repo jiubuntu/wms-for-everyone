@@ -211,6 +211,100 @@ class InventoryApiIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
+    @DisplayName("Idempotency-Key 헤더 없이 재고를 조정하면 400을 반환한다")
+    void adjust_withoutIdempotencyKey_rejected() throws Exception {
+        Company company = seedCompany("멱등키누락기업", "666-66-66666");
+        seedUser(company, null, "inv-idem-missing-admin@test.com", UserRole.COMPANY_ADMIN);
+        String token = login("inv-idem-missing-admin@test.com");
+
+        CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "INV-STORE6");
+        CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "INV-CAT6");
+        Warehouse warehouse = seedWarehouse(company, storageType, "멱등키누락창고");
+        Location location = seedLocation(warehouse, "A-01-01-6");
+        ProductUnit unit = seedProductUnit(company, "박스");
+        Product product = seedProduct(company, category, storageType, unit, "SKU-INV-6");
+        Inventory inventory = seedInventory(location, product, 50, 0);
+
+        mockMvc.perform(post("/api/inventory/" + inventory.getId() + "/adjust")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(Map.of("quantity", 80, "reason", "실사 결과 반영"))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(ErrorCode.IDEMPOTENCY_KEY_REQUIRED.getMessage()));
+    }
+
+    @Test
+    @DisplayName("같은 Idempotency-Key로 동일한 조정 요청을 반복하면 재처리 없이 같은 응답을 반환한다")
+    void adjust_sameIdempotencyKeyAndBody_returnsCachedResponse() throws Exception {
+        Company company = seedCompany("멱등재생기업", "777-77-77777");
+        seedUser(company, null, "inv-idem-replay-admin@test.com", UserRole.COMPANY_ADMIN);
+        String token = login("inv-idem-replay-admin@test.com");
+
+        CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "INV-STORE7");
+        CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "INV-CAT7");
+        Warehouse warehouse = seedWarehouse(company, storageType, "멱등재생창고");
+        Location location = seedLocation(warehouse, "A-01-01-7");
+        ProductUnit unit = seedProductUnit(company, "박스");
+        Product product = seedProduct(company, category, storageType, unit, "SKU-INV-7");
+        Inventory inventory = seedInventory(location, product, 50, 0);
+
+        String body = objectMapper.writeValueAsString(Map.of("quantity", 80, "reason", "실사 결과 반영"));
+
+        mockMvc.perform(post("/api/inventory/" + inventory.getId() + "/adjust")
+                        .header("Authorization", "Bearer " + token)
+                        .header("Idempotency-Key", "replay-key-1")
+                        .contentType("application/json")
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.quantity").value(80));
+
+        mockMvc.perform(post("/api/inventory/" + inventory.getId() + "/adjust")
+                        .header("Authorization", "Bearer " + token)
+                        .header("Idempotency-Key", "replay-key-1")
+                        .contentType("application/json")
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.quantity").value(80));
+
+        mockMvc.perform(get("/api/inventory/history")
+                        .header("Authorization", "Bearer " + token)
+                        .param("warehouseId", warehouse.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content.length()").value(1));
+    }
+
+    @Test
+    @DisplayName("같은 Idempotency-Key로 다른 내용의 조정 요청을 보내면 409를 반환한다")
+    void adjust_sameIdempotencyKeyDifferentBody_rejected() throws Exception {
+        Company company = seedCompany("멱등불일치기업", "888-88-88888");
+        seedUser(company, null, "inv-idem-mismatch-admin@test.com", UserRole.COMPANY_ADMIN);
+        String token = login("inv-idem-mismatch-admin@test.com");
+
+        CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "INV-STORE8");
+        CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "INV-CAT8");
+        Warehouse warehouse = seedWarehouse(company, storageType, "멱등불일치창고");
+        Location location = seedLocation(warehouse, "A-01-01-8");
+        ProductUnit unit = seedProductUnit(company, "박스");
+        Product product = seedProduct(company, category, storageType, unit, "SKU-INV-8");
+        Inventory inventory = seedInventory(location, product, 50, 0);
+
+        mockMvc.perform(post("/api/inventory/" + inventory.getId() + "/adjust")
+                        .header("Authorization", "Bearer " + token)
+                        .header("Idempotency-Key", "mismatch-key-1")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(Map.of("quantity", 80, "reason", "실사 결과 반영"))))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/inventory/" + inventory.getId() + "/adjust")
+                        .header("Authorization", "Bearer " + token)
+                        .header("Idempotency-Key", "mismatch-key-1")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(Map.of("quantity", 90, "reason", "다른 사유"))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value(ErrorCode.IDEMPOTENCY_REQUEST_MISMATCH.getMessage()));
+    }
+
+    @Test
     @DisplayName("가용재고가 0 이하인 위치는 가용재고 조회 결과에서 제외된다")
     void availableLocations_excludesZeroAvailable() throws Exception {
         Company company = seedCompany("가용재고기업", "444-44-44444");

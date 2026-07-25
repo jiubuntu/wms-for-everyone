@@ -264,6 +264,69 @@ class TransferApiIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
+    @DisplayName("Idempotency-Key 헤더 없이 이동을 등록하면 400을 반환한다")
+    void create_withoutIdempotencyKey_rejected() throws Exception {
+        Company company = seedCompany("이동멱등키누락기업", "666-66-66666");
+        seedUser(company, null, "transfer-idem-missing@test.com", UserRole.COMPANY_ADMIN);
+        String token = login("transfer-idem-missing@test.com");
+
+        CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "TR-STORE6");
+        CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "TR-CAT6");
+        Warehouse warehouse = seedWarehouse(company, storageType, "이동멱등키누락창고");
+        Location fromLocation = seedLocation(warehouse, "A-01-01-6");
+        Location toLocation = seedLocation(warehouse, "A-01-02-6");
+        ProductUnit unit = seedProductUnit(company, "박스");
+        Product product = seedProduct(company, category, storageType, unit, "SKU-TR-6");
+        seedInventory(fromLocation, product, 100, 0);
+
+        mockMvc.perform(post("/api/warehouse/" + warehouse.getId() + "/transfer/create")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(
+                                createBody(product.getId(), fromLocation.getId(), toLocation.getId(), 10, null))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(ErrorCode.IDEMPOTENCY_KEY_REQUIRED.getMessage()));
+    }
+
+    @Test
+    @DisplayName("같은 Idempotency-Key로 동일한 이동 등록을 반복해도 재고는 한 번만 반영된다")
+    void create_sameIdempotencyKeyAndBody_appliedOnce() throws Exception {
+        Company company = seedCompany("이동멱등재생기업", "777-77-77777");
+        seedUser(company, null, "transfer-idem-replay@test.com", UserRole.COMPANY_ADMIN);
+        String token = login("transfer-idem-replay@test.com");
+
+        CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "TR-STORE7");
+        CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "TR-CAT7");
+        Warehouse warehouse = seedWarehouse(company, storageType, "이동멱등재생창고");
+        Location fromLocation = seedLocation(warehouse, "A-01-01-7");
+        Location toLocation = seedLocation(warehouse, "A-01-02-7");
+        ProductUnit unit = seedProductUnit(company, "박스");
+        Product product = seedProduct(company, category, storageType, unit, "SKU-TR-7");
+        seedInventory(fromLocation, product, 100, 0);
+
+        String body = objectMapper.writeValueAsString(
+                createBody(product.getId(), fromLocation.getId(), toLocation.getId(), 30, null));
+
+        mockMvc.perform(post("/api/warehouse/" + warehouse.getId() + "/transfer/create")
+                        .header("Authorization", "Bearer " + token)
+                        .header("Idempotency-Key", "replay-transfer-key-1")
+                        .contentType("application/json")
+                        .content(body))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/warehouse/" + warehouse.getId() + "/transfer/create")
+                        .header("Authorization", "Bearer " + token)
+                        .header("Idempotency-Key", "replay-transfer-key-1")
+                        .contentType("application/json")
+                        .content(body))
+                .andExpect(status().isCreated());
+
+        Inventory fromInventory = inventoryRepository
+                .findActiveByLocationAndProductAndLotNumber(fromLocation.getId(), product.getId(), null).orElseThrow();
+        assertThat(fromInventory.getQuantity()).isEqualTo(70);
+    }
+
+    @Test
     @DisplayName("이동 목록을 조회한다")
     void list_success() throws Exception {
         Company company = seedCompany("이동조회기업", "555-55-55555");
