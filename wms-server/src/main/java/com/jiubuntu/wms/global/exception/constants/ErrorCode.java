@@ -12,6 +12,9 @@ public enum ErrorCode {
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(), "0002", "파일 업로드에 실패했습니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN.value(), "0003", "접근 권한이 없습니다."),
     EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(), "0004", "이메일 발송에 실패했습니다."),
+    IDEMPOTENCY_KEY_REQUIRED(HttpStatus.BAD_REQUEST.value(), "0005", "Idempotency-Key 헤더가 필요합니다."),
+    IDEMPOTENCY_REQUEST_IN_PROGRESS(HttpStatus.CONFLICT.value(), "0006", "이전 요청이 아직 처리 중입니다. 잠시 후 다시 시도해주세요."),
+    IDEMPOTENCY_REQUEST_MISMATCH(HttpStatus.CONFLICT.value(), "0007", "이전 요청과 내용이 달라 처리할 수 없습니다. 새로고침 후 다시 시도해주세요."),
 
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0101", "이미 가입된 이메일입니다."),
     BUSINESS_NUMBER_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0102", "이미 등록된 사업자등록번호입니다."),
