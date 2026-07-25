@@ -96,6 +96,12 @@ public class ProductService {
         product.delete();
     }
 
+    public Product getAccessible(Long id, Long companyId) {
+        Product product = getActiveById(id);
+        productValidator.validateScope(product, companyId);
+        return product;
+    }
+
     private Product getActiveById(Long id) {
         return productRepository.findActiveById(id)
                 .orElseThrow(() -> new CommonException(ErrorCode.PRODUCT_NOT_FOUND));

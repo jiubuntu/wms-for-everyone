@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   createProduct,
   deleteProduct,
+  getAllProducts,
   getProducts,
   updateProduct,
 } from "@/features/products/api"
@@ -11,6 +12,13 @@ export function useProducts(page: number, limit = 10) {
   return useQuery({
     queryKey: ["products", page, limit],
     queryFn: () => getProducts(page, limit),
+  })
+}
+
+export function useAllProducts() {
+  return useQuery({
+    queryKey: ["products", "all"],
+    queryFn: () => getAllProducts(),
   })
 }
 

@@ -16,6 +16,11 @@ export async function getWarehouses(
   return res.data.data
 }
 
+export async function getAllWarehouses(): Promise<WarehouseItem[]> {
+  const res = await api.get<ApiCommonResponse<WarehouseItem[]>>("/warehouse/all")
+  return res.data.data
+}
+
 export async function getWarehouse(id: number): Promise<WarehouseItem> {
   const res = await api.get<ApiCommonResponse<WarehouseItem>>(`/warehouse/${id}`)
   return res.data.data

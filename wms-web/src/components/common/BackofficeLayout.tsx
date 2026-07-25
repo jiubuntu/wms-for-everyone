@@ -8,10 +8,12 @@ export function BackofficeLayout({
   brandLabel,
   homeTo,
   nav,
+  showWarehouseSelector,
 }: {
   brandLabel: string
   homeTo: string
   nav: NavEntry[]
+  showWarehouseSelector?: boolean
 }) {
   const [collapsed, setCollapsed] = useState(false)
 
@@ -20,7 +22,10 @@ export function BackofficeLayout({
       <BackofficeSidebar brandLabel={brandLabel} homeTo={homeTo} nav={nav} collapsed={collapsed} />
 
       <div className={cn("flex flex-1 flex-col", collapsed ? "pl-[80px]" : "pl-[245px]")}>
-        <BackofficeHeader onToggleSidebar={() => setCollapsed((prev) => !prev)} />
+        <BackofficeHeader
+          onToggleSidebar={() => setCollapsed((prev) => !prev)}
+          showWarehouseSelector={showWarehouseSelector}
+        />
         <main className="flex-1 p-6">
           <Outlet />
         </main>

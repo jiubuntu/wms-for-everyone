@@ -114,7 +114,7 @@ public class LocationService {
         return locations;
     }
 
-    private Location getActiveInWarehouse(Long id, Long warehouseId) {
+    public Location getActiveInWarehouse(Long id, Long warehouseId) {
         Location location = locationRepository.findActiveById(id)
                 .orElseThrow(() -> new CommonException(ErrorCode.LOCATION_NOT_FOUND));
         if (!location.getWarehouse().getId().equals(warehouseId)) {

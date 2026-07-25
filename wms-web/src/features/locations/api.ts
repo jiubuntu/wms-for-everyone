@@ -18,6 +18,13 @@ export async function getLocations(
   return res.data.data
 }
 
+export async function getAllLocations(warehouseId: number): Promise<LocationItem[]> {
+  const res = await api.get<ApiCommonResponse<LocationItem[]>>(
+    `/warehouse/${warehouseId}/location/all`
+  )
+  return res.data.data
+}
+
 export async function bulkCreateLocations(
   warehouseId: number,
   input: LocationBulkCreateInput

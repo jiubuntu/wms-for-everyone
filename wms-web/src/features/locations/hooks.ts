@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   bulkCreateLocations,
   deleteLocation,
+  getAllLocations,
   getLocations,
   updateLocation,
 } from "@/features/locations/api"
@@ -12,6 +13,14 @@ export function useLocations(warehouseId: number, page: number, limit = 10) {
     queryKey: ["locations", warehouseId, page, limit],
     queryFn: () => getLocations(warehouseId, page, limit),
     enabled: Number.isFinite(warehouseId),
+  })
+}
+
+export function useAllLocations(warehouseId: number | null) {
+  return useQuery({
+    queryKey: ["locations", warehouseId, "all"],
+    queryFn: () => getAllLocations(warehouseId as number),
+    enabled: warehouseId != null,
   })
 }
 

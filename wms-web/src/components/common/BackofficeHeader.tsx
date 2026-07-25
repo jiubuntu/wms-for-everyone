@@ -10,10 +10,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { WarehouseSelector } from "@/components/common/WarehouseSelector"
 
 const MOCK_NOTIFICATIONS: { id: number; text: string }[] = []
 
-export function BackofficeHeader({ onToggleSidebar }: { onToggleSidebar: () => void }) {
+export function BackofficeHeader({
+  onToggleSidebar,
+  showWarehouseSelector,
+}: {
+  onToggleSidebar: () => void
+  showWarehouseSelector?: boolean
+}) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -26,9 +33,12 @@ export function BackofficeHeader({ onToggleSidebar }: { onToggleSidebar: () => v
 
   return (
     <header className="sticky top-0 z-10 flex h-[70px] shrink-0 items-center justify-between bg-card px-4 shadow-[0_0_15px_0_rgba(154,161,171,0.05)]">
-      <Button variant="ghost" size="icon" onClick={onToggleSidebar} aria-label="사이드바 접기/펼치기">
-        <Menu className="size-4.5" />
-      </Button>
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={onToggleSidebar} aria-label="사이드바 접기/펼치기">
+          <Menu className="size-4.5" />
+        </Button>
+        {showWarehouseSelector && <WarehouseSelector />}
+      </div>
 
       <div className="flex items-center gap-3">
         <DropdownMenu>

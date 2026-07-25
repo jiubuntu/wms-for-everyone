@@ -1,0 +1,129 @@
+package com.jiubuntu.wms.biz.inventory.application;
+
+import com.jiubuntu.wms.biz.inventory.application.dto.command.InventoryAdjustCommand;
+import com.jiubuntu.wms.biz.inventory.application.dto.result.AvailableLocationResult;
+import com.jiubuntu.wms.biz.inventory.application.dto.result.InventoryHistoryResult;
+import com.jiubuntu.wms.biz.inventory.application.dto.result.InventoryResult;
+import com.jiubuntu.wms.biz.inventory.application.validator.InventoryValidator;
+import com.jiubuntu.wms.biz.inventory.domain.Inventory;
+import com.jiubuntu.wms.biz.inventory.domain.InventoryHistory;
+import com.jiubuntu.wms.biz.inventory.domain.InventoryHistoryTargetType;
+import com.jiubuntu.wms.biz.inventory.infrastructure.InventoryHistoryRepository;
+import com.jiubuntu.wms.biz.inventory.infrastructure.InventoryRepository;
+import com.jiubuntu.wms.biz.location.domain.Location;
+import com.jiubuntu.wms.biz.product.domain.Product;
+import com.jiubuntu.wms.biz.user.domain.UserRole;
+import com.jiubuntu.wms.biz.warehouse.application.WarehouseService;
+import com.jiubuntu.wms.biz.warehouse.domain.Warehouse;
+import com.jiubuntu.wms.global.exception.CommonException;
+import com.jiubuntu.wms.global.exception.constants.ErrorCode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class InventoryService {
+
+    private final InventoryRepository inventoryRepository;
+    private final InventoryHistoryRepository inventoryHistoryRepository;
+    private final InventoryValidator inventoryValidator;
+    private final WarehouseService warehouseService;
+
+    public Page<InventoryResult> list(Long warehouseId, Long companyId, UserRole role, Long principalWarehouseId,
+                                       Pageable pageable) {
+        Long resolvedWarehouseId = resolveWarehouseId(warehouseId, role, principalWarehouseId);
+        warehouseService.getAccessible(resolvedWarehouseId, companyId, role, principalWarehouseId);
+        return inventoryRepository.findActiveByWarehouse(resolvedWarehouseId, pageable);
+    }
+
+    public List<AvailableLocationResult> getAvailableLocations(Long warehouseId, Long productId, Long companyId,
+                                                                 UserRole role, Long principalWarehouseId) {
+        warehouseService.getAccessible(warehouseId, companyId, role, principalWarehouseId);
+        return inventoryRepository.findAvailableByWarehouseAndProduct(warehouseId, productId);
+    }
+
+    public Page<InventoryHistoryResult> getHistory(Long warehouseId, Long companyId, UserRole role,
+                                                    Long principalWarehouseId, Pageable pageable) {
+        Long resolvedWarehouseId = resolveWarehouseId(warehouseId, role, principalWarehouseId);
+        warehouseService.getAccessible(resolvedWarehouseId, companyId, role, principalWarehouseId);
+        return inventoryHistoryRepository.findByWarehouse(resolvedWarehouseId, pageable);
+    }
+
+    @Transactional
+    public InventoryResult adjust(InventoryAdjustCommand command) {
+        Inventory inventory = getActiveById(command.getId());
+        Warehouse warehouse = inventory.getLocation().getWarehouse();
+        warehouseService.getAccessible(warehouse.getId(), command.getCompanyId(), command.getRole(), command.getPrincipalWarehouseId());
+        inventoryValidator.validateAdjust(inventory, command.getQuantity());
+
+        int quantityChange = command.getQuantity() - inventory.getQuantity();
+        inventory.adjustTo(command.getQuantity());
+        inventory.assignUpdater(command.getUpdatedBy());
+
+        recordHistory(inventory, warehouse, quantityChange, InventoryHistoryTargetType.ADJUSTMENT, null,
+                command.getReason(), command.getUpdatedBy());
+
+        return inventoryRepository.findResultById(inventory.getId())
+                .orElseThrow(() -> new CommonException(ErrorCode.INVENTORY_NOT_FOUND));
+    }
+
+    public Inventory getActiveByLocationProductLot(Long locationId, Long productId, String lotNumber) {
+        return inventoryRepository.findActiveByLocationAndProductAndLotNumber(locationId, productId, lotNumber)
+                .orElseThrow(() -> new CommonException(ErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY));
+    }
+
+    @Transactional
+    public Inventory getOrCreateForLocation(Location location, Product product, String lotNumber,
+                                             LocalDate manufactureDate, LocalDate expiryDate) {
+        return inventoryRepository.findActiveByLocationAndProductAndLotNumber(location.getId(), product.getId(), lotNumber)
+                .orElseGet(() -> inventoryRepository.save(
+                        new Inventory(location, product, lotNumber, manufactureDate, expiryDate, 0)));
+    }
+
+    /**
+     * 여러 위치를 한 트랜잭션에서 갱신할 때 location_id 오름차순으로 호출해 데드락을 회피한다.
+     * 즉시 flush하여 실제 UPDATE/INSERT가 호출 순서대로 DB에 반영되도록 한다.
+     */
+    @Transactional
+    public Inventory applyOrderedQuantityChange(Location location, Product product, String lotNumber,
+                                                 LocalDate manufactureDate, LocalDate expiryDate, int delta) {
+        Inventory target = getOrCreateForLocation(location, product, lotNumber, manufactureDate, expiryDate);
+        if (delta < 0) {
+            target.decreaseQuantity(-delta);
+        } else {
+            target.increaseQuantity(delta);
+        }
+        return inventoryRepository.saveAndFlush(target);
+    }
+
+    public void recordHistory(Inventory inventory, Warehouse warehouse, int quantityChange,
+                               InventoryHistoryTargetType targetType, Long targetId, String reason, Long createdBy) {
+        InventoryHistory history = new InventoryHistory(
+                warehouse.getCompany(), warehouse, inventory.getLocation(), inventory.getProduct(),
+                inventory.getLotNumber(), quantityChange, inventory.getQuantity(), targetType, targetId, reason, createdBy);
+        inventoryHistoryRepository.save(history);
+    }
+
+    private Inventory getActiveById(Long id) {
+        return inventoryRepository.findActiveById(id)
+                .orElseThrow(() -> new CommonException(ErrorCode.INVENTORY_NOT_FOUND));
+    }
+
+    private Long resolveWarehouseId(Long warehouseId, UserRole role, Long principalWarehouseId) {
+        if (role == UserRole.COMPANY_ADMIN) {
+            if (warehouseId == null) {
+                throw new CommonException(ErrorCode.BAD_REQUEST);
+            }
+            return warehouseId;
+        }
+        return principalWarehouseId;
+    }
+
+}

@@ -1,4 +1,4 @@
-import { Database, LayoutDashboard, Package, Users, Warehouse } from "lucide-react"
+import { Boxes, Database, LayoutDashboard, Package, Send, Users, Warehouse } from "lucide-react"
 import type { NavEntry } from "@/components/common/BackofficeSidebar"
 
 export const ADMIN_NAV: NavEntry[] = [
@@ -50,6 +50,35 @@ export const APP_NAV: NavEntry[] = [
         label: "창고 관리",
         to: "/app/warehouses",
         roles: ["COMPANY_ADMIN", "WAREHOUSE_MANAGER"],
+      },
+    ],
+  },
+  {
+    type: "item",
+    label: "출고",
+    to: "/app/outbounds",
+    icon: Send,
+    roles: ["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"],
+  },
+  {
+    type: "group",
+    label: "재고",
+    icon: Boxes,
+    children: [
+      {
+        label: "재고 현황",
+        to: "/app/inventory",
+        roles: ["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"],
+      },
+      {
+        label: "재고 이동",
+        to: "/app/inventory/transfers",
+        roles: ["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"],
+      },
+      {
+        label: "재고 이력",
+        to: "/app/inventory/history",
+        roles: ["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"],
       },
     ],
   },

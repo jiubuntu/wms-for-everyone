@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   createWarehouse,
   deleteWarehouse,
+  getAllWarehouses,
   getWarehouse,
   getWarehouses,
   updateWarehouse,
@@ -12,6 +13,13 @@ export function useWarehouses(page: number, limit = 10) {
   return useQuery({
     queryKey: ["warehouses", page, limit],
     queryFn: () => getWarehouses(page, limit),
+  })
+}
+
+export function useAllWarehouses() {
+  return useQuery({
+    queryKey: ["warehouses", "all"],
+    queryFn: () => getAllWarehouses(),
   })
 }
 

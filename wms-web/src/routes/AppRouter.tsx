@@ -7,6 +7,7 @@ import { Forbidden } from "@/pages/Forbidden"
 import { ProtectedRoute } from "@/routes/ProtectedRoute"
 import { GuestRoute } from "@/routes/GuestRoute"
 import { BackofficeLayout } from "@/components/common/BackofficeLayout"
+import { WarehouseFilterProvider } from "@/contexts/WarehouseFilterContext"
 import { ADMIN_NAV, APP_NAV } from "@/routes/nav"
 import { DashboardPage as AdminDashboardPage } from "@/pages/admin/DashboardPage"
 import { CompanyApprovalListPage } from "@/pages/admin/CompanyApprovalListPage"
@@ -18,6 +19,12 @@ import { ProductUnitPage } from "@/pages/app/ProductUnitPage"
 import { ProductPage } from "@/pages/app/ProductPage"
 import { WarehousePage } from "@/pages/app/WarehousePage"
 import { WarehouseDetailPage } from "@/pages/app/WarehouseDetailPage"
+import { InventoryPage } from "@/pages/app/InventoryPage"
+import { InventoryHistoryPage } from "@/pages/app/InventoryHistoryPage"
+import { TransferPage } from "@/pages/app/TransferPage"
+import { OutboundPage } from "@/pages/app/OutboundPage"
+import { OutboundNewPage } from "@/pages/app/OutboundNewPage"
+import { OutboundDetailPage } from "@/pages/app/OutboundDetailPage"
 
 export function AppRouter() {
   return (
@@ -46,7 +53,14 @@ export function AppRouter() {
         path="/app"
         element={
           <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
-            <BackofficeLayout brandLabel="모두의 WMS" homeTo="/app" nav={APP_NAV} />
+            <WarehouseFilterProvider>
+              <BackofficeLayout
+                brandLabel="모두의 WMS"
+                homeTo="/app"
+                nav={APP_NAV}
+                showWarehouseSelector
+              />
+            </WarehouseFilterProvider>
           </ProtectedRoute>
         }
       >
@@ -88,6 +102,54 @@ export function AppRouter() {
           element={
             <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER"]}>
               <WarehouseDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="outbounds"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
+              <OutboundPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="outbounds/new"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
+              <OutboundNewPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="outbounds/:id"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
+              <OutboundDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="inventory"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
+              <InventoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="inventory/transfers"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
+              <TransferPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="inventory/history"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
+              <InventoryHistoryPage />
             </ProtectedRoute>
           }
         />
