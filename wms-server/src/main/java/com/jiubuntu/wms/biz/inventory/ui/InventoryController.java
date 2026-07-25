@@ -10,6 +10,7 @@ import com.jiubuntu.wms.biz.inventory.ui.payload.response.AvailableLocationRespo
 import com.jiubuntu.wms.biz.inventory.ui.payload.response.InventoryHistoryResponse;
 import com.jiubuntu.wms.biz.inventory.ui.payload.response.InventoryResponse;
 import com.jiubuntu.wms.biz.user.domain.UserRole;
+import com.jiubuntu.wms.global.idempotency.Idempotent;
 import com.jiubuntu.wms.global.payload.constants.PageConstants;
 import com.jiubuntu.wms.global.payload.response.ApiCommonResponse;
 import com.jiubuntu.wms.global.payload.response.ApiPageResponse;
@@ -54,6 +55,7 @@ public class InventoryController {
         return ResponseEntity.status(body.getHttpCode()).body(body);
     }
 
+    @Idempotent("inventory-adjust")
     @PostMapping("/{id}/adjust")
     public ResponseEntity<ApiCommonResponse<InventoryResponse>> adjust(
             AuthPrincipal principal,

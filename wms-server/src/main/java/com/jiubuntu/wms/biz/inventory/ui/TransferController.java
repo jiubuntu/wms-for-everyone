@@ -6,6 +6,7 @@ import com.jiubuntu.wms.biz.inventory.application.dto.result.TransferResult;
 import com.jiubuntu.wms.biz.inventory.ui.payload.request.TransferCreateRequest;
 import com.jiubuntu.wms.biz.inventory.ui.payload.response.TransferResponse;
 import com.jiubuntu.wms.biz.user.domain.UserRole;
+import com.jiubuntu.wms.global.idempotency.Idempotent;
 import com.jiubuntu.wms.global.payload.constants.PageConstants;
 import com.jiubuntu.wms.global.payload.constants.ResponseCode;
 import com.jiubuntu.wms.global.payload.response.ApiCommonResponse;
@@ -49,6 +50,7 @@ public class TransferController {
         return ResponseEntity.status(body.getHttpCode()).body(body);
     }
 
+    @Idempotent("transfer-create")
     @PostMapping("/create")
     public ResponseEntity<ApiCommonResponse<TransferResponse>> create(
             AuthPrincipal principal,
