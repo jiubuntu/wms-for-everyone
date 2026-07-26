@@ -63,6 +63,12 @@ public enum ErrorCode {
     TRANSFER_SAME_LOCATION(HttpStatus.BAD_REQUEST.value(), "1001", "출발 위치와 도착 위치는 달라야 합니다."),
     TRANSFER_LOCATION_DISABLED(HttpStatus.BAD_REQUEST.value(), "1002", "비활성화된 위치로는 이동할 수 없습니다."),
 
+    OUTBOUND_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "1101", "존재하지 않는 출고입니다."),
+    OUTBOUND_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST.value(), "1102", "이미 확정된 출고입니다."),
+    OUTBOUND_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST.value(), "1103", "이미 취소된 출고입니다."),
+    OUTBOUND_ALLOCATION_MISMATCH(HttpStatus.BAD_REQUEST.value(), "1104", "할당한 위치별 수량 합계가 출고 수량과 일치하지 않습니다."),
+    OUTBOUND_INVALID_UNIT(HttpStatus.BAD_REQUEST.value(), "1105", "상품에 등록되지 않은 단위입니다."),
+
     ;
 
     private final int httpCode;
