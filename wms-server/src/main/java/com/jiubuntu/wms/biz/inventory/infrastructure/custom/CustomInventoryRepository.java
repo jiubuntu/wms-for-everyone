@@ -21,4 +21,6 @@ public interface CustomInventoryRepository {
 
     List<AvailableLocationResult> findAvailableByWarehouseAndProduct(Long warehouseId, Long productId);
 
+    List<Inventory> findActiveAvailableForAllocation(Long warehouseId, Long productId);
+
 }

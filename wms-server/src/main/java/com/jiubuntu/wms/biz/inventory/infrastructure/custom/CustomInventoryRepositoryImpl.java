@@ -137,6 +137,18 @@ public class CustomInventoryRepositoryImpl implements CustomInventoryRepository 
                 .fetch();
     }
 
+    @Override
+    public List<Inventory> findActiveAvailableForAllocation(Long warehouseId, Long productId) {
+        return queryFactory.selectFrom(inventory)
+                .join(inventory.location, location).fetchJoin()
+                .where(location.warehouse.id.eq(warehouseId),
+                        inventory.product.id.eq(productId),
+                        inventory.quantity.subtract(inventory.reservedQuantity).gt(0),
+                        activeEq())
+                .orderBy(inventory.expiryDate.asc().nullsLast())
+                .fetch();
+    }
+
     private BooleanExpression lotNumberEq(String lotNumber) {
         return lotNumber != null ? inventory.lotNumber.eq(lotNumber) : inventory.lotNumber.isNull();
     }
