@@ -12,6 +12,6 @@ public enum InventoryHistoryTargetType {
     TRANSFER("이동"),
     ADJUSTMENT("조정");
 
-    private final String name;
+    private final String title;
 
 }
