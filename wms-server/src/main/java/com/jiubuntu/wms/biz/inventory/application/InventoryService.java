@@ -79,6 +79,38 @@ public class InventoryService {
                 .orElseThrow(() -> new CommonException(ErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY));
     }
 
+    /**
+     * 유효기간 임박 순(FEFO)으로 정렬된, 가용재고가 남은 재고 목록. 출고 FEFO 자동 할당에서 앞에서부터 소진한다.
+     */
+    public List<Inventory> findAvailableForAllocation(Long warehouseId, Long productId) {
+        return inventoryRepository.findActiveAvailableForAllocation(warehouseId, productId);
+    }
+
+    @Transactional
+    public Inventory reserve(Inventory inventory, int amount, Long updatedBy) {
+        inventoryValidator.validateSufficientQuantity(inventory, amount);
+        inventory.reserve(amount);
+        inventory.assignUpdater(updatedBy);
+        return inventoryRepository.saveAndFlush(inventory);
+    }
+
+    @Transactional
+    public Inventory confirmReservation(Inventory inventory, int amount, Warehouse warehouse,
+                                         InventoryHistoryTargetType targetType, Long targetId, Long updatedBy) {
+        inventory.confirmReservation(amount);
+        inventory.assignUpdater(updatedBy);
+        Inventory saved = inventoryRepository.saveAndFlush(inventory);
+        recordHistory(saved, warehouse, -amount, targetType, targetId, null, updatedBy);
+        return saved;
+    }
+
+    @Transactional
+    public Inventory releaseReservation(Inventory inventory, int amount, Long updatedBy) {
+        inventory.releaseReservation(amount);
+        inventory.assignUpdater(updatedBy);
+        return inventoryRepository.saveAndFlush(inventory);
+    }
+
     @Transactional
     public Inventory getOrCreateForLocation(Location location, Product product, String lotNumber,
                                              LocalDate manufactureDate, LocalDate expiryDate) {

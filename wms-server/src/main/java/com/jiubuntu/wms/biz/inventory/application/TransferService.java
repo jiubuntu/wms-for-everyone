@@ -59,7 +59,7 @@ public class TransferService {
                 fromLocation.getId(), product.getId(), command.getLotNumber());
         inventoryValidator.validateSufficientQuantity(sourceInventory, command.getQuantity());
 
-        OrderedInventories updated = applyOrderedChanges(
+        TransferOrderedInventories updated = applyOrderedChanges(
                 fromLocation, toLocation, product, command.getLotNumber(), sourceInventory, command.getQuantity());
 
         Transfer saved = saveTransfer(warehouse, product, fromLocation, toLocation, reason, command);
@@ -78,8 +78,8 @@ public class TransferService {
     /**
      * location_id 오름차순으로 먼저/나중 위치를 정해 순서대로 갱신한다
      */
-    private OrderedInventories applyOrderedChanges(Location fromLocation, Location toLocation, Product product,
-                                                    String lotNumber, Inventory sourceInventory, int quantity) {
+    private TransferOrderedInventories applyOrderedChanges(Location fromLocation, Location toLocation, Product product,
+                                                            String lotNumber, Inventory sourceInventory, int quantity) {
         boolean fromFirst = fromLocation.getId() < toLocation.getId();
         Location firstLocation = fromFirst ? fromLocation : toLocation;
         Location secondLocation = fromFirst ? toLocation : fromLocation;
@@ -93,7 +93,7 @@ public class TransferService {
 
         Inventory fromInventory = fromFirst ? firstInventory : secondInventory;
         Inventory toInventory = fromFirst ? secondInventory : firstInventory;
-        return new OrderedInventories(fromInventory, toInventory);
+        return new TransferOrderedInventories(fromInventory, toInventory);
     }
 
     private Transfer saveTransfer(Warehouse warehouse, Product product, Location fromLocation, Location toLocation,
@@ -104,25 +104,13 @@ public class TransferService {
         return transferRepository.save(transfer);
     }
 
-    private void recordTransferHistory(OrderedInventories updated, Warehouse warehouse, CommonCode reason,
+    private void recordTransferHistory(TransferOrderedInventories updated, Warehouse warehouse, CommonCode reason,
                                         Transfer saved, TransferCreateCommand command) {
         String reasonName = reason != null ? reason.getName() : null;
-        inventoryService.recordHistory(updated.from, warehouse, -command.getQuantity(),
+        inventoryService.recordHistory(updated.getFrom(), warehouse, -command.getQuantity(),
                 InventoryHistoryTargetType.TRANSFER, saved.getId(), reasonName, command.getCreatedBy());
-        inventoryService.recordHistory(updated.to, warehouse, command.getQuantity(),
+        inventoryService.recordHistory(updated.getTo(), warehouse, command.getQuantity(),
                 InventoryHistoryTargetType.TRANSFER, saved.getId(), reasonName, command.getCreatedBy());
-    }
-
-    private static class OrderedInventories {
-
-        private final Inventory from;
-        private final Inventory to;
-
-        private OrderedInventories(Inventory from, Inventory to) {
-            this.from = from;
-            this.to = to;
-        }
-
     }
 
 }
