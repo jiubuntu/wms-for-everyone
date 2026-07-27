@@ -22,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -36,6 +38,12 @@ public class ProductService {
     public Page<ProductResult> list(Long companyId, Pageable pageable) {
         return productRepository.findActiveByCompany(companyId, pageable)
                 .map(this::toResult);
+    }
+
+    public List<ProductResult> listAll(Long companyId) {
+        return productRepository.findAllActiveByCompany(companyId).stream()
+                .map(this::toResult)
+                .toList();
     }
 
     @Transactional

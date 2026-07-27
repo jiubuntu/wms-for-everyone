@@ -57,6 +57,14 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
         return new PageImpl<>(content, pageable, total != null ? total : 0L);
     }
 
+    @Override
+    public List<Product> findAllActiveByCompany(Long companyId) {
+        return queryFactory.selectFrom(product)
+                .where(product.company.id.eq(companyId), activeEq())
+                .orderBy(product.createdAt.asc())
+                .fetch();
+    }
+
     private BooleanExpression activeEq() {
         return product.active.isTrue();
     }

@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -44,7 +45,8 @@ public class WarehouseService {
         if (!Objects.equals(warehouse.getCompany().getId(), companyId)) {
             throw new CommonException(ErrorCode.COMPANY_SCOPE_VIOLATION);
         }
-        if (role == UserRole.WAREHOUSE_MANAGER && !Objects.equals(warehouse.getId(), principalWarehouseId)) {
+        if ((role == UserRole.WAREHOUSE_MANAGER || role == UserRole.WORKER)
+                && !Objects.equals(warehouse.getId(), principalWarehouseId)) {
             throw new CommonException(ErrorCode.WAREHOUSE_SCOPE_VIOLATION);
         }
         return warehouse;
@@ -55,6 +57,16 @@ public class WarehouseService {
                 ? warehouseRepository.findActiveByCompanyAndId(companyId, principalWarehouseId, pageable)
                 : warehouseRepository.findActiveByCompany(companyId, pageable);
         return warehouses.map(this::toResult);
+    }
+
+    /**
+     * 전역 창고 선택기용 — 페이지네이션 없이 전체 목록. 창고관리자·작업자는 담당 창고 1건만 반환한다.
+     */
+    public List<WarehouseResult> listAll(Long companyId, UserRole role, Long principalWarehouseId) {
+        List<Warehouse> warehouses = (role == UserRole.WAREHOUSE_MANAGER || role == UserRole.WORKER)
+                ? warehouseRepository.findAllActiveByCompanyAndId(companyId, principalWarehouseId)
+                : warehouseRepository.findAllActiveByCompany(companyId);
+        return warehouses.stream().map(this::toResult).toList();
     }
 
     @Transactional

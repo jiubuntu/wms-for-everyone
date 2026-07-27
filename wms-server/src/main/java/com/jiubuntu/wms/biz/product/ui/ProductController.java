@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Secure({UserRole.COMPANY_ADMIN, UserRole.WAREHOUSE_MANAGER})
 @RestController
 @RequestMapping("/api/product")
@@ -37,6 +39,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProductController {
 
     private final ProductService productService;
+
+    @Secure({UserRole.COMPANY_ADMIN, UserRole.WAREHOUSE_MANAGER, UserRole.WORKER})
+    @GetMapping("/all")
+    public ResponseEntity<ApiCommonResponse<List<ProductResponse>>> listAll(AuthPrincipal principal) {
+        List<ProductResponse> results = productService.listAll(principal.getCompanyId()).stream()
+                .map(ProductResponse::from)
+                .toList();
+
+        ApiCommonResponse<List<ProductResponse>> body = ApiCommonResponse.success(results);
+        return ResponseEntity.status(body.getHttpCode()).body(body);
+    }
 
     @GetMapping("/list")
     public ResponseEntity<ApiCommonResponse<ApiPageResponse<ProductResponse>>> list(

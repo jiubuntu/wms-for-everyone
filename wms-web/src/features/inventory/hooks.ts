@@ -11,6 +11,7 @@ export function useInventory(warehouseId: number | null, page: number, limit = 1
   return useQuery({
     queryKey: ["inventory", warehouseId, page, limit],
     queryFn: () => getInventory(warehouseId, page, limit),
+    refetchInterval: 5000,
   })
 }
 

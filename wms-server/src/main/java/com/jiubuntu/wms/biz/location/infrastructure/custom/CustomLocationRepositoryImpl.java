@@ -52,6 +52,14 @@ public class CustomLocationRepositoryImpl implements CustomLocationRepository {
     }
 
     @Override
+    public List<Location> findAllActiveByWarehouse(Long warehouseId) {
+        return queryFactory.selectFrom(location)
+                .where(location.warehouse.id.eq(warehouseId), activeEq())
+                .orderBy(location.code.asc())
+                .fetch();
+    }
+
+    @Override
     public List<String> findActiveCodesByWarehouseAndCodeIn(Long warehouseId, Collection<String> codes) {
         if (codes.isEmpty()) {
             return List.of();

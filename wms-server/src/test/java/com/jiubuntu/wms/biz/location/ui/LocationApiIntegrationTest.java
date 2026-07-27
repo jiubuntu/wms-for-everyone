@@ -215,4 +215,39 @@ class LocationApiIntegrationTest extends IntegrationTestSupport {
                 .andExpect(jsonPath("$.message").value(ErrorCode.WAREHOUSE_SCOPE_VIOLATION.getMessage()));
     }
 
+    @Test
+    @DisplayName("작업자도 담당 창고의 위치 전체 목록은 조회할 수 있다 (입출고/재고이동 등록 화면의 위치 선택용)")
+    void listAll_allowedForWorker() throws Exception {
+        Company company = seedCompany("위치작업자전체조회기업", "777-77-77777");
+        CommonCode storageType = seedStorageType("LOC-STORE7");
+        Warehouse warehouse = seedWarehouse(company, storageType, "작업자전체조회창고");
+        seedUser(company, warehouse, "loc-worker-all@test.com", UserRole.WORKER);
+        String token = login("loc-worker-all@test.com");
+
+        locationRepository.save(Location.builder()
+                .warehouse(warehouse).zone("A").row("01").col("01").level("1").code("A-01-01-1").build());
+
+        mockMvc.perform(get("/api/warehouse/" + warehouse.getId() + "/location/all")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].code").value("A-01-01-1"));
+    }
+
+    @Test
+    @DisplayName("작업자가 담당 창고가 아닌 창고의 위치 전체 목록을 조회하면 거부된다")
+    void listAll_worker_otherWarehouse_rejected() throws Exception {
+        Company company = seedCompany("위치작업자스코프기업", "888-88-88888");
+        CommonCode storageType = seedStorageType("LOC-STORE8");
+        Warehouse ownWarehouse = seedWarehouse(company, storageType, "작업자담당창고");
+        Warehouse otherWarehouse = seedWarehouse(company, storageType, "작업자다른창고");
+        seedUser(company, ownWarehouse, "loc-worker-scope@test.com", UserRole.WORKER);
+        String token = login("loc-worker-scope@test.com");
+
+        mockMvc.perform(get("/api/warehouse/" + otherWarehouse.getId() + "/location/all")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value(ErrorCode.WAREHOUSE_SCOPE_VIOLATION.getMessage()));
+    }
+
 }

@@ -69,6 +69,15 @@ public enum ErrorCode {
     OUTBOUND_ALLOCATION_MISMATCH(HttpStatus.BAD_REQUEST.value(), "1104", "할당한 위치별 수량 합계가 출고 수량과 일치하지 않습니다."),
     OUTBOUND_INVALID_UNIT(HttpStatus.BAD_REQUEST.value(), "1105", "상품에 등록되지 않은 단위입니다."),
 
+    INBOUND_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "1201", "존재하지 않는 입고입니다."),
+    INBOUND_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST.value(), "1202", "이미 확정된 입고입니다."),
+    INBOUND_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST.value(), "1203", "이미 취소된 입고입니다."),
+    INBOUND_LOCATION_SUM_MISMATCH(HttpStatus.BAD_REQUEST.value(), "1204", "배치한 위치별 수량 합계가 상품 라인의 수량과 일치하지 않습니다."),
+    INBOUND_NOT_FULLY_PLACED(HttpStatus.BAD_REQUEST.value(), "1205", "위치 배치가 끝나지 않은 상품 라인이 있습니다."),
+    INBOUND_INVALID_UNIT(HttpStatus.BAD_REQUEST.value(), "1206", "상품에 등록되지 않은 단위입니다."),
+    INBOUND_CONCURRENT_UPDATE_CONFLICT(HttpStatus.CONFLICT.value(), "1207", "다른 요청과 재고 처리가 겹쳐 실패했습니다. 다시 시도해주세요."),
+    INBOUND_LOT_INFO_REQUIRED(HttpStatus.BAD_REQUEST.value(), "1208", "LOT 관리 상품은 로트번호·제조일자·유통기한을 입력해야 합니다."),
+
     ;
 
     private final int httpCode;

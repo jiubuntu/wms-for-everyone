@@ -5,6 +5,7 @@ import { DataTablePagination } from "@/components/common/DataTablePagination"
 import { Card, CardContent } from "@/components/ui/card"
 import { useWarehouseFilter } from "@/contexts/WarehouseFilterContext"
 import { useInventory } from "@/features/inventory/hooks"
+import { useFlashingRows } from "@/features/inventory/useFlashingRows"
 import { InventoryTable } from "@/features/inventory/components/InventoryTable"
 import { InventoryAdjustDialog } from "@/features/inventory/components/InventoryAdjustDialog"
 import type { InventoryItem } from "@/features/inventory/types"
@@ -20,6 +21,7 @@ export function InventoryPage() {
   const [isAdjustOpen, setIsAdjustOpen] = useState(false)
 
   const { data, isLoading, isError } = useInventory(warehouseId, page, PAGE_SIZE)
+  const flashingIds = useFlashingRows(data?.content ?? [], `${warehouseId ?? "none"}-${page}`)
 
   const filteredItems = useMemo(() => {
     const keyword = search.trim().toLowerCase()
@@ -49,7 +51,7 @@ export function InventoryPage() {
 
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
-          <InventoryTable items={filteredItems} onAdjust={handleAdjust} />
+          <InventoryTable items={filteredItems} onAdjust={handleAdjust} flashingIds={flashingIds} />
 
           {!isLoading && !isError && filteredItems.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">

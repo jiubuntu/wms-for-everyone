@@ -69,7 +69,7 @@ export function OutboundItemLineEditor({
   const total = manualTotal(value)
 
   return (
-    <div className="flex flex-col gap-3 rounded-[0.3rem] border border-dashed p-4">
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">상품 {index + 1}</span>
         <Button

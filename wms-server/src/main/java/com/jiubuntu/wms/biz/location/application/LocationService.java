@@ -42,6 +42,13 @@ public class LocationService {
         return locationRepository.findActiveByWarehouse(warehouseId, pageable).map(this::toResult);
     }
 
+    public List<LocationResult> listAll(Long warehouseId, Long companyId, UserRole role, Long principalWarehouseId) {
+        warehouseService.getAccessible(warehouseId, companyId, role, principalWarehouseId);
+        return locationRepository.findAllActiveByWarehouse(warehouseId).stream()
+                .map(this::toResult)
+                .toList();
+    }
+
     public Map<Long, Long> countActiveByWarehouseIds(Collection<Long> warehouseIds) {
         return locationRepository.countActiveByWarehouseIds(warehouseIds);
     }
