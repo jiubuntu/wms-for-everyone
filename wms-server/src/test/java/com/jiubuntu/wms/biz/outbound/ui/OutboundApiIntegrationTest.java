@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -44,7 +43,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Transactional
+// register/complete/cancel 모두 낙관적 락 재시도를 위해 PROPAGATION_REQUIRES_NEW로 완전히 새 트랜잭션을 연다.
+// 테스트에 @Transactional을 걸면 그 새 트랜잭션이 아직 커밋 안 된 테스트 트랜잭션의 데이터를 못 봐서 실패하므로,
+// 이 클래스는 다른 통합 테스트와 달리 @Transactional을 걸지 않는다 (시드 데이터는 테스트마다 고유값 사용).
 class OutboundApiIntegrationTest extends IntegrationTestSupport {
 
     @Autowired
