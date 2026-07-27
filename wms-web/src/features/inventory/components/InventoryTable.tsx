@@ -1,4 +1,5 @@
 import { SlidersHorizontal } from "lucide-react"
+import { cn } from "@/lib/utils"
 import {
   Table,
   TableBody,
@@ -13,9 +14,10 @@ import type { InventoryItem } from "@/features/inventory/types"
 interface InventoryTableProps {
   items: InventoryItem[]
   onAdjust: (item: InventoryItem) => void
+  flashingIds?: Set<number>
 }
 
-export function InventoryTable({ items, onAdjust }: InventoryTableProps) {
+export function InventoryTable({ items, onAdjust, flashingIds }: InventoryTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -31,7 +33,10 @@ export function InventoryTable({ items, onAdjust }: InventoryTableProps) {
       </TableHeader>
       <TableBody>
         {items.map((item) => (
-          <TableRow key={item.id}>
+          <TableRow
+            key={item.id}
+            className={cn(flashingIds?.has(item.id) && "animate-row-flash")}
+          >
             <TableCell className="font-medium">
               {item.productName}
               <span className="ml-1.5 text-xs text-muted-foreground">{item.productSkuCode}</span>
