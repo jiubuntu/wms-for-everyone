@@ -35,7 +35,11 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -48,7 +52,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -81,6 +87,9 @@ class OutboundServiceTest {
 
     @Mock
     private ProductUnitService productUnitService;
+
+    @Mock
+    private PlatformTransactionManager transactionManager;
 
     @InjectMocks
     private OutboundService outboundService;
@@ -116,6 +125,11 @@ class OutboundServiceTest {
         Inventory inventory = new Inventory(location, product, lotNumber, null, expiryDate, quantity);
         ReflectionTestUtils.setField(inventory, "reservedQuantity", reservedQuantity);
         return inventory;
+    }
+
+    private void stubTransactionManager() {
+        TransactionStatus status = mock(TransactionStatus.class);
+        when(transactionManager.getTransaction(any(TransactionDefinition.class))).thenReturn(status);
     }
 
     private void stubDetailLookup(Long outboundId, Long itemId, Warehouse warehouse) {
@@ -280,6 +294,250 @@ class OutboundServiceTest {
         InOrder inOrder = inOrder(inventoryService);
         inOrder.verify(inventoryService).releaseReservation(inventoryAtLower, 10, 999L);
         inOrder.verify(inventoryService).releaseReservation(inventoryAtHigher, 20, 999L);
+    }
+
+    @Test
+    @DisplayName("등록 중 낙관적 락 충돌이 나면 재시도해서 결국 성공한다")
+    void register_optimisticLockConflict_retriesAndSucceeds() {
+        stubTransactionManager();
+        Warehouse warehouse = warehouseWithId(100L);
+        ProductUnit baseUnit = unitWithId(1L);
+        Product product = productWithId(5L, baseUnit);
+        Location location = locationWithId(10L);
+        Inventory inventory = inventoryOf(location, product, "LOT-A", LocalDate.of(2026, 1, 1), 20, 0);
+
+        when(warehouseService.getAccessible(100L, 1L, UserRole.COMPANY_ADMIN, null)).thenReturn(warehouse);
+        when(productService.getAccessible(5L, 1L)).thenReturn(product);
+        when(productUnitService.getAccessible(1L, 1L)).thenReturn(baseUnit);
+        when(outboundRepository.save(any(Outbound.class))).thenAnswer(invocation -> {
+            Outbound saved = invocation.getArgument(0);
+            ReflectionTestUtils.setField(saved, "id", 500L);
+            return saved;
+        });
+        when(outboundItemRepository.save(any(OutboundItem.class))).thenAnswer(invocation -> {
+            OutboundItem saved = invocation.getArgument(0);
+            ReflectionTestUtils.setField(saved, "id", 700L);
+            return saved;
+        });
+        when(outboundAllocationPlanner.plan(eq(100L), eq(product), eq(baseUnit), eq(10), eq(AllocationType.FEFO), any()))
+                .thenReturn(List.of(new OutboundAllocationPlan(location, "LOT-A", inventory, 10)));
+        when(inventoryService.reserve(any(Inventory.class), anyInt(), anyLong()))
+                .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L))
+                .thenReturn(inventory);
+        when(outboundItemLocationRepository.save(any(OutboundItemLocation.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        stubDetailLookup(500L, 700L, warehouse);
+
+        OutboundRegisterCommand command = OutboundRegisterCommand.builder()
+                .warehouseId(100L).companyId(1L).role(UserRole.COMPANY_ADMIN).principalWarehouseId(null)
+                .customerName("고객사").note(null)
+                .items(List.of(new OutboundItemCommand(5L, 1L, 10, AllocationType.FEFO, List.of())))
+                .createdBy(999L)
+                .build();
+
+        outboundService.register(command);
+
+        verify(inventoryService, times(2)).reserve(any(Inventory.class), anyInt(), anyLong());
+    }
+
+    @Test
+    @DisplayName("등록 중 낙관적 락 충돌이 재시도 횟수를 초과하면 OUTBOUND_CONCURRENT_UPDATE_CONFLICT 예외가 발생한다")
+    void register_retryExhausted_throwsConflictError() {
+        stubTransactionManager();
+        Warehouse warehouse = warehouseWithId(100L);
+        ProductUnit baseUnit = unitWithId(1L);
+        Product product = productWithId(5L, baseUnit);
+        Location location = locationWithId(10L);
+        Inventory inventory = inventoryOf(location, product, "LOT-A", LocalDate.of(2026, 1, 1), 20, 0);
+
+        when(warehouseService.getAccessible(100L, 1L, UserRole.COMPANY_ADMIN, null)).thenReturn(warehouse);
+        when(productService.getAccessible(5L, 1L)).thenReturn(product);
+        when(productUnitService.getAccessible(1L, 1L)).thenReturn(baseUnit);
+        when(outboundRepository.save(any(Outbound.class))).thenAnswer(invocation -> {
+            Outbound saved = invocation.getArgument(0);
+            ReflectionTestUtils.setField(saved, "id", 500L);
+            return saved;
+        });
+        when(outboundItemRepository.save(any(OutboundItem.class))).thenAnswer(invocation -> {
+            OutboundItem saved = invocation.getArgument(0);
+            ReflectionTestUtils.setField(saved, "id", 700L);
+            return saved;
+        });
+        when(outboundAllocationPlanner.plan(eq(100L), eq(product), eq(baseUnit), eq(10), eq(AllocationType.FEFO), any()))
+                .thenReturn(List.of(new OutboundAllocationPlan(location, "LOT-A", inventory, 10)));
+        when(inventoryService.reserve(any(Inventory.class), anyInt(), anyLong()))
+                .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L));
+
+        OutboundRegisterCommand command = OutboundRegisterCommand.builder()
+                .warehouseId(100L).companyId(1L).role(UserRole.COMPANY_ADMIN).principalWarehouseId(null)
+                .customerName("고객사").note(null)
+                .items(List.of(new OutboundItemCommand(5L, 1L, 10, AllocationType.FEFO, List.of())))
+                .createdBy(999L)
+                .build();
+
+        assertThatThrownBy(() -> outboundService.register(command))
+                .isInstanceOf(CommonException.class)
+                .extracting(e -> ((CommonException) e).getErrorCode())
+                .isEqualTo(ErrorCode.OUTBOUND_CONCURRENT_UPDATE_CONFLICT);
+        verify(inventoryService, times(3)).reserve(any(Inventory.class), anyInt(), anyLong());
+    }
+
+    @Test
+    @DisplayName("확정 중 낙관적 락 충돌이 나면 재시도해서 결국 성공한다")
+    void complete_optimisticLockConflict_retriesAndSucceeds() {
+        stubTransactionManager();
+        Warehouse warehouse = warehouseWithId(100L);
+        Outbound outbound = new Outbound(warehouse.getCompany(), warehouse, "고객사", null);
+        ReflectionTestUtils.setField(outbound, "id", 500L);
+        ReflectionTestUtils.setField(outbound, "status", OutboundStatus.PENDING);
+
+        ProductUnit baseUnit = unitWithId(1L);
+        Product product = productWithId(5L, baseUnit);
+        OutboundItem item = new OutboundItem(outbound, product, baseUnit, 10, AllocationType.MANUAL);
+        ReflectionTestUtils.setField(item, "id", 700L);
+
+        Location location = locationWithId(10L);
+        OutboundItemLocation allocation = new OutboundItemLocation(item, location, null, 10);
+        Inventory inventory = inventoryOf(location, product, null, null, 50, 10);
+
+        when(outboundRepository.findActiveById(500L)).thenReturn(Optional.of(outbound));
+        when(warehouseService.getAccessible(100L, 1L, UserRole.COMPANY_ADMIN, null)).thenReturn(warehouse);
+        when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
+        when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
+                .thenReturn(List.of(allocation));
+        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventory);
+        when(inventoryService.confirmReservation(eq(inventory), eq(10), eq(warehouse), any(), eq(500L), eq(999L)))
+                .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L))
+                .thenReturn(inventory);
+        stubDetailLookup(500L, 700L, warehouse);
+
+        OutboundActionCommand command = OutboundActionCommand.builder()
+                .outboundId(500L).warehouseId(100L).companyId(1L).role(UserRole.COMPANY_ADMIN)
+                .principalWarehouseId(null).actorId(999L)
+                .build();
+
+        outboundService.complete(command);
+
+        verify(inventoryService, times(2))
+                .confirmReservation(eq(inventory), eq(10), eq(warehouse), any(), eq(500L), eq(999L));
+    }
+
+    @Test
+    @DisplayName("확정 중 낙관적 락 충돌이 재시도 횟수를 초과하면 OUTBOUND_CONCURRENT_UPDATE_CONFLICT 예외가 발생한다")
+    void complete_retryExhausted_throwsConflictError() {
+        stubTransactionManager();
+        Warehouse warehouse = warehouseWithId(100L);
+        Outbound outbound = new Outbound(warehouse.getCompany(), warehouse, "고객사", null);
+        ReflectionTestUtils.setField(outbound, "id", 500L);
+        ReflectionTestUtils.setField(outbound, "status", OutboundStatus.PENDING);
+
+        ProductUnit baseUnit = unitWithId(1L);
+        Product product = productWithId(5L, baseUnit);
+        OutboundItem item = new OutboundItem(outbound, product, baseUnit, 10, AllocationType.MANUAL);
+        ReflectionTestUtils.setField(item, "id", 700L);
+
+        Location location = locationWithId(10L);
+        OutboundItemLocation allocation = new OutboundItemLocation(item, location, null, 10);
+        Inventory inventory = inventoryOf(location, product, null, null, 50, 10);
+
+        when(outboundRepository.findActiveById(500L)).thenReturn(Optional.of(outbound));
+        when(warehouseService.getAccessible(100L, 1L, UserRole.COMPANY_ADMIN, null)).thenReturn(warehouse);
+        when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
+        when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
+                .thenReturn(List.of(allocation));
+        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventory);
+        when(inventoryService.confirmReservation(eq(inventory), eq(10), eq(warehouse), any(), eq(500L), eq(999L)))
+                .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L));
+
+        OutboundActionCommand command = OutboundActionCommand.builder()
+                .outboundId(500L).warehouseId(100L).companyId(1L).role(UserRole.COMPANY_ADMIN)
+                .principalWarehouseId(null).actorId(999L)
+                .build();
+
+        assertThatThrownBy(() -> outboundService.complete(command))
+                .isInstanceOf(CommonException.class)
+                .extracting(e -> ((CommonException) e).getErrorCode())
+                .isEqualTo(ErrorCode.OUTBOUND_CONCURRENT_UPDATE_CONFLICT);
+        verify(inventoryService, times(3))
+                .confirmReservation(eq(inventory), eq(10), eq(warehouse), any(), eq(500L), eq(999L));
+    }
+
+    @Test
+    @DisplayName("취소 중 낙관적 락 충돌이 나면 재시도해서 결국 성공한다")
+    void cancel_optimisticLockConflict_retriesAndSucceeds() {
+        stubTransactionManager();
+        Warehouse warehouse = warehouseWithId(100L);
+        Outbound outbound = new Outbound(warehouse.getCompany(), warehouse, "고객사", null);
+        ReflectionTestUtils.setField(outbound, "id", 500L);
+        ReflectionTestUtils.setField(outbound, "status", OutboundStatus.PENDING);
+
+        ProductUnit baseUnit = unitWithId(1L);
+        Product product = productWithId(5L, baseUnit);
+        OutboundItem item = new OutboundItem(outbound, product, baseUnit, 10, AllocationType.MANUAL);
+        ReflectionTestUtils.setField(item, "id", 700L);
+
+        Location location = locationWithId(10L);
+        OutboundItemLocation allocation = new OutboundItemLocation(item, location, null, 10);
+        Inventory inventory = inventoryOf(location, product, null, null, 50, 10);
+
+        when(outboundRepository.findActiveById(500L)).thenReturn(Optional.of(outbound));
+        when(warehouseService.getAccessible(100L, 1L, UserRole.COMPANY_ADMIN, null)).thenReturn(warehouse);
+        when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
+        when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
+                .thenReturn(List.of(allocation));
+        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventory);
+        when(inventoryService.releaseReservation(inventory, 10, 999L))
+                .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L))
+                .thenReturn(inventory);
+        stubDetailLookup(500L, 700L, warehouse);
+
+        OutboundActionCommand command = OutboundActionCommand.builder()
+                .outboundId(500L).warehouseId(100L).companyId(1L).role(UserRole.COMPANY_ADMIN)
+                .principalWarehouseId(null).actorId(999L)
+                .build();
+
+        outboundService.cancel(command);
+
+        verify(inventoryService, times(2)).releaseReservation(inventory, 10, 999L);
+    }
+
+    @Test
+    @DisplayName("취소 중 낙관적 락 충돌이 재시도 횟수를 초과하면 OUTBOUND_CONCURRENT_UPDATE_CONFLICT 예외가 발생한다")
+    void cancel_retryExhausted_throwsConflictError() {
+        stubTransactionManager();
+        Warehouse warehouse = warehouseWithId(100L);
+        Outbound outbound = new Outbound(warehouse.getCompany(), warehouse, "고객사", null);
+        ReflectionTestUtils.setField(outbound, "id", 500L);
+        ReflectionTestUtils.setField(outbound, "status", OutboundStatus.PENDING);
+
+        ProductUnit baseUnit = unitWithId(1L);
+        Product product = productWithId(5L, baseUnit);
+        OutboundItem item = new OutboundItem(outbound, product, baseUnit, 10, AllocationType.MANUAL);
+        ReflectionTestUtils.setField(item, "id", 700L);
+
+        Location location = locationWithId(10L);
+        OutboundItemLocation allocation = new OutboundItemLocation(item, location, null, 10);
+        Inventory inventory = inventoryOf(location, product, null, null, 50, 10);
+
+        when(outboundRepository.findActiveById(500L)).thenReturn(Optional.of(outbound));
+        when(warehouseService.getAccessible(100L, 1L, UserRole.COMPANY_ADMIN, null)).thenReturn(warehouse);
+        when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
+        when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
+                .thenReturn(List.of(allocation));
+        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventory);
+        when(inventoryService.releaseReservation(inventory, 10, 999L))
+                .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L));
+
+        OutboundActionCommand command = OutboundActionCommand.builder()
+                .outboundId(500L).warehouseId(100L).companyId(1L).role(UserRole.COMPANY_ADMIN)
+                .principalWarehouseId(null).actorId(999L)
+                .build();
+
+        assertThatThrownBy(() -> outboundService.cancel(command))
+                .isInstanceOf(CommonException.class)
+                .extracting(e -> ((CommonException) e).getErrorCode())
+                .isEqualTo(ErrorCode.OUTBOUND_CONCURRENT_UPDATE_CONFLICT);
+        verify(inventoryService, times(3)).releaseReservation(inventory, 10, 999L);
     }
 
 }

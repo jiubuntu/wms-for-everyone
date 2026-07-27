@@ -68,6 +68,7 @@ public enum ErrorCode {
     OUTBOUND_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST.value(), "1103", "이미 취소된 출고입니다."),
     OUTBOUND_ALLOCATION_MISMATCH(HttpStatus.BAD_REQUEST.value(), "1104", "할당한 위치별 수량 합계가 출고 수량과 일치하지 않습니다."),
     OUTBOUND_INVALID_UNIT(HttpStatus.BAD_REQUEST.value(), "1105", "상품에 등록되지 않은 단위입니다."),
+    OUTBOUND_CONCURRENT_UPDATE_CONFLICT(HttpStatus.CONFLICT.value(), "1106", "다른 요청과 재고 처리가 겹쳐 실패했습니다. 다시 시도해주세요."),
 
     INBOUND_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "1201", "존재하지 않는 입고입니다."),
     INBOUND_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST.value(), "1202", "이미 확정된 입고입니다."),

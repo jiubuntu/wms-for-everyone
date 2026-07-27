@@ -32,8 +32,12 @@ import com.jiubuntu.wms.global.exception.constants.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -46,6 +50,8 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class OutboundService {
 
+    private static final int MAX_ATTEMPTS = 3;
+
     private final OutboundRepository outboundRepository;
     private final OutboundItemRepository outboundItemRepository;
     private final OutboundItemLocationRepository outboundItemLocationRepository;
@@ -55,6 +61,7 @@ public class OutboundService {
     private final WarehouseService warehouseService;
     private final ProductService productService;
     private final ProductUnitService productUnitService;
+    private final PlatformTransactionManager transactionManager;
 
     public Page<OutboundListResult> list(Long warehouseId, Long companyId, UserRole role, Long principalWarehouseId,
                                           Pageable pageable) {
@@ -69,8 +76,28 @@ public class OutboundService {
         return assembleResult(header);
     }
 
-    @Transactional
+    /**
+     * 낙관적 락 충돌 시 시도마다 완전히 새 트랜잭션으로 재조회부터 다시 수행한다 (최대 3회).
+     * 같은 빈 안에서 @Transactional 메서드를 자기 호출하면 프록시를 안 타 트랜잭션이 안 걸리므로,
+     * TransactionTemplate(REQUIRES_NEW)으로 시도마다 명시적으로 새 트랜잭션을 연다.
+     */
     public OutboundResult register(OutboundRegisterCommand command) {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            try {
+                return transactionTemplate.execute(status -> registerOnce(command));
+            } catch (ObjectOptimisticLockingFailureException e) {
+                if (attempt == MAX_ATTEMPTS) {
+                    throw new CommonException(ErrorCode.OUTBOUND_CONCURRENT_UPDATE_CONFLICT);
+                }
+            }
+        }
+        throw new IllegalStateException("재시도 루프를 벗어날 수 없습니다.");
+    }
+
+    private OutboundResult registerOnce(OutboundRegisterCommand command) {
         Warehouse warehouse = warehouseService.getAccessible(
                 command.getWarehouseId(), command.getCompanyId(), command.getRole(), command.getPrincipalWarehouseId());
 
@@ -102,8 +129,26 @@ public class OutboundService {
         return getDetail(outbound.getId(), command.getCompanyId(), command.getRole(), command.getPrincipalWarehouseId());
     }
 
-    @Transactional
+    /**
+     * register()와 동일한 낙관적 락 재시도 패턴.
+     */
     public OutboundResult complete(OutboundActionCommand command) {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            try {
+                return transactionTemplate.execute(status -> completeOnce(command));
+            } catch (ObjectOptimisticLockingFailureException e) {
+                if (attempt == MAX_ATTEMPTS) {
+                    throw new CommonException(ErrorCode.OUTBOUND_CONCURRENT_UPDATE_CONFLICT);
+                }
+            }
+        }
+        throw new IllegalStateException("재시도 루프를 벗어날 수 없습니다.");
+    }
+
+    private OutboundResult completeOnce(OutboundActionCommand command) {
         Outbound outbound = getActiveById(command.getOutboundId());
         Warehouse warehouse = warehouseService.getAccessible(
                 outbound.getWarehouse().getId(), command.getCompanyId(), command.getRole(), command.getPrincipalWarehouseId());
@@ -124,8 +169,26 @@ public class OutboundService {
         return getDetail(outbound.getId(), command.getCompanyId(), command.getRole(), command.getPrincipalWarehouseId());
     }
 
-    @Transactional
+    /**
+     * register()와 동일한 낙관적 락 재시도 패턴.
+     */
     public OutboundResult cancel(OutboundActionCommand command) {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            try {
+                return transactionTemplate.execute(status -> cancelOnce(command));
+            } catch (ObjectOptimisticLockingFailureException e) {
+                if (attempt == MAX_ATTEMPTS) {
+                    throw new CommonException(ErrorCode.OUTBOUND_CONCURRENT_UPDATE_CONFLICT);
+                }
+            }
+        }
+        throw new IllegalStateException("재시도 루프를 벗어날 수 없습니다.");
+    }
+
+    private OutboundResult cancelOnce(OutboundActionCommand command) {
         Outbound outbound = getActiveById(command.getOutboundId());
         warehouseService.getAccessible(
                 outbound.getWarehouse().getId(), command.getCompanyId(), command.getRole(), command.getPrincipalWarehouseId());
