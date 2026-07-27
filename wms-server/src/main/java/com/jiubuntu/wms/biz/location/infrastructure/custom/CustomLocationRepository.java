@@ -15,6 +15,8 @@ public interface CustomLocationRepository {
 
     Page<Location> findActiveByWarehouse(Long warehouseId, Pageable pageable);
 
+    List<Location> findAllActiveByWarehouse(Long warehouseId);
+
     List<String> findActiveCodesByWarehouseAndCodeIn(Long warehouseId, Collection<String> codes);
 
     Map<Long, Long> countActiveByWarehouseIds(Collection<Long> warehouseIds);

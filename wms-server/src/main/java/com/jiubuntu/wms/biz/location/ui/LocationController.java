@@ -40,6 +40,22 @@ public class LocationController {
 
     private final LocationService locationService;
 
+    @Secure({UserRole.COMPANY_ADMIN, UserRole.WAREHOUSE_MANAGER, UserRole.WORKER})
+    @GetMapping("/all")
+    public ResponseEntity<ApiCommonResponse<List<LocationResponse>>> listAll(
+            AuthPrincipal principal,
+            @PathVariable Long warehouseId
+    ) {
+        List<LocationResponse> results = locationService.listAll(
+                        warehouseId, principal.getCompanyId(), principal.getRole(), principal.getWarehouseId())
+                .stream()
+                .map(LocationResponse::from)
+                .toList();
+
+        ApiCommonResponse<List<LocationResponse>> body = ApiCommonResponse.success(results);
+        return ResponseEntity.status(body.getHttpCode()).body(body);
+    }
+
     @GetMapping("/list")
     public ResponseEntity<ApiCommonResponse<ApiPageResponse<LocationResponse>>> list(
             AuthPrincipal principal,

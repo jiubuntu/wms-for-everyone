@@ -62,6 +62,19 @@ public class WarehouseController {
         return ResponseEntity.status(body.getHttpCode()).body(body);
     }
 
+    @Secure({UserRole.COMPANY_ADMIN, UserRole.WAREHOUSE_MANAGER, UserRole.WORKER} )
+    @GetMapping("/all")
+    public ResponseEntity<ApiCommonResponse<List<WarehouseResponse>>> listAll(AuthPrincipal principal) {
+        List<WarehouseResponse> results = warehouseService.listAll(
+                        principal.getCompanyId(), principal.getRole(), principal.getWarehouseId())
+                .stream()
+                .map(WarehouseResponse::from)
+                .toList();
+
+        ApiCommonResponse<List<WarehouseResponse>> body = ApiCommonResponse.success(results);
+        return ResponseEntity.status(body.getHttpCode()).body(body);
+    }
+
     @Secure({UserRole.COMPANY_ADMIN, UserRole.WAREHOUSE_MANAGER})
     @GetMapping("/{id}")
     public ResponseEntity<ApiCommonResponse<WarehouseResponse>> get(

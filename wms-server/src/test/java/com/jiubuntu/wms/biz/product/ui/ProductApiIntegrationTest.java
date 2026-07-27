@@ -138,6 +138,27 @@ class ProductApiIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
+    @DisplayName("작업자도 전체 목록 조회는 가능하다 (출고/재고이동 등록 화면의 상품 선택용)")
+    void listAll_allowedForWorker() throws Exception {
+        Company company = seedCompany("작업자전체조회기업", "333-33-33333");
+        seedUser(company, "worker-all@test.com", UserRole.WORKER);
+        String token = login("worker-all@test.com");
+
+        CommonCode category = seedCategory("CAT-ALL1");
+        CommonCode storageType = seedStorageType("STORE-ALL1");
+        ProductUnit unit = seedUnit(company, "개-all1");
+        productRepository.save(Product.builder()
+                .company(company).skuCode("SKU-ALL-1").name("사과").category(category)
+                .storageType(storageType).baseUnit(unit).lotTracking(false).build());
+
+        mockMvc.perform(get("/api/product/all")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].skuCode").value("SKU-ALL-1"));
+    }
+
+    @Test
     @DisplayName("상품을 등록할 수 있다")
     void create_success() throws Exception {
         Company company = seedCompany("등록기업", "333-33-33333");

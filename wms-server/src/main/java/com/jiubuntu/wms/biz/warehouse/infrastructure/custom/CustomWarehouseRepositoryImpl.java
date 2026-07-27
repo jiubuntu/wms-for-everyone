@@ -69,6 +69,24 @@ public class CustomWarehouseRepositoryImpl implements CustomWarehouseRepository 
         return new PageImpl<>(content, pageable, total != null ? total : 0L);
     }
 
+    @Override
+    public List<Warehouse> findAllActiveByCompany(Long companyId) {
+        return queryFactory.selectFrom(warehouse)
+                .where(warehouse.company.id.eq(companyId), activeEq())
+                .orderBy(warehouse.createdAt.asc())
+                .fetch();
+    }
+
+    @Override
+    public List<Warehouse> findAllActiveByCompanyAndId(Long companyId, Long id) {
+        if (id == null) {
+            return List.of();
+        }
+        return queryFactory.selectFrom(warehouse)
+                .where(warehouse.company.id.eq(companyId), warehouse.id.eq(id), activeEq())
+                .fetch();
+    }
+
     private BooleanExpression activeEq() {
         return warehouse.active.isTrue();
     }

@@ -85,6 +85,40 @@ class WarehouseApiIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
+    @DisplayName("기업관리자는 전역 선택기용 전체 목록에서 자사 창고를 전부 조회한다")
+    void listAll_companyAdmin_returnsAllOwnCompanyWarehouses() throws Exception {
+        Company company = seedCompany("전체조회기업", "999-11-11111");
+        seedUser(company, null, "wh-all-admin@test.com", UserRole.COMPANY_ADMIN);
+        String token = login("wh-all-admin@test.com");
+
+        CommonCode storageType = seedStorageType("WH-STORE-ALL1");
+        seedWarehouse(company, storageType, "창고A");
+        seedWarehouse(company, storageType, "창고B");
+
+        mockMvc.perform(get("/api/warehouse/all")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(2));
+    }
+
+    @Test
+    @DisplayName("작업자가 전역 선택기용 전체 목록을 조회하면 담당 창고 1건만 내려온다")
+    void listAll_worker_scopedToOwnWarehouse() throws Exception {
+        Company company = seedCompany("작업자전체조회기업", "999-22-22222");
+        CommonCode storageType = seedStorageType("WH-STORE-ALL2");
+        Warehouse ownWarehouse = seedWarehouse(company, storageType, "담당창고");
+        seedWarehouse(company, storageType, "다른창고");
+        seedUser(company, ownWarehouse, "wh-all-worker@test.com", UserRole.WORKER);
+        String token = login("wh-all-worker@test.com");
+
+        mockMvc.perform(get("/api/warehouse/all")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].name").value("담당창고"));
+    }
+
+    @Test
     @DisplayName("기업관리자는 자사 창고 목록을 조회한다")
     void list_returnsOwnCompanyWarehouses() throws Exception {
         Company company = seedCompany("목록조회기업", "111-11-11111");
