@@ -46,6 +46,10 @@ public class ProductService {
                 .toList();
     }
 
+    public long countByCompany(Long companyId) {
+        return productRepository.countActiveByCompany(companyId);
+    }
+
     @Transactional
     public Product create(ProductCreateCommand command) {
         productValidator.validateCreate(command);
