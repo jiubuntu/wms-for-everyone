@@ -16,17 +16,11 @@ import type { WarehouseItem } from "@/features/warehouses/types"
 
 interface WarehouseTableProps {
   items: WarehouseItem[]
-  storageTypeNameById: Map<number, string>
   canManage: boolean
   onEdit: (item: WarehouseItem) => void
 }
 
-export function WarehouseTable({
-  items,
-  storageTypeNameById,
-  canManage,
-  onEdit,
-}: WarehouseTableProps) {
+export function WarehouseTable({ items, canManage, onEdit }: WarehouseTableProps) {
   const deleteMutation = useDeleteWarehouse()
 
   async function handleDelete(item: WarehouseItem) {
@@ -45,7 +39,6 @@ export function WarehouseTable({
       <TableHeader>
         <TableRow className="bg-muted/50 hover:bg-muted/50">
           <TableHead className="text-xs text-muted-foreground uppercase">창고명</TableHead>
-          <TableHead className="text-xs text-muted-foreground uppercase">보관 유형</TableHead>
           <TableHead className="text-xs text-muted-foreground uppercase">주소</TableHead>
           <TableHead className="text-xs text-muted-foreground uppercase">위치 수</TableHead>
           <TableHead className="text-xs text-muted-foreground uppercase">상태</TableHead>
@@ -56,7 +49,6 @@ export function WarehouseTable({
         {items.map((item) => (
           <TableRow key={item.id}>
             <TableCell className="font-medium">{item.name}</TableCell>
-            <TableCell>{storageTypeNameById.get(item.storageTypeId) ?? "-"}</TableCell>
             <TableCell>{item.address ?? "-"}</TableCell>
             <TableCell>{item.locationCount}</TableCell>
             <TableCell>

@@ -6,7 +6,6 @@ import { DataTablePagination } from "@/components/common/DataTablePagination"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/contexts/AuthContext"
-import { useAllCommonCodes } from "@/features/common-codes/hooks"
 import { useWarehouses } from "@/features/warehouses/hooks"
 import { WarehouseTable } from "@/features/warehouses/components/WarehouseTable"
 import { WarehouseFormDialog } from "@/features/warehouses/components/WarehouseFormDialog"
@@ -24,12 +23,6 @@ export function WarehousePage() {
   const [isFormOpen, setIsFormOpen] = useState(false)
 
   const { data, isLoading, isError } = useWarehouses(page, PAGE_SIZE)
-  const { data: storageTypes } = useAllCommonCodes("company", "STORAGE_TYPE")
-
-  const storageTypeNameById = useMemo(
-    () => new Map(storageTypes?.map((s) => [s.id, s.name]) ?? []),
-    [storageTypes]
-  )
 
   const filteredItems = useMemo(() => {
     const keyword = search.trim().toLowerCase()
@@ -68,12 +61,7 @@ export function WarehousePage() {
 
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
-          <WarehouseTable
-            items={filteredItems}
-            storageTypeNameById={storageTypeNameById}
-            canManage={canManage}
-            onEdit={handleEdit}
-          />
+          <WarehouseTable items={filteredItems} canManage={canManage} onEdit={handleEdit} />
 
           {!isLoading && !isError && filteredItems.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">

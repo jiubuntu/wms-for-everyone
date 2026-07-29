@@ -9,14 +9,6 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { useAllCommonCodes } from "@/features/common-codes/hooks"
 import { useCreateWarehouse, useUpdateWarehouse } from "@/features/warehouses/hooks"
 import type { WarehouseItem } from "@/features/warehouses/types"
 
@@ -28,11 +20,8 @@ interface WarehouseFormDialogProps {
 
 export function WarehouseFormDialog({ open, onOpenChange, target }: WarehouseFormDialogProps) {
   const [name, setName] = useState("")
-  const [storageTypeId, setStorageTypeId] = useState("")
   const [address, setAddress] = useState("")
   const [error, setError] = useState("")
-
-  const { data: storageTypes } = useAllCommonCodes("company", "STORAGE_TYPE")
 
   const createMutation = useCreateWarehouse()
   const updateMutation = useUpdateWarehouse()
@@ -41,7 +30,6 @@ export function WarehouseFormDialog({ open, onOpenChange, target }: WarehouseFor
   useEffect(() => {
     if (!open) return
     setName(target?.name ?? "")
-    setStorageTypeId(target ? String(target.storageTypeId) : "")
     setAddress(target?.address ?? "")
     setError("")
   }, [open, target])
@@ -52,7 +40,6 @@ export function WarehouseFormDialog({ open, onOpenChange, target }: WarehouseFor
 
     const input = {
       name,
-      storageTypeId: Number(storageTypeId),
       address: address.trim() ? address : null,
     }
 
@@ -88,22 +75,6 @@ export function WarehouseFormDialog({ open, onOpenChange, target }: WarehouseFor
                 onChange={(e) => setName(e.target.value)}
                 required
               />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium">보관 유형</label>
-              <Select value={storageTypeId} onValueChange={setStorageTypeId} required>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="보관 유형 선택" />
-                </SelectTrigger>
-                <SelectContent>
-                  {storageTypes?.map((s) => (
-                    <SelectItem key={s.id} value={String(s.id)}>
-                      {s.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             <div className="flex flex-col gap-1.5">
