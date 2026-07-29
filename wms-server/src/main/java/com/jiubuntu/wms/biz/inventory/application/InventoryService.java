@@ -2,7 +2,9 @@ package com.jiubuntu.wms.biz.inventory.application;
 
 import com.jiubuntu.wms.biz.inventory.application.dto.command.InventoryAdjustCommand;
 import com.jiubuntu.wms.biz.inventory.application.dto.result.AvailableLocationResult;
+import com.jiubuntu.wms.biz.inventory.application.dto.result.InventoryExpiringRow;
 import com.jiubuntu.wms.biz.inventory.application.dto.result.InventoryHistoryResult;
+import com.jiubuntu.wms.biz.inventory.application.dto.result.InventoryProductSummaryRow;
 import com.jiubuntu.wms.biz.inventory.application.dto.result.InventoryResult;
 import com.jiubuntu.wms.biz.inventory.application.validator.InventoryValidator;
 import com.jiubuntu.wms.biz.inventory.domain.Inventory;
@@ -24,7 +26,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +51,29 @@ public class InventoryService {
                                                                  UserRole role, Long principalWarehouseId) {
         warehouseService.getAccessible(warehouseId, companyId, role, principalWarehouseId);
         return inventoryRepository.findAvailableByWarehouseAndProduct(warehouseId, productId);
+    }
+
+    /**
+     * 대시보드 집계용 — 호출측(DashboardService)에서 이미 창고 접근 권한을 확인했다고 가정하고,
+     * 별도로 getAccessible()을 다시 거치지 않는다.
+     */
+    public List<InventoryExpiringRow> findExpiringSoon(Long warehouseId, int days, int limit) {
+        LocalDate today = LocalDate.now();
+        return inventoryRepository.findActiveExpiringSoon(warehouseId, today, today.plusDays(days), limit);
+    }
+
+    public long countExpiringSoon(Long warehouseId, int days) {
+        LocalDate today = LocalDate.now();
+        return inventoryRepository.countActiveExpiringSoon(warehouseId, today, today.plusDays(days));
+    }
+
+    public Map<Long, Long> countExpiringSoonGroupedByWarehouses(Collection<Long> warehouseIds, int days) {
+        LocalDate today = LocalDate.now();
+        return inventoryRepository.countActiveExpiringSoonGroupedByWarehouses(warehouseIds, today, today.plusDays(days));
+    }
+
+    public List<InventoryProductSummaryRow> findProductSummary(Long warehouseId) {
+        return inventoryRepository.findActiveProductSummaryByWarehouse(warehouseId);
     }
 
     public Page<InventoryHistoryResult> getHistory(Long warehouseId, Long companyId, UserRole role,

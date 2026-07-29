@@ -1,12 +1,15 @@
 package com.jiubuntu.wms.biz.inventory.infrastructure.custom;
 
 import com.jiubuntu.wms.biz.inventory.application.dto.result.AvailableLocationResult;
+import com.jiubuntu.wms.biz.inventory.application.dto.result.InventoryExpiringRow;
+import com.jiubuntu.wms.biz.inventory.application.dto.result.InventoryProductSummaryRow;
 import com.jiubuntu.wms.biz.inventory.application.dto.result.InventoryResult;
 import com.jiubuntu.wms.biz.inventory.domain.Inventory;
 import com.jiubuntu.wms.biz.inventory.domain.QInventory;
 import com.jiubuntu.wms.biz.location.domain.QLocation;
 import com.jiubuntu.wms.biz.product.domain.QProduct;
 import com.jiubuntu.wms.biz.productunit.domain.QProductUnit;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -15,7 +18,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -146,6 +153,90 @@ public class CustomInventoryRepositoryImpl implements CustomInventoryRepository 
                         inventory.quantity.subtract(inventory.reservedQuantity).gt(0),
                         activeEq())
                 .orderBy(inventory.expiryDate.asc().nullsLast())
+                .fetch();
+    }
+
+    @Override
+    public List<InventoryExpiringRow> findActiveExpiringSoon(Long warehouseId, LocalDate from, LocalDate to, int limit) {
+        return queryFactory
+                .select(Projections.constructor(
+                        InventoryExpiringRow.class,
+                        product.name,
+                        inventory.lotNumber,
+                        location.code,
+                        inventory.quantity,
+                        inventory.expiryDate
+                ))
+                .from(inventory)
+                .join(inventory.location, location)
+                .join(inventory.product, product)
+                .where(
+                        location.warehouse.id.eq(warehouseId),
+                        inventory.expiryDate.between(from, to),
+                        inventory.quantity.gt(0),
+                        activeEq()
+                )
+                .orderBy(inventory.expiryDate.asc())
+                .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public long countActiveExpiringSoon(Long warehouseId, LocalDate from, LocalDate to) {
+        Long count = queryFactory
+                .select(inventory.count())
+                .from(inventory)
+                .join(inventory.location, location)
+                .where(
+                        location.warehouse.id.eq(warehouseId),
+                        inventory.expiryDate.between(from, to),
+                        inventory.quantity.gt(0),
+                        activeEq()
+                )
+                .fetchOne();
+        return count != null ? count : 0L;
+    }
+
+    @Override
+    public Map<Long, Long> countActiveExpiringSoonGroupedByWarehouses(Collection<Long> warehouseIds, LocalDate from, LocalDate to) {
+        if (warehouseIds.isEmpty()) {
+            return Map.of();
+        }
+        List<Tuple> rows = queryFactory
+                .select(location.warehouse.id, inventory.count())
+                .from(inventory)
+                .join(inventory.location, location)
+                .where(
+                        location.warehouse.id.in(warehouseIds),
+                        inventory.expiryDate.between(from, to),
+                        inventory.quantity.gt(0),
+                        activeEq()
+                )
+                .groupBy(location.warehouse.id)
+                .fetch();
+
+        Map<Long, Long> result = new HashMap<>();
+        for (Tuple row : rows) {
+            result.put(row.get(location.warehouse.id), row.get(inventory.count()));
+        }
+        return result;
+    }
+
+    @Override
+    public List<InventoryProductSummaryRow> findActiveProductSummaryByWarehouse(Long warehouseId) {
+        return queryFactory
+                .select(Projections.constructor(
+                        InventoryProductSummaryRow.class,
+                        product.name,
+                        product.skuCode,
+                        inventory.quantity.sumAggregate(),
+                        inventory.reservedQuantity.sumAggregate()
+                ))
+                .from(inventory)
+                .join(inventory.location, location)
+                .join(inventory.product, product)
+                .where(location.warehouse.id.eq(warehouseId), activeEq())
+                .groupBy(product.id, product.name, product.skuCode)
                 .fetch();
     }
 
