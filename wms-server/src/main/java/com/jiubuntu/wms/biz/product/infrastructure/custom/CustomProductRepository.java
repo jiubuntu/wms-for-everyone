@@ -17,4 +17,6 @@ public interface CustomProductRepository {
 
     List<Product> findAllActiveByCompany(Long companyId);
 
+    long countActiveByCompany(Long companyId);
+
 }

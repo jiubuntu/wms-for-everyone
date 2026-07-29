@@ -46,8 +46,13 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -74,6 +79,48 @@ public class InboundService {
                                          Pageable pageable) {
         warehouseService.getAccessible(warehouseId, companyId, role, principalWarehouseId);
         return inboundRepository.findActiveByWarehouse(warehouseId, pageable);
+    }
+
+    /**
+     * 대시보드 집계용 — 호출측(DashboardService)에서 이미 창고 접근 권한을 확인했다고 가정하고,
+     * 별도로 getAccessible()을 다시 거치지 않는다.
+     */
+    public long countByWarehouseAndStatus(Long warehouseId, InboundStatus status) {
+        return inboundRepository.countActiveByWarehouseAndStatus(warehouseId, status);
+    }
+
+    public List<InboundListResult> findWaitingQueue(Long warehouseId, int limit) {
+        return inboundRepository.findActiveWaitingQueue(
+                warehouseId, List.of(InboundStatus.PENDING, InboundStatus.IN_PROGRESS), limit);
+    }
+
+    public Map<InboundStatus, Long> countTodayGroupedByStatus(Long companyId) {
+        LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+        LocalDateTime todayEnd = todayStart.plusDays(1);
+        Map<InboundStatus, Long> counts = inboundRepository
+                .countActiveByCompanyAndCreatedAtBetweenGroupByStatus(companyId, todayStart, todayEnd);
+
+        Map<InboundStatus, Long> filled = new EnumMap<>(InboundStatus.class);
+        for (InboundStatus status : InboundStatus.values()) {
+            filled.put(status, counts.getOrDefault(status, 0L));
+        }
+        return filled;
+    }
+
+    public Map<Long, Long> countByWarehousesAndStatus(Collection<Long> warehouseIds, InboundStatus status) {
+        return inboundRepository.countActiveByWarehousesAndStatus(warehouseIds, status);
+    }
+
+    public Map<LocalDate, Long> countCompletedByDateRange(Long companyId, LocalDate from, LocalDate to) {
+        List<LocalDateTime> updatedAtValues = inboundRepository.findActiveUpdatedAtByCompanyAndStatusAndUpdatedAtBetween(
+                companyId, InboundStatus.COMPLETED, from.atStartOfDay(), to.plusDays(1).atStartOfDay());
+
+        Map<LocalDate, Long> counts = new HashMap<>();
+        for (LocalDateTime updatedAt : updatedAtValues) {
+            LocalDate date = updatedAt.toLocalDate();
+            counts.merge(date, 1L, Long::sum);
+        }
+        return counts;
     }
 
     public InboundResult getDetail(Long id, Long companyId, UserRole role, Long principalWarehouseId) {

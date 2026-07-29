@@ -65,6 +65,16 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
                 .fetch();
     }
 
+    @Override
+    public long countActiveByCompany(Long companyId) {
+        Long count = queryFactory
+                .select(product.count())
+                .from(product)
+                .where(product.company.id.eq(companyId), activeEq())
+                .fetchOne();
+        return count != null ? count : 0L;
+    }
+
     private BooleanExpression activeEq() {
         return product.active.isTrue();
     }
