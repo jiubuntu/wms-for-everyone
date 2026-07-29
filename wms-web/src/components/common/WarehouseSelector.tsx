@@ -9,9 +9,25 @@ import {
 import { useWarehouseFilter } from "@/contexts/WarehouseFilterContext"
 
 export function WarehouseSelector() {
-  const { warehouseId, setWarehouseId, warehouses, isLoading } = useWarehouseFilter()
+  const { warehouseId, setWarehouseId, warehouses, isLoading, isLocked } = useWarehouseFilter()
 
-  if (isLoading || warehouses.length <= 1) return null
+  if (isLoading) return null
+
+  if (isLocked) {
+    const myWarehouse = warehouses.find((w) => w.id === warehouseId)
+    if (!myWarehouse) return null
+
+    return (
+      <div className="flex h-8 items-center gap-2 rounded-lg bg-muted px-2.5 text-sm text-muted-foreground">
+        <Warehouse className="size-4" />
+        <span>
+          내 창고 · <span className="font-medium text-foreground">{myWarehouse.name}</span>
+        </span>
+      </div>
+    )
+  }
+
+  if (warehouses.length <= 1) return null
 
   return (
     <Select

@@ -88,7 +88,7 @@ class TransferApiIntegrationTest extends IntegrationTestSupport {
 
     private User seedUser(Company company, Warehouse warehouse, String email, UserRole role) {
         return userRepository.save(new User(company, warehouse, email, passwordEncoder.encode("password1!"),
-                "홍길동", "010-0000-0000", role, UserStatus.ACTIVE));
+                "홍길동", "010-0000-0000", role, UserStatus.ACTIVE, false));
     }
 
     private String login(String email) throws Exception {
@@ -105,8 +105,8 @@ class TransferApiIntegrationTest extends IntegrationTestSupport {
         return commonCodeRepository.save(new CommonCode(null, group, code, code, 1));
     }
 
-    private Warehouse seedWarehouse(Company company, CommonCode storageType, String name) {
-        return warehouseRepository.save(new Warehouse(company, name, storageType, "서울시"));
+    private Warehouse seedWarehouse(Company company, String name) {
+        return warehouseRepository.save(new Warehouse(company, name, "서울시"));
     }
 
     private Location seedLocation(Warehouse warehouse, String code) {
@@ -153,7 +153,7 @@ class TransferApiIntegrationTest extends IntegrationTestSupport {
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "TR-STORE1");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "TR-CAT1");
         CommonCode reason = seedCommonCode(CommonCodeGroup.TRANSFER_REASON, "TR-REASON1");
-        Warehouse warehouse = seedWarehouse(company, storageType, "이동창고");
+        Warehouse warehouse = seedWarehouse(company, "이동창고");
         Location fromLocation = seedLocation(warehouse, "A-01-01-1");
         Location toLocation = seedLocation(warehouse, "A-01-02-1");
         ProductUnit unit = seedProductUnit(company, "박스");
@@ -193,7 +193,7 @@ class TransferApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "TR-STORE2");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "TR-CAT2");
-        Warehouse warehouse = seedWarehouse(company, storageType, "이동수량부족창고");
+        Warehouse warehouse = seedWarehouse(company, "이동수량부족창고");
         Location fromLocation = seedLocation(warehouse, "A-01-01-2");
         Location toLocation = seedLocation(warehouse, "A-01-02-2");
         ProductUnit unit = seedProductUnit(company, "박스");
@@ -219,7 +219,7 @@ class TransferApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "TR-STORE3");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "TR-CAT3");
-        Warehouse warehouse = seedWarehouse(company, storageType, "이동동일위치창고");
+        Warehouse warehouse = seedWarehouse(company, "이동동일위치창고");
         Location location = seedLocation(warehouse, "A-01-01-3");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-TR-3");
@@ -244,7 +244,7 @@ class TransferApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "TR-STORE4");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "TR-CAT4");
-        Warehouse warehouse = seedWarehouse(company, storageType, "이동비활성창고");
+        Warehouse warehouse = seedWarehouse(company, "이동비활성창고");
         Location fromLocation = seedLocation(warehouse, "A-01-01-4");
         Location toLocation = seedLocation(warehouse, "A-01-02-4");
         toLocation.update(storageType, LocationStatus.DISABLED);
@@ -272,7 +272,7 @@ class TransferApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "TR-STORE6");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "TR-CAT6");
-        Warehouse warehouse = seedWarehouse(company, storageType, "이동멱등키누락창고");
+        Warehouse warehouse = seedWarehouse(company, "이동멱등키누락창고");
         Location fromLocation = seedLocation(warehouse, "A-01-01-6");
         Location toLocation = seedLocation(warehouse, "A-01-02-6");
         ProductUnit unit = seedProductUnit(company, "박스");
@@ -297,7 +297,7 @@ class TransferApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "TR-STORE7");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "TR-CAT7");
-        Warehouse warehouse = seedWarehouse(company, storageType, "이동멱등재생창고");
+        Warehouse warehouse = seedWarehouse(company, "이동멱등재생창고");
         Location fromLocation = seedLocation(warehouse, "A-01-01-7");
         Location toLocation = seedLocation(warehouse, "A-01-02-7");
         ProductUnit unit = seedProductUnit(company, "박스");
@@ -335,7 +335,7 @@ class TransferApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "TR-STORE5");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "TR-CAT5");
-        Warehouse warehouse = seedWarehouse(company, storageType, "이동조회창고");
+        Warehouse warehouse = seedWarehouse(company, "이동조회창고");
         Location fromLocation = seedLocation(warehouse, "A-01-01-5");
         Location toLocation = seedLocation(warehouse, "A-01-02-5");
         ProductUnit unit = seedProductUnit(company, "박스");

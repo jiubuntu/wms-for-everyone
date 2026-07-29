@@ -9,7 +9,6 @@ public class WarehouseCreateCommand {
 
     private final Long companyId;
     private final String name;
-    private final Long storageTypeId;
     private final String address;
 
 }

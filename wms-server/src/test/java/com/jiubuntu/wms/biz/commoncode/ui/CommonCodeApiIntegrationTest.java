@@ -57,7 +57,7 @@ class CommonCodeApiIntegrationTest extends IntegrationTestSupport {
 
     private User seedUser(Company company, String email, UserRole role) {
         User user = new User(company, null, email, passwordEncoder.encode("password1!"),
-                "홍길동", "010-0000-0000", role, UserStatus.ACTIVE);
+                "홍길동", "010-0000-0000", role, UserStatus.ACTIVE, false);
         return userRepository.save(user);
     }
 

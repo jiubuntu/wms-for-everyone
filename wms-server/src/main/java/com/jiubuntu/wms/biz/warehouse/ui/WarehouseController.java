@@ -97,7 +97,6 @@ public class WarehouseController {
         WarehouseCreateCommand command = WarehouseCreateCommand.builder()
                 .companyId(principal.getCompanyId())
                 .name(request.getName())
-                .storageTypeId(request.getStorageTypeId())
                 .address(request.getAddress())
                 .build();
         Warehouse warehouse = warehouseService.create(command);
@@ -117,7 +116,6 @@ public class WarehouseController {
                 .id(id)
                 .expectedCompanyId(principal.getCompanyId())
                 .name(request.getName())
-                .storageTypeId(request.getStorageTypeId())
                 .address(request.getAddress())
                 .updatedBy(principal.getUserId())
                 .build();

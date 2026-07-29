@@ -85,12 +85,6 @@ export function WarehouseDetailPage() {
             )}
           </CardHeader>
           <CardContent className="flex flex-col gap-2 text-sm">
-            <div className="flex justify-between border-b pb-2">
-              <span className="text-muted-foreground">보관 유형</span>
-              <span className="font-medium">
-                {storageTypeNameById.get(warehouse.storageTypeId) ?? "-"}
-              </span>
-            </div>
             <div className="flex justify-between pb-1">
               <span className="text-muted-foreground">주소</span>
               <span className="font-medium">{warehouse.address ?? "-"}</span>

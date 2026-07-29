@@ -53,7 +53,7 @@ class SignupServiceTest {
         );
         Company company = new Company("테스트기업", "123-45-67890", CompanyStatus.PENDING);
         User createdUser = new User(company, null, "user@test.com", "encoded-password",
-                "홍길동", "010-0000-0000", UserRole.COMPANY_ADMIN, UserStatus.PENDING);
+                "홍길동", "010-0000-0000", UserRole.COMPANY_ADMIN, UserStatus.PENDING, false);
 
         when(companyService.create("테스트기업", "123-45-67890")).thenReturn(company);
         when(passwordEncoder.encode("password1!")).thenReturn("encoded-password");

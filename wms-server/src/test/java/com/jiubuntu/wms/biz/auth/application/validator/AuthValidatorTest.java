@@ -24,7 +24,7 @@ class AuthValidatorTest {
 
     private User activeUser(String rawPassword) {
         return new User(null, null, "user@test.com", passwordEncoder.encode(rawPassword),
-                "홍길동", "010-0000-0000", UserRole.COMPANY_ADMIN, UserStatus.ACTIVE);
+                "홍길동", "010-0000-0000", UserRole.COMPANY_ADMIN, UserStatus.ACTIVE, false);
     }
 
     @Test
@@ -74,7 +74,7 @@ class AuthValidatorTest {
     @DisplayName("활성 상태가 아닌 계정(PENDING 등)은 ACCOUNT_NOT_ACTIVE 예외가 발생한다")
     void validateLogin_notActive() {
         User user = new User(null, null, "user@test.com", passwordEncoder.encode("password1!"),
-                "홍길동", "010-0000-0000", UserRole.COMPANY_ADMIN, UserStatus.PENDING);
+                "홍길동", "010-0000-0000", UserRole.COMPANY_ADMIN, UserStatus.PENDING, false);
 
         assertThatThrownBy(() -> authValidator.validateLogin(user, "password1!"))
                 .isInstanceOf(CommonException.class)

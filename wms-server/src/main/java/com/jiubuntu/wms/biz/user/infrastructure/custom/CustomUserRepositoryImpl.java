@@ -7,7 +7,11 @@ import com.jiubuntu.wms.biz.user.domain.UserStatus;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -72,6 +76,32 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
                 .where(user.warehouse.id.eq(warehouseId), activeEq())
                 .fetchFirst();
         return result != null;
+    }
+
+    @Override
+    public Page<User> findActiveStaffByCompany(Long companyId, Long warehouseId, Pageable pageable) {
+        BooleanExpression condition = user.company.id.eq(companyId)
+                .and(user.role.in(UserRole.WAREHOUSE_MANAGER, UserRole.WORKER))
+                .and(activeEq());
+        if (warehouseId != null) {
+            condition = condition.and(user.warehouse.id.eq(warehouseId));
+        }
+
+        List<User> content = queryFactory
+                .selectFrom(user)
+                .where(condition)
+                .orderBy(user.createdAt.asc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long total = queryFactory
+                .select(user.count())
+                .from(user)
+                .where(condition)
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, total != null ? total : 0L);
     }
 
     private BooleanExpression activeEq() {

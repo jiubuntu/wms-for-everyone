@@ -57,8 +57,10 @@ public class User extends BaseEntity {
 
     private LocalDateTime lockedUntil;
 
+    private boolean mustChangePassword;
+
     public User(Company company, Warehouse warehouse, String email, String password, String name, String phone,
-                 UserRole role, UserStatus status) {
+                 UserRole role, UserStatus status, boolean mustChangePassword) {
         this.company = company;
         this.warehouse = warehouse;
         this.email = email;
@@ -68,6 +70,7 @@ public class User extends BaseEntity {
         this.role = role;
         this.status = status;
         this.loginFailedCount = 0;
+        this.mustChangePassword = mustChangePassword;
     }
 
     public void verifyEmail() {
@@ -99,6 +102,7 @@ public class User extends BaseEntity {
 
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
+        this.mustChangePassword = false;
     }
 
     public void withdraw() {

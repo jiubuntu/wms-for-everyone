@@ -10,12 +10,14 @@ public class AuthPrincipal {
     private final Long companyId;
     private final UserRole role;
     private final Long warehouseId;
+    private final boolean mustChangePassword;
 
-    public AuthPrincipal(Long userId, Long companyId, UserRole role, Long warehouseId) {
+    public AuthPrincipal(Long userId, Long companyId, UserRole role, Long warehouseId, boolean mustChangePassword) {
         this.userId = userId;
         this.companyId = companyId;
         this.role = role;
         this.warehouseId = warehouseId;
+        this.mustChangePassword = mustChangePassword;
     }
 
 }

@@ -84,7 +84,7 @@ class InventoryApiIntegrationTest extends IntegrationTestSupport {
 
     private User seedUser(Company company, Warehouse warehouse, String email, UserRole role) {
         return userRepository.save(new User(company, warehouse, email, passwordEncoder.encode("password1!"),
-                "홍길동", "010-0000-0000", role, UserStatus.ACTIVE));
+                "홍길동", "010-0000-0000", role, UserStatus.ACTIVE, false));
     }
 
     private String login(String email) throws Exception {
@@ -101,8 +101,8 @@ class InventoryApiIntegrationTest extends IntegrationTestSupport {
         return commonCodeRepository.save(new CommonCode(null, group, code, code, 1));
     }
 
-    private Warehouse seedWarehouse(Company company, CommonCode storageType, String name) {
-        return warehouseRepository.save(new Warehouse(company, name, storageType, "서울시"));
+    private Warehouse seedWarehouse(Company company, String name) {
+        return warehouseRepository.save(new Warehouse(company, name, "서울시"));
     }
 
     private Location seedLocation(Warehouse warehouse, String code) {
@@ -135,7 +135,7 @@ class InventoryApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "INV-STORE1");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "INV-CAT1");
-        Warehouse warehouse = seedWarehouse(company, storageType, "재고조회창고");
+        Warehouse warehouse = seedWarehouse(company, "재고조회창고");
         Location location = seedLocation(warehouse, "A-01-01-1");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-INV-1");
@@ -162,7 +162,7 @@ class InventoryApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "INV-STORE2");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "INV-CAT2");
-        Warehouse warehouse = seedWarehouse(company, storageType, "재고조정창고");
+        Warehouse warehouse = seedWarehouse(company, "재고조정창고");
         Location location = seedLocation(warehouse, "A-01-01-2");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-INV-2");
@@ -195,7 +195,7 @@ class InventoryApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "INV-STORE3");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "INV-CAT3");
-        Warehouse warehouse = seedWarehouse(company, storageType, "재고조정거부창고");
+        Warehouse warehouse = seedWarehouse(company, "재고조정거부창고");
         Location location = seedLocation(warehouse, "A-01-01-3");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-INV-3");
@@ -219,7 +219,7 @@ class InventoryApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "INV-STORE6");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "INV-CAT6");
-        Warehouse warehouse = seedWarehouse(company, storageType, "멱등키누락창고");
+        Warehouse warehouse = seedWarehouse(company, "멱등키누락창고");
         Location location = seedLocation(warehouse, "A-01-01-6");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-INV-6");
@@ -242,7 +242,7 @@ class InventoryApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "INV-STORE7");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "INV-CAT7");
-        Warehouse warehouse = seedWarehouse(company, storageType, "멱등재생창고");
+        Warehouse warehouse = seedWarehouse(company, "멱등재생창고");
         Location location = seedLocation(warehouse, "A-01-01-7");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-INV-7");
@@ -282,7 +282,7 @@ class InventoryApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "INV-STORE8");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "INV-CAT8");
-        Warehouse warehouse = seedWarehouse(company, storageType, "멱등불일치창고");
+        Warehouse warehouse = seedWarehouse(company, "멱등불일치창고");
         Location location = seedLocation(warehouse, "A-01-01-8");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-INV-8");
@@ -313,7 +313,7 @@ class InventoryApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "INV-STORE4");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "INV-CAT4");
-        Warehouse warehouse = seedWarehouse(company, storageType, "가용재고창고");
+        Warehouse warehouse = seedWarehouse(company, "가용재고창고");
         Location locationWithStock = seedLocation(warehouse, "A-01-01-4");
         Location locationFullyReserved = seedLocation(warehouse, "A-01-02-4");
         ProductUnit unit = seedProductUnit(company, "박스");
@@ -337,8 +337,8 @@ class InventoryApiIntegrationTest extends IntegrationTestSupport {
         Company company = seedCompany("재고스코프기업", "555-55-55555");
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "INV-STORE5");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "INV-CAT5");
-        Warehouse ownWarehouse = seedWarehouse(company, storageType, "담당창고");
-        Warehouse otherWarehouse = seedWarehouse(company, storageType, "다른창고");
+        Warehouse ownWarehouse = seedWarehouse(company, "담당창고");
+        Warehouse otherWarehouse = seedWarehouse(company, "다른창고");
         seedUser(company, ownWarehouse, "inv-manager@test.com", UserRole.WAREHOUSE_MANAGER);
         String token = login("inv-manager@test.com");
 

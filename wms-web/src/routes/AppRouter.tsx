@@ -3,6 +3,7 @@ import { Landing } from "@/pages/Landing"
 import { Login } from "@/pages/auth/Login"
 import { Signup } from "@/pages/auth/Signup"
 import { ResetPassword } from "@/pages/auth/ResetPassword"
+import { ChangePasswordPage } from "@/pages/auth/ChangePasswordPage"
 import { Forbidden } from "@/pages/Forbidden"
 import { ProtectedRoute } from "@/routes/ProtectedRoute"
 import { GuestRoute } from "@/routes/GuestRoute"
@@ -28,6 +29,7 @@ import { InboundDetailPage } from "@/pages/app/InboundDetailPage"
 import { OutboundPage } from "@/pages/app/OutboundPage"
 import { OutboundNewPage } from "@/pages/app/OutboundNewPage"
 import { OutboundDetailPage } from "@/pages/app/OutboundDetailPage"
+import { UserPage } from "@/pages/app/UserPage"
 
 export function AppRouter() {
   return (
@@ -36,6 +38,14 @@ export function AppRouter() {
       <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
       <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route
+        path="/change-password"
+        element={
+          <ProtectedRoute>
+            <ChangePasswordPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/forbidden" element={<Forbidden />} />
 
       <Route
@@ -177,6 +187,14 @@ export function AppRouter() {
           element={
             <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER", "WORKER"]}>
               <InventoryHistoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="users"
+          element={
+            <ProtectedRoute allowedRoles={["COMPANY_ADMIN", "WAREHOUSE_MANAGER"]}>
+              <UserPage />
             </ProtectedRoute>
           }
         />

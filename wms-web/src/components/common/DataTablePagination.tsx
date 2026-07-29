@@ -74,7 +74,7 @@ function PageButton({
       onClick={onClick}
       aria-label={ariaLabel}
       className={cn(
-        "-ml-px flex h-8 w-8 items-center justify-center border border-border text-sm first:ml-0 disabled:pointer-events-none disabled:opacity-40",
+        "-ml-px flex h-8 w-8 cursor-pointer items-center justify-center border border-border text-sm first:ml-0 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40",
         active
           ? "z-10 border-primary bg-primary text-primary-foreground"
           : "bg-card text-foreground hover:bg-muted",

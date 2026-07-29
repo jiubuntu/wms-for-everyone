@@ -2,7 +2,6 @@ export interface WarehouseItem {
   id: number
   companyId: number
   name: string
-  storageTypeId: number
   address: string | null
   locationCount: number
   active: boolean
@@ -11,7 +10,6 @@ export interface WarehouseItem {
 
 export interface WarehouseCreateInput {
   name: string
-  storageTypeId: number
   address: string | null
 }
 

@@ -2,9 +2,6 @@ package com.jiubuntu.wms.biz.location.ui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jiubuntu.wms.IntegrationTestSupport;
-import com.jiubuntu.wms.biz.commoncode.domain.CommonCode;
-import com.jiubuntu.wms.biz.commoncode.domain.CommonCodeGroup;
-import com.jiubuntu.wms.biz.commoncode.infrastructure.CommonCodeRepository;
 import com.jiubuntu.wms.biz.company.domain.Company;
 import com.jiubuntu.wms.biz.company.domain.CompanyStatus;
 import com.jiubuntu.wms.biz.company.infrastructure.CompanyRepository;
@@ -56,9 +53,6 @@ class LocationApiIntegrationTest extends IntegrationTestSupport {
     private LocationRepository locationRepository;
 
     @Autowired
-    private CommonCodeRepository commonCodeRepository;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private Company seedCompany(String name, String businessNumber) {
@@ -67,7 +61,7 @@ class LocationApiIntegrationTest extends IntegrationTestSupport {
 
     private User seedUser(Company company, Warehouse warehouse, String email, UserRole role) {
         return userRepository.save(new User(company, warehouse, email, passwordEncoder.encode("password1!"),
-                "홍길동", "010-0000-0000", role, UserStatus.ACTIVE));
+                "홍길동", "010-0000-0000", role, UserStatus.ACTIVE, false));
     }
 
     private String login(String email) throws Exception {
@@ -80,12 +74,8 @@ class LocationApiIntegrationTest extends IntegrationTestSupport {
                 .path("data").path("accessToken").asText();
     }
 
-    private CommonCode seedStorageType(String code) {
-        return commonCodeRepository.save(new CommonCode(null, CommonCodeGroup.STORAGE_TYPE, code, code, 1));
-    }
-
-    private Warehouse seedWarehouse(Company company, CommonCode storageType, String name) {
-        return warehouseRepository.save(new Warehouse(company, name, storageType, "서울시"));
+    private Warehouse seedWarehouse(Company company, String name) {
+        return warehouseRepository.save(new Warehouse(company, name, "서울시"));
     }
 
     private Map<String, Object> bulkCreateBody(String zone, int rowFrom, int rowTo, int colFrom, int colTo, int levelCount) {
@@ -106,8 +96,7 @@ class LocationApiIntegrationTest extends IntegrationTestSupport {
         seedUser(company, null, "loc-create-admin@test.com", UserRole.COMPANY_ADMIN);
         String token = login("loc-create-admin@test.com");
 
-        CommonCode storageType = seedStorageType("LOC-STORE1");
-        Warehouse warehouse = seedWarehouse(company, storageType, "생성창고");
+        Warehouse warehouse = seedWarehouse(company, "생성창고");
 
         mockMvc.perform(post("/api/warehouse/" + warehouse.getId() + "/location/bulk-create")
                         .header("Authorization", "Bearer " + token)
@@ -125,8 +114,7 @@ class LocationApiIntegrationTest extends IntegrationTestSupport {
         seedUser(company, null, "loc-dup-admin@test.com", UserRole.COMPANY_ADMIN);
         String token = login("loc-dup-admin@test.com");
 
-        CommonCode storageType = seedStorageType("LOC-STORE2");
-        Warehouse warehouse = seedWarehouse(company, storageType, "중복창고");
+        Warehouse warehouse = seedWarehouse(company, "중복창고");
         locationRepository.save(Location.builder()
                 .warehouse(warehouse).zone("A").row("01").col("01").level("1").code("A-01-01-1").build());
 
@@ -145,8 +133,7 @@ class LocationApiIntegrationTest extends IntegrationTestSupport {
         seedUser(company, null, "loc-list-admin@test.com", UserRole.COMPANY_ADMIN);
         String token = login("loc-list-admin@test.com");
 
-        CommonCode storageType = seedStorageType("LOC-STORE3");
-        Warehouse warehouse = seedWarehouse(company, storageType, "조회창고");
+        Warehouse warehouse = seedWarehouse(company, "조회창고");
         locationRepository.save(Location.builder()
                 .warehouse(warehouse).zone("A").row("01").col("01").level("1").code("A-01-01-1").build());
 
@@ -164,8 +151,7 @@ class LocationApiIntegrationTest extends IntegrationTestSupport {
         seedUser(company, null, "loc-update-admin@test.com", UserRole.COMPANY_ADMIN);
         String token = login("loc-update-admin@test.com");
 
-        CommonCode storageType = seedStorageType("LOC-STORE4");
-        Warehouse warehouse = seedWarehouse(company, storageType, "수정창고");
+        Warehouse warehouse = seedWarehouse(company, "수정창고");
         Location location = locationRepository.save(Location.builder()
                 .warehouse(warehouse).zone("A").row("01").col("01").level("1").code("A-01-01-1").build());
 
@@ -184,8 +170,7 @@ class LocationApiIntegrationTest extends IntegrationTestSupport {
         seedUser(company, null, "loc-delete-admin@test.com", UserRole.COMPANY_ADMIN);
         String token = login("loc-delete-admin@test.com");
 
-        CommonCode storageType = seedStorageType("LOC-STORE5");
-        Warehouse warehouse = seedWarehouse(company, storageType, "삭제창고");
+        Warehouse warehouse = seedWarehouse(company, "삭제창고");
         Location location = locationRepository.save(Location.builder()
                 .warehouse(warehouse).zone("A").row("01").col("01").level("1").code("A-01-01-1").build());
 
@@ -203,9 +188,8 @@ class LocationApiIntegrationTest extends IntegrationTestSupport {
     @DisplayName("창고관리자가 담당 창고가 아닌 창고의 위치에 접근하면 거부된다")
     void list_warehouseManager_otherWarehouse_rejected() throws Exception {
         Company company = seedCompany("위치스코프기업", "666-66-66666");
-        CommonCode storageType = seedStorageType("LOC-STORE6");
-        Warehouse ownWarehouse = seedWarehouse(company, storageType, "담당창고3");
-        Warehouse otherWarehouse = seedWarehouse(company, storageType, "다른창고3");
+        Warehouse ownWarehouse = seedWarehouse(company, "담당창고3");
+        Warehouse otherWarehouse = seedWarehouse(company, "다른창고3");
         seedUser(company, ownWarehouse, "loc-manager@test.com", UserRole.WAREHOUSE_MANAGER);
         String token = login("loc-manager@test.com");
 
@@ -219,8 +203,7 @@ class LocationApiIntegrationTest extends IntegrationTestSupport {
     @DisplayName("작업자도 담당 창고의 위치 전체 목록은 조회할 수 있다 (입출고/재고이동 등록 화면의 위치 선택용)")
     void listAll_allowedForWorker() throws Exception {
         Company company = seedCompany("위치작업자전체조회기업", "777-77-77777");
-        CommonCode storageType = seedStorageType("LOC-STORE7");
-        Warehouse warehouse = seedWarehouse(company, storageType, "작업자전체조회창고");
+        Warehouse warehouse = seedWarehouse(company, "작업자전체조회창고");
         seedUser(company, warehouse, "loc-worker-all@test.com", UserRole.WORKER);
         String token = login("loc-worker-all@test.com");
 
@@ -238,9 +221,8 @@ class LocationApiIntegrationTest extends IntegrationTestSupport {
     @DisplayName("작업자가 담당 창고가 아닌 창고의 위치 전체 목록을 조회하면 거부된다")
     void listAll_worker_otherWarehouse_rejected() throws Exception {
         Company company = seedCompany("위치작업자스코프기업", "888-88-88888");
-        CommonCode storageType = seedStorageType("LOC-STORE8");
-        Warehouse ownWarehouse = seedWarehouse(company, storageType, "작업자담당창고");
-        Warehouse otherWarehouse = seedWarehouse(company, storageType, "작업자다른창고");
+        Warehouse ownWarehouse = seedWarehouse(company, "작업자담당창고");
+        Warehouse otherWarehouse = seedWarehouse(company, "작업자다른창고");
         seedUser(company, ownWarehouse, "loc-worker-scope@test.com", UserRole.WORKER);
         String token = login("loc-worker-scope@test.com");
 

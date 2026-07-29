@@ -6,6 +6,7 @@ import { setAccessToken, setUnauthorizedHandler } from "@/lib/axios"
 interface AccessTokenPayload {
   sub: string
   companyId: number | null
+  warehouseId: number | null
   role: UserRole
 }
 
@@ -20,6 +21,7 @@ interface AuthContextValue {
   isLoading: boolean
   login: (email: string, password: string) => Promise<AuthUser>
   logout: () => Promise<void>
+  clearMustChangePassword: () => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -35,7 +37,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then(({ accessToken }) => {
         setAccessToken(accessToken)
         const payload = decodeAccessToken(accessToken)
-        setUser({ userId: Number(payload.sub), companyId: payload.companyId, role: payload.role })
+        // mustChangePassword는 JWT claim에 없어 새로고침 복원 시엔 항상 false로 취급한다 (알려진 제약, docs/request/user.md 참고)
+        setUser({
+          userId: Number(payload.sub),
+          companyId: payload.companyId,
+          warehouseId: payload.warehouseId,
+          role: payload.role,
+          mustChangePassword: false,
+        })
       })
       .catch(() => {
         setAccessToken(null)
@@ -51,9 +60,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const loggedInUser: AuthUser = {
       userId: result.userId,
       companyId: payload.companyId,
+      warehouseId: payload.warehouseId,
       role: result.role,
       email: result.email,
       name: result.name,
+      mustChangePassword: result.mustChangePassword,
     }
     setUser(loggedInUser)
     return loggedInUser
@@ -65,8 +76,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
+  function clearMustChangePassword() {
+    setUser((prev) => (prev ? { ...prev, mustChangePassword: false } : prev))
+  }
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, clearMustChangePassword }}>
       {children}
     </AuthContext.Provider>
   )

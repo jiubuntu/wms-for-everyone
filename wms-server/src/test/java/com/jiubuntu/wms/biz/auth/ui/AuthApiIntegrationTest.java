@@ -79,7 +79,7 @@ class AuthApiIntegrationTest extends IntegrationTestSupport {
     private User seedActiveUser(String email, String rawPassword) {
         Company company = companyRepository.save(new Company("로그인테스트기업", "111-11-11111", CompanyStatus.ACTIVE));
         User user = new User(company, null, email, passwordEncoder.encode(rawPassword),
-                "홍길동", "010-0000-0000", UserRole.COMPANY_ADMIN, UserStatus.ACTIVE);
+                "홍길동", "010-0000-0000", UserRole.COMPANY_ADMIN, UserStatus.ACTIVE, false);
         return userRepository.save(user);
     }
 
@@ -184,6 +184,7 @@ class AuthApiIntegrationTest extends IntegrationTestSupport {
                         .content(objectMapper.writeValueAsString(Map.of("email", "login@test.com", "password", "password1!"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.data.mustChangePassword").value(false))
                 .andExpect(cookie().exists(RefreshTokenCookieProvider.COOKIE_NAME));
     }
 
@@ -192,7 +193,7 @@ class AuthApiIntegrationTest extends IntegrationTestSupport {
     void login_pendingAccount() throws Exception {
         Company company = companyRepository.save(new Company("승인대기기업", "555-55-55555", CompanyStatus.PENDING));
         userRepository.save(new User(company, null, "pending@test.com", passwordEncoder.encode("password1!"),
-                "홍길동", "010-0000-0000", UserRole.COMPANY_ADMIN, UserStatus.PENDING));
+                "홍길동", "010-0000-0000", UserRole.COMPANY_ADMIN, UserStatus.PENDING, false));
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType("application/json")

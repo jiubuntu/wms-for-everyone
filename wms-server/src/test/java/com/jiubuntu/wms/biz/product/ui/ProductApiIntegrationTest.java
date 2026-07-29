@@ -68,7 +68,7 @@ class ProductApiIntegrationTest extends IntegrationTestSupport {
 
     private void seedUser(Company company, String email, UserRole role) {
         userRepository.save(new User(company, null, email, passwordEncoder.encode("password1!"),
-                "홍길동", "010-0000-0000", role, UserStatus.ACTIVE));
+                "홍길동", "010-0000-0000", role, UserStatus.ACTIVE, false));
     }
 
     private String login(String email) throws Exception {
