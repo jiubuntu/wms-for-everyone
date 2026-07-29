@@ -4,6 +4,14 @@ import { ChevronDown, type LucideProps } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/AuthContext"
 import type { UserRole } from "@/features/auth/types"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 type Icon = ComponentType<LucideProps>
 
@@ -144,15 +152,29 @@ function SidebarGroup({
 
   if (collapsed) {
     return (
-      <div
-        title={group.label}
-        className={cn(
-          "flex items-center justify-center rounded-[0.3rem] px-0 py-2 text-muted-foreground",
-          hasActiveChild && "font-medium text-primary"
-        )}
-      >
-        <Icon className="size-5 shrink-0" />
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            title={group.label}
+            className={cn(
+              "flex w-full cursor-pointer items-center justify-center rounded-[0.3rem] px-0 py-2 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary",
+              hasActiveChild && "font-medium text-primary"
+            )}
+          >
+            <Icon className="size-5 shrink-0" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side="right" align="start">
+          <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {group.children.map((child) => (
+            <DropdownMenuItem key={child.to} asChild>
+              <Link to={child.to}>{child.label}</Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
     )
   }
 
@@ -176,7 +198,7 @@ function SidebarGroup({
       {open && (
         <div className="mt-0.5 flex flex-col gap-0.5">
           {group.children.map((child) => (
-            <SidebarLink key={child.to} to={child.to} label={child.label} collapsed={false} sub />
+            <SidebarLink key={child.to} to={child.to} label={child.label} collapsed={false} sub end />
           ))}
         </div>
       )}
