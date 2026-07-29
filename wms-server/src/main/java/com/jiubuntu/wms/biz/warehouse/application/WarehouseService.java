@@ -1,8 +1,5 @@
 package com.jiubuntu.wms.biz.warehouse.application;
 
-import com.jiubuntu.wms.biz.commoncode.application.CommonCodeService;
-import com.jiubuntu.wms.biz.commoncode.domain.CommonCode;
-import com.jiubuntu.wms.biz.commoncode.domain.CommonCodeGroup;
 import com.jiubuntu.wms.biz.company.application.CompanyService;
 import com.jiubuntu.wms.biz.company.domain.Company;
 import com.jiubuntu.wms.biz.user.domain.UserRole;
@@ -32,7 +29,6 @@ public class WarehouseService {
     private final WarehouseRepository warehouseRepository;
     private final WarehouseValidator warehouseValidator;
     private final CompanyService companyService;
-    private final CommonCodeService commonCodeService;
 
     public Warehouse getActiveById(Long id) {
         return warehouseRepository.findActiveById(id)
@@ -72,20 +68,16 @@ public class WarehouseService {
     @Transactional
     public Warehouse create(WarehouseCreateCommand command) {
         Company company = companyService.getActiveById(command.getCompanyId());
-        CommonCode storageType = commonCodeService.getAccessible(
-                command.getStorageTypeId(), CommonCodeGroup.STORAGE_TYPE, command.getCompanyId());
 
-        Warehouse warehouse = new Warehouse(company, command.getName(), storageType, command.getAddress());
+        Warehouse warehouse = new Warehouse(company, command.getName(), command.getAddress());
         return warehouseRepository.save(warehouse);
     }
 
     @Transactional
     public Warehouse update(WarehouseUpdateCommand command) {
         Warehouse warehouse = getAccessible(command.getId(), command.getExpectedCompanyId(), UserRole.COMPANY_ADMIN, null);
-        CommonCode storageType = commonCodeService.getAccessible(
-                command.getStorageTypeId(), CommonCodeGroup.STORAGE_TYPE, command.getExpectedCompanyId());
 
-        warehouse.update(command.getName(), storageType, command.getAddress());
+        warehouse.update(command.getName(), command.getAddress());
         warehouse.assignUpdater(command.getUpdatedBy());
         return warehouse;
     }
@@ -104,7 +96,6 @@ public class WarehouseService {
                 .id(warehouse.getId())
                 .companyId(warehouse.getCompany() != null ? warehouse.getCompany().getId() : null)
                 .name(warehouse.getName())
-                .storageTypeId(warehouse.getStorageType() != null ? warehouse.getStorageType().getId() : null)
                 .address(warehouse.getAddress())
                 .active(warehouse.isActive())
                 .createdAt(warehouse.getCreatedAt())

@@ -107,8 +107,8 @@ class OutboundApiIntegrationTest extends IntegrationTestSupport {
         return commonCodeRepository.save(new CommonCode(null, group, code, code, 1));
     }
 
-    private Warehouse seedWarehouse(Company company, CommonCode storageType, String name) {
-        return warehouseRepository.save(new Warehouse(company, name, storageType, "서울시"));
+    private Warehouse seedWarehouse(Company company, String name) {
+        return warehouseRepository.save(new Warehouse(company, name, "서울시"));
     }
 
     private Location seedLocation(Warehouse warehouse, String code) {
@@ -159,7 +159,7 @@ class OutboundApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "OUT-STORE1");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "OUT-CAT1");
-        Warehouse warehouse = seedWarehouse(company, storageType, "출고FEFO창고");
+        Warehouse warehouse = seedWarehouse(company, "출고FEFO창고");
         Location earlyLocation = seedLocation(warehouse, "A-01-01-1");
         Location lateLocation = seedLocation(warehouse, "A-01-02-1");
         ProductUnit unit = seedProductUnit(company, "박스");
@@ -197,7 +197,7 @@ class OutboundApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "OUT-STORE2");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "OUT-CAT2");
-        Warehouse warehouse = seedWarehouse(company, storageType, "출고MANUAL창고");
+        Warehouse warehouse = seedWarehouse(company, "출고MANUAL창고");
         Location location = seedLocation(warehouse, "A-01-01-2");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-OUT-2");
@@ -234,7 +234,7 @@ class OutboundApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "OUT-STORE3");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "OUT-CAT3");
-        Warehouse warehouse = seedWarehouse(company, storageType, "출고합계불일치창고");
+        Warehouse warehouse = seedWarehouse(company, "출고합계불일치창고");
         Location location = seedLocation(warehouse, "A-01-01-3");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-OUT-3");
@@ -266,7 +266,7 @@ class OutboundApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "OUT-STORE4");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "OUT-CAT4");
-        Warehouse warehouse = seedWarehouse(company, storageType, "출고재고부족창고");
+        Warehouse warehouse = seedWarehouse(company, "출고재고부족창고");
         Location location = seedLocation(warehouse, "A-01-01-4");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-OUT-4");
@@ -297,7 +297,7 @@ class OutboundApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "OUT-STORE5");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "OUT-CAT5");
-        Warehouse warehouse = seedWarehouse(company, storageType, "출고확정창고");
+        Warehouse warehouse = seedWarehouse(company, "출고확정창고");
         Location location = seedLocation(warehouse, "A-01-01-5");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-OUT-5");
@@ -343,7 +343,7 @@ class OutboundApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "OUT-STORE6");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "OUT-CAT6");
-        Warehouse warehouse = seedWarehouse(company, storageType, "출고재확정창고");
+        Warehouse warehouse = seedWarehouse(company, "출고재확정창고");
         Location location = seedLocation(warehouse, "A-01-01-6");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-OUT-6");
@@ -383,7 +383,7 @@ class OutboundApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "OUT-STORE7");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "OUT-CAT7");
-        Warehouse warehouse = seedWarehouse(company, storageType, "출고취소창고");
+        Warehouse warehouse = seedWarehouse(company, "출고취소창고");
         Location location = seedLocation(warehouse, "A-01-01-7");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-OUT-7");
@@ -428,7 +428,7 @@ class OutboundApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "OUT-STORE8");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "OUT-CAT8");
-        Warehouse warehouse = seedWarehouse(company, storageType, "출고조회창고");
+        Warehouse warehouse = seedWarehouse(company, "출고조회창고");
         Location location = seedLocation(warehouse, "A-01-01-8");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-OUT-8");
@@ -470,7 +470,7 @@ class OutboundApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "OUT-STORE9");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "OUT-CAT9");
-        Warehouse warehouse = seedWarehouse(company, storageType, "출고멱등키누락창고");
+        Warehouse warehouse = seedWarehouse(company, "출고멱등키누락창고");
         Location location = seedLocation(warehouse, "A-01-01-9");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-OUT-9");
@@ -496,7 +496,7 @@ class OutboundApiIntegrationTest extends IntegrationTestSupport {
 
         CommonCode storageType = seedCommonCode(CommonCodeGroup.STORAGE_TYPE, "OUT-STORE10");
         CommonCode category = seedCommonCode(CommonCodeGroup.PRODUCT_CATEGORY, "OUT-CAT10");
-        Warehouse warehouse = seedWarehouse(company, storageType, "출고멱등재생창고");
+        Warehouse warehouse = seedWarehouse(company, "출고멱등재생창고");
         Location location = seedLocation(warehouse, "A-01-01-10");
         ProductUnit unit = seedProductUnit(company, "박스");
         Product product = seedProduct(company, category, storageType, unit, "SKU-OUT-10");

@@ -1,8 +1,5 @@
 package com.jiubuntu.wms.biz.warehouse.application;
 
-import com.jiubuntu.wms.biz.commoncode.application.CommonCodeService;
-import com.jiubuntu.wms.biz.commoncode.domain.CommonCode;
-import com.jiubuntu.wms.biz.commoncode.domain.CommonCodeGroup;
 import com.jiubuntu.wms.biz.company.application.CompanyService;
 import com.jiubuntu.wms.biz.company.domain.Company;
 import com.jiubuntu.wms.biz.company.domain.CompanyStatus;
@@ -42,9 +39,6 @@ class WarehouseServiceTest {
     @Mock
     private CompanyService companyService;
 
-    @Mock
-    private CommonCodeService commonCodeService;
-
     @InjectMocks
     private WarehouseService warehouseService;
 
@@ -54,32 +48,24 @@ class WarehouseServiceTest {
         return company;
     }
 
-    private CommonCode storageTypeWithId(Long id) {
-        CommonCode commonCode = new CommonCode(null, CommonCodeGroup.STORAGE_TYPE, "COLD", "냉장", 1);
-        ReflectionTestUtils.setField(commonCode, "id", id);
-        return commonCode;
-    }
-
     private Warehouse warehouseWithId(Long id, Company company) {
-        Warehouse warehouse = new Warehouse(company, "본사창고", storageTypeWithId(20L), "서울시");
+        Warehouse warehouse = new Warehouse(company, "본사창고", "서울시");
         ReflectionTestUtils.setField(warehouse, "id", id);
         return warehouse;
     }
 
     @Test
-    @DisplayName("창고를 등록하면 회사와 보관유형을 조회해 연결한다")
+    @DisplayName("창고를 등록하면 회사를 조회해 연결한다")
     void create_success() {
         when(companyService.getActiveById(1L)).thenReturn(companyWithId(1L));
-        when(commonCodeService.getAccessible(20L, CommonCodeGroup.STORAGE_TYPE, 1L)).thenReturn(storageTypeWithId(20L));
         when(warehouseRepository.save(any(Warehouse.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         WarehouseCreateCommand command = WarehouseCreateCommand.builder()
-                .companyId(1L).name("본사창고").storageTypeId(20L).address("서울시")
+                .companyId(1L).name("본사창고").address("서울시")
                 .build();
         Warehouse result = warehouseService.create(command);
 
         assertThat(result.getName()).isEqualTo("본사창고");
-        assertThat(result.getStorageType().getId()).isEqualTo(20L);
     }
 
     @Test
@@ -129,14 +115,13 @@ class WarehouseServiceTest {
     }
 
     @Test
-    @DisplayName("창고를 수정하면 이름과 보관유형, 주소가 갱신된다")
+    @DisplayName("창고를 수정하면 이름과 주소가 갱신된다")
     void update_success() {
         Warehouse warehouse = warehouseWithId(100L, companyWithId(1L));
         when(warehouseRepository.findActiveById(100L)).thenReturn(Optional.of(warehouse));
-        when(commonCodeService.getAccessible(30L, CommonCodeGroup.STORAGE_TYPE, 1L)).thenReturn(storageTypeWithId(30L));
 
         WarehouseUpdateCommand command = WarehouseUpdateCommand.builder()
-                .id(100L).expectedCompanyId(1L).name("제2창고").storageTypeId(30L).address("부산시")
+                .id(100L).expectedCompanyId(1L).name("제2창고").address("부산시")
                 .updatedBy(999L)
                 .build();
         Warehouse result = warehouseService.update(command);

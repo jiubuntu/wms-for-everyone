@@ -2,9 +2,6 @@ package com.jiubuntu.wms.biz.warehouse.ui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jiubuntu.wms.IntegrationTestSupport;
-import com.jiubuntu.wms.biz.commoncode.domain.CommonCode;
-import com.jiubuntu.wms.biz.commoncode.domain.CommonCodeGroup;
-import com.jiubuntu.wms.biz.commoncode.infrastructure.CommonCodeRepository;
 import com.jiubuntu.wms.biz.company.domain.Company;
 import com.jiubuntu.wms.biz.company.domain.CompanyStatus;
 import com.jiubuntu.wms.biz.company.infrastructure.CompanyRepository;
@@ -52,9 +49,6 @@ class WarehouseApiIntegrationTest extends IntegrationTestSupport {
     private WarehouseRepository warehouseRepository;
 
     @Autowired
-    private CommonCodeRepository commonCodeRepository;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private Company seedCompany(String name, String businessNumber) {
@@ -76,12 +70,8 @@ class WarehouseApiIntegrationTest extends IntegrationTestSupport {
                 .path("data").path("accessToken").asText();
     }
 
-    private CommonCode seedStorageType(String code) {
-        return commonCodeRepository.save(new CommonCode(null, CommonCodeGroup.STORAGE_TYPE, code, code, 1));
-    }
-
-    private Warehouse seedWarehouse(Company company, CommonCode storageType, String name) {
-        return warehouseRepository.save(new Warehouse(company, name, storageType, "서울시"));
+    private Warehouse seedWarehouse(Company company, String name) {
+        return warehouseRepository.save(new Warehouse(company, name, "서울시"));
     }
 
     @Test
@@ -91,9 +81,8 @@ class WarehouseApiIntegrationTest extends IntegrationTestSupport {
         seedUser(company, null, "wh-all-admin@test.com", UserRole.COMPANY_ADMIN);
         String token = login("wh-all-admin@test.com");
 
-        CommonCode storageType = seedStorageType("WH-STORE-ALL1");
-        seedWarehouse(company, storageType, "창고A");
-        seedWarehouse(company, storageType, "창고B");
+        seedWarehouse(company, "창고A");
+        seedWarehouse(company, "창고B");
 
         mockMvc.perform(get("/api/warehouse/all")
                         .header("Authorization", "Bearer " + token))
@@ -105,9 +94,8 @@ class WarehouseApiIntegrationTest extends IntegrationTestSupport {
     @DisplayName("작업자가 전역 선택기용 전체 목록을 조회하면 담당 창고 1건만 내려온다")
     void listAll_worker_scopedToOwnWarehouse() throws Exception {
         Company company = seedCompany("작업자전체조회기업", "999-22-22222");
-        CommonCode storageType = seedStorageType("WH-STORE-ALL2");
-        Warehouse ownWarehouse = seedWarehouse(company, storageType, "담당창고");
-        seedWarehouse(company, storageType, "다른창고");
+        Warehouse ownWarehouse = seedWarehouse(company, "담당창고");
+        seedWarehouse(company, "다른창고");
         seedUser(company, ownWarehouse, "wh-all-worker@test.com", UserRole.WORKER);
         String token = login("wh-all-worker@test.com");
 
@@ -125,8 +113,7 @@ class WarehouseApiIntegrationTest extends IntegrationTestSupport {
         seedUser(company, null, "wh-list-admin@test.com", UserRole.COMPANY_ADMIN);
         String token = login("wh-list-admin@test.com");
 
-        CommonCode storageType = seedStorageType("WH-STORE1");
-        seedWarehouse(company, storageType, "본사창고");
+        seedWarehouse(company, "본사창고");
 
         mockMvc.perform(get("/api/warehouse/list")
                         .header("Authorization", "Bearer " + token))
@@ -140,9 +127,8 @@ class WarehouseApiIntegrationTest extends IntegrationTestSupport {
     @DisplayName("창고관리자는 목록 조회 시 본인 담당 창고 1건만 조회된다")
     void list_warehouseManager_scopedToOwnWarehouse() throws Exception {
         Company company = seedCompany("창고관리자기업", "222-22-22222");
-        CommonCode storageType = seedStorageType("WH-STORE2");
-        Warehouse ownWarehouse = seedWarehouse(company, storageType, "담당창고");
-        seedWarehouse(company, storageType, "다른창고");
+        Warehouse ownWarehouse = seedWarehouse(company, "담당창고");
+        seedWarehouse(company, "다른창고");
         seedUser(company, ownWarehouse, "wh-manager@test.com", UserRole.WAREHOUSE_MANAGER);
         String token = login("wh-manager@test.com");
 
@@ -169,9 +155,8 @@ class WarehouseApiIntegrationTest extends IntegrationTestSupport {
     @DisplayName("창고관리자가 담당 창고가 아닌 창고를 상세 조회하면 거부된다")
     void get_warehouseManager_otherWarehouse_rejected() throws Exception {
         Company company = seedCompany("상세조회기업", "444-44-44444");
-        CommonCode storageType = seedStorageType("WH-STORE3");
-        Warehouse ownWarehouse = seedWarehouse(company, storageType, "담당창고2");
-        Warehouse otherWarehouse = seedWarehouse(company, storageType, "다른창고2");
+        Warehouse ownWarehouse = seedWarehouse(company, "담당창고2");
+        Warehouse otherWarehouse = seedWarehouse(company, "다른창고2");
         seedUser(company, ownWarehouse, "wh-manager2@test.com", UserRole.WAREHOUSE_MANAGER);
         String token = login("wh-manager2@test.com");
 
@@ -188,11 +173,8 @@ class WarehouseApiIntegrationTest extends IntegrationTestSupport {
         seedUser(company, null, "wh-create-admin@test.com", UserRole.COMPANY_ADMIN);
         String token = login("wh-create-admin@test.com");
 
-        CommonCode storageType = seedStorageType("WH-STORE4");
-
         Map<String, Object> body = new HashMap<>();
         body.put("name", "신규창고");
-        body.put("storageTypeId", storageType.getId());
         body.put("address", "인천시");
 
         mockMvc.perform(post("/api/warehouse/create")
@@ -208,14 +190,12 @@ class WarehouseApiIntegrationTest extends IntegrationTestSupport {
     @DisplayName("창고관리자는 창고를 등록할 수 없다")
     void create_deniedForWarehouseManager() throws Exception {
         Company company = seedCompany("등록거부기업", "666-66-66666");
-        CommonCode storageType = seedStorageType("WH-STORE5");
-        Warehouse warehouse = seedWarehouse(company, storageType, "기존창고");
+        Warehouse warehouse = seedWarehouse(company, "기존창고");
         seedUser(company, warehouse, "wh-create-manager@test.com", UserRole.WAREHOUSE_MANAGER);
         String token = login("wh-create-manager@test.com");
 
         Map<String, Object> body = new HashMap<>();
         body.put("name", "신규창고2");
-        body.put("storageTypeId", storageType.getId());
 
         mockMvc.perform(post("/api/warehouse/create")
                         .header("Authorization", "Bearer " + token)
@@ -232,12 +212,10 @@ class WarehouseApiIntegrationTest extends IntegrationTestSupport {
         seedUser(attackerCompany, null, "wh-attacker@test.com", UserRole.COMPANY_ADMIN);
         String token = login("wh-attacker@test.com");
 
-        CommonCode storageType = seedStorageType("WH-STORE6");
-        Warehouse warehouse = seedWarehouse(ownerCompany, storageType, "타사창고");
+        Warehouse warehouse = seedWarehouse(ownerCompany, "타사창고");
 
         Map<String, Object> body = new HashMap<>();
         body.put("name", "변경시도");
-        body.put("storageTypeId", storageType.getId());
 
         mockMvc.perform(post("/api/warehouse/" + warehouse.getId() + "/update")
                         .header("Authorization", "Bearer " + token)
@@ -251,8 +229,7 @@ class WarehouseApiIntegrationTest extends IntegrationTestSupport {
     @DisplayName("담당자가 배정된 창고는 비활성화할 수 없다")
     void delete_withAssignedStaff_rejected() throws Exception {
         Company company = seedCompany("담당자배정기업", "121-21-21212");
-        CommonCode storageType = seedStorageType("WH-STORE7");
-        Warehouse warehouse = seedWarehouse(company, storageType, "담당자있는창고");
+        Warehouse warehouse = seedWarehouse(company, "담당자있는창고");
         seedUser(company, null, "wh-delete-admin@test.com", UserRole.COMPANY_ADMIN);
         seedUser(company, warehouse, "wh-delete-manager@test.com", UserRole.WAREHOUSE_MANAGER);
         String token = login("wh-delete-admin@test.com");
@@ -269,8 +246,7 @@ class WarehouseApiIntegrationTest extends IntegrationTestSupport {
     @DisplayName("담당자가 없는 창고는 비활성화하면 소프트 삭제된다")
     void delete_withoutAssignedStaff_softDeletes() throws Exception {
         Company company = seedCompany("담당자없음기업", "131-31-31313");
-        CommonCode storageType = seedStorageType("WH-STORE8");
-        Warehouse warehouse = seedWarehouse(company, storageType, "담당자없는창고");
+        Warehouse warehouse = seedWarehouse(company, "담당자없는창고");
         seedUser(company, null, "wh-delete-admin2@test.com", UserRole.COMPANY_ADMIN);
         String token = login("wh-delete-admin2@test.com");
 

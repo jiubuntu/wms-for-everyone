@@ -29,7 +29,7 @@ class WarehouseValidatorTest {
 
     private Warehouse warehouseWithId(Long id) {
         Company company = new Company("테스트기업", "123-45-67890", CompanyStatus.ACTIVE);
-        Warehouse warehouse = new Warehouse(company, "본사창고", null, null);
+        Warehouse warehouse = new Warehouse(company, "본사창고", null);
         ReflectionTestUtils.setField(warehouse, "id", id);
         return warehouse;
     }

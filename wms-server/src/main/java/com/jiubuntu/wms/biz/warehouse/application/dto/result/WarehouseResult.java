@@ -12,7 +12,6 @@ public class WarehouseResult {
     private final Long id;
     private final Long companyId;
     private final String name;
-    private final Long storageTypeId;
     private final String address;
     private final boolean active;
     private final LocalDateTime createdAt;

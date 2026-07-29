@@ -10,7 +10,6 @@ public class WarehouseUpdateCommand {
     private final Long id;
     private final Long expectedCompanyId;
     private final String name;
-    private final Long storageTypeId;
     private final String address;
     private final Long updatedBy;
 

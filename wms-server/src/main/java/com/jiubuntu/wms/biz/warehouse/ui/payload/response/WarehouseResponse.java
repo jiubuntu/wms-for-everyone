@@ -12,18 +12,16 @@ public class WarehouseResponse {
     private final Long id;
     private final Long companyId;
     private final String name;
-    private final Long storageTypeId;
     private final String address;
     private final Long locationCount;
     private final boolean active;
     private final LocalDateTime createdAt;
 
-    private WarehouseResponse(Long id, Long companyId, String name, Long storageTypeId, String address,
+    private WarehouseResponse(Long id, Long companyId, String name, String address,
                                Long locationCount, boolean active, LocalDateTime createdAt) {
         this.id = id;
         this.companyId = companyId;
         this.name = name;
-        this.storageTypeId = storageTypeId;
         this.address = address;
         this.locationCount = locationCount;
         this.active = active;
@@ -35,7 +33,6 @@ public class WarehouseResponse {
                 result.getId(),
                 result.getCompanyId(),
                 result.getName(),
-                result.getStorageTypeId(),
                 result.getAddress(),
                 locationCount,
                 result.isActive(),
@@ -52,7 +49,6 @@ public class WarehouseResponse {
                 warehouse.getId(),
                 warehouse.getCompany() != null ? warehouse.getCompany().getId() : null,
                 warehouse.getName(),
-                warehouse.getStorageType() != null ? warehouse.getStorageType().getId() : null,
                 warehouse.getAddress(),
                 null,
                 warehouse.isActive(),
