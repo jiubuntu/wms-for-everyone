@@ -17,6 +17,7 @@ public class JwtProvider {
     private static final String CLAIM_COMPANY_ID = "companyId";
     private static final String CLAIM_ROLE = "role";
     private static final String CLAIM_WAREHOUSE_ID = "warehouseId";
+    private static final String CLAIM_MUST_CHANGE_PASSWORD = "mustChangePassword";
 
     private final SecretKey secretKey;
     private final long accessTokenExpiration;
@@ -38,6 +39,7 @@ public class JwtProvider {
                 .claim(CLAIM_COMPANY_ID, principal.getCompanyId())
                 .claim(CLAIM_ROLE, principal.getRole().name())
                 .claim(CLAIM_WAREHOUSE_ID, principal.getWarehouseId())
+                .claim(CLAIM_MUST_CHANGE_PASSWORD, principal.isMustChangePassword())
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(secretKey)
@@ -55,8 +57,9 @@ public class JwtProvider {
         Long companyId = claims.get(CLAIM_COMPANY_ID, Long.class);
         UserRole role = UserRole.valueOf(claims.get(CLAIM_ROLE, String.class));
         Long warehouseId = claims.get(CLAIM_WAREHOUSE_ID, Long.class);
+        boolean mustChangePassword = Boolean.TRUE.equals(claims.get(CLAIM_MUST_CHANGE_PASSWORD, Boolean.class));
 
-        return new AuthPrincipal(userId, companyId, role, warehouseId);
+        return new AuthPrincipal(userId, companyId, role, warehouseId, mustChangePassword);
     }
 
 }

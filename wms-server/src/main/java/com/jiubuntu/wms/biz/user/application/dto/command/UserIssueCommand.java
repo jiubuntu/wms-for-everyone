@@ -8,17 +8,15 @@ public class UserIssueCommand {
 
     private final Long issuerUserId;
     private final String email;
-    private final String password;
     private final String name;
     private final String phone;
     private final UserRole role;
     private final Long warehouseId;
 
-    public UserIssueCommand(Long issuerUserId, String email, String password, String name, String phone,
+    public UserIssueCommand(Long issuerUserId, String email, String name, String phone,
                              UserRole role, Long warehouseId) {
         this.issuerUserId = issuerUserId;
         this.email = email;
-        this.password = password;
         this.name = name;
         this.phone = phone;
         this.role = role;

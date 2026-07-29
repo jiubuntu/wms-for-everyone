@@ -11,17 +11,21 @@ public class AuthLoginResponse {
     private final String email;
     private final String name;
     private final String role;
+    private final boolean mustChangePassword;
 
-    private AuthLoginResponse(String accessToken, Long userId, String email, String name, String role) {
+    private AuthLoginResponse(String accessToken, Long userId, String email, String name, String role,
+                               boolean mustChangePassword) {
         this.accessToken = accessToken;
         this.userId = userId;
         this.email = email;
         this.name = name;
         this.role = role;
+        this.mustChangePassword = mustChangePassword;
     }
 
     public static AuthLoginResponse of(String accessToken, User user) {
-        return new AuthLoginResponse(accessToken, user.getId(), user.getEmail(), user.getName(), user.getRole().name());
+        return new AuthLoginResponse(
+                accessToken, user.getId(), user.getEmail(), user.getName(), user.getRole().name(), user.isMustChangePassword());
     }
 
 }

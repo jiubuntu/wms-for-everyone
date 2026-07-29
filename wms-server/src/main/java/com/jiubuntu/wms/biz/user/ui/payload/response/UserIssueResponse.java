@@ -14,24 +14,28 @@ public class UserIssueResponse {
     private final UserRole role;
     private final UserStatus status;
     private final Long warehouseId;
+    private final String temporaryPassword;
 
-    private UserIssueResponse(Long id, String email, String name, UserRole role, UserStatus status, Long warehouseId) {
+    private UserIssueResponse(Long id, String email, String name, UserRole role, UserStatus status, Long warehouseId,
+                               String temporaryPassword) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.role = role;
         this.status = status;
         this.warehouseId = warehouseId;
+        this.temporaryPassword = temporaryPassword;
     }
 
-    public static UserIssueResponse from(User user) {
+    public static UserIssueResponse from(User user, String temporaryPassword) {
         return new UserIssueResponse(
                 user.getId(),
                 user.getEmail(),
                 user.getName(),
                 user.getRole(),
                 user.getStatus(),
-                user.getWarehouse() != null ? user.getWarehouse().getId() : null
+                user.getWarehouse() != null ? user.getWarehouse().getId() : null,
+                temporaryPassword
         );
     }
 
