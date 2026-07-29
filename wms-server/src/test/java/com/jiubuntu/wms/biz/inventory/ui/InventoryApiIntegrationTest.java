@@ -84,7 +84,7 @@ class InventoryApiIntegrationTest extends IntegrationTestSupport {
 
     private User seedUser(Company company, Warehouse warehouse, String email, UserRole role) {
         return userRepository.save(new User(company, warehouse, email, passwordEncoder.encode("password1!"),
-                "홍길동", "010-0000-0000", role, UserStatus.ACTIVE));
+                "홍길동", "010-0000-0000", role, UserStatus.ACTIVE, false));
     }
 
     private String login(String email) throws Exception {

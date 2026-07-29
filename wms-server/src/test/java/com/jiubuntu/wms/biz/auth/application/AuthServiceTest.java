@@ -72,7 +72,7 @@ class AuthServiceTest {
     private User activeUser() {
         Company company = new Company("테스트기업", "123-45-67890", CompanyStatus.ACTIVE);
         return new User(company, null, "user@test.com", "encoded-password",
-                "홍길동", "010-0000-0000", UserRole.COMPANY_ADMIN, UserStatus.ACTIVE);
+                "홍길동", "010-0000-0000", UserRole.COMPANY_ADMIN, UserStatus.ACTIVE, false);
     }
 
     @Test
