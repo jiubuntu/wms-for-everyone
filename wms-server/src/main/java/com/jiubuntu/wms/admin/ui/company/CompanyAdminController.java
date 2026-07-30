@@ -34,10 +34,11 @@ public class CompanyAdminController {
     @GetMapping("/list")
     public ResponseEntity<ApiCommonResponse<ApiPageResponse<CompanyAdminListItemResponse>>> list(
             AuthPrincipal principal,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = PageConstants.DEFAULT_LIMIT) int limit
     ) {
-        Page<CompanyResult> pendingList = companyAdminService.findPendingList(PageRequest.of(page - 1, limit));
+        Page<CompanyResult> pendingList = companyAdminService.findPendingList(keyword, PageRequest.of(page - 1, limit));
         Page<CompanyAdminListItemResponse> mapped = pendingList.map(CompanyAdminListItemResponse::from);
 
         ApiCommonResponse<ApiPageResponse<CompanyAdminListItemResponse>> body = ApiCommonResponse.success(ApiPageResponse.of(mapped));

@@ -13,6 +13,6 @@ public interface CustomCompanyRepository {
 
     Optional<Company> findActiveById(Long id);
 
-    Page<CompanyResult> findPendingList(Pageable pageable);
+    Page<CompanyResult> findPendingList(String keyword, Pageable pageable);
 
 }
