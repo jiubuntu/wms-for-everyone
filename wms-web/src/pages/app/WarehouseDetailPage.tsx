@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useParams } from "react-router-dom"
 import { Plus } from "lucide-react"
 import { PageHeader } from "@/components/common/PageHeader"
@@ -32,21 +32,20 @@ export function WarehouseDetailPage() {
   const [editTarget, setEditTarget] = useState<LocationItem | null>(null)
   const [isEditOpen, setIsEditOpen] = useState(false)
 
+  useEffect(() => {
+    setPage(1)
+  }, [search])
+
   const { data: warehouse, isLoading: isWarehouseLoading, isError: isWarehouseError } =
     useWarehouse(warehouseId)
   const { data: storageTypes } = useAllCommonCodes("company", "STORAGE_TYPE")
-  const { data, isLoading, isError } = useLocations(warehouseId, page, PAGE_SIZE)
+  const { data, isLoading, isError } = useLocations(warehouseId, search, page, PAGE_SIZE)
+  const items = data?.content ?? []
 
   const storageTypeNameById = useMemo(
     () => new Map(storageTypes?.map((s) => [s.id, s.name]) ?? []),
     [storageTypes]
   )
-
-  const filteredItems = useMemo(() => {
-    const keyword = search.trim().toLowerCase()
-    if (!keyword) return data?.content ?? []
-    return (data?.content ?? []).filter((item) => item.code.toLowerCase().includes(keyword))
-  }, [data, search])
 
   function handleEditLocation(item: LocationItem) {
     setEditTarget(item)
@@ -110,12 +109,12 @@ export function WarehouseDetailPage() {
         <CardContent className="p-0">
           <LocationTable
             warehouseId={warehouseId}
-            items={filteredItems}
+            items={items}
             storageTypeNameById={storageTypeNameById}
             onEdit={handleEditLocation}
           />
 
-          {!isLoading && !isError && filteredItems.length === 0 && (
+          {!isLoading && !isError && items.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">
               {search ? "검색 결과가 없습니다." : "등록된 위치가 없습니다."}
             </p>

@@ -16,12 +16,13 @@ import type {
 export function useCommonCodes(
   scope: CommonCodeScope,
   groupCode: CommonCodeGroup,
+  keyword: string,
   page: number,
   limit = 10
 ) {
   return useQuery({
-    queryKey: ["common-codes", scope, groupCode, page, limit],
-    queryFn: () => getCommonCodes(scope, groupCode, page, limit),
+    queryKey: ["common-codes", scope, groupCode, keyword, page, limit],
+    queryFn: () => getCommonCodes(scope, groupCode, keyword, page, limit),
   })
 }
 

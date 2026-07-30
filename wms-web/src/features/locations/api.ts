@@ -8,12 +8,13 @@ import type {
 
 export async function getLocations(
   warehouseId: number,
+  keyword: string,
   page: number,
   limit: number
 ): Promise<ApiPageResponse<LocationItem>> {
   const res = await api.get<ApiCommonResponse<ApiPageResponse<LocationItem>>>(
     `/warehouse/${warehouseId}/location/list`,
-    { params: { page, limit } }
+    { params: { keyword: keyword || undefined, page, limit } }
   )
   return res.data.data
 }

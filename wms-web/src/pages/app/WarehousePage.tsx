@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { Plus } from "lucide-react"
 import { PageHeader } from "@/components/common/PageHeader"
 import { SearchInput } from "@/components/common/SearchInput"
@@ -22,13 +22,12 @@ export function WarehousePage() {
   const [formTarget, setFormTarget] = useState<WarehouseItem | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
 
-  const { data, isLoading, isError } = useWarehouses(page, PAGE_SIZE)
+  useEffect(() => {
+    setPage(1)
+  }, [search])
 
-  const filteredItems = useMemo(() => {
-    const keyword = search.trim().toLowerCase()
-    if (!keyword) return data?.content ?? []
-    return (data?.content ?? []).filter((item) => item.name.toLowerCase().includes(keyword))
-  }, [data, search])
+  const { data, isLoading, isError } = useWarehouses(search, page, PAGE_SIZE)
+  const items = data?.content ?? []
 
   function handleCreate() {
     setFormTarget(null)
@@ -61,9 +60,9 @@ export function WarehousePage() {
 
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
-          <WarehouseTable items={filteredItems} canManage={canManage} onEdit={handleEdit} />
+          <WarehouseTable items={items} canManage={canManage} onEdit={handleEdit} />
 
-          {!isLoading && !isError && filteredItems.length === 0 && (
+          {!isLoading && !isError && items.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">
               {search ? "검색 결과가 없습니다." : "등록된 창고가 없습니다."}
             </p>

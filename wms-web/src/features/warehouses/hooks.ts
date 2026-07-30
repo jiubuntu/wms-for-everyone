@@ -9,10 +9,10 @@ import {
 } from "@/features/warehouses/api"
 import type { WarehouseCreateInput, WarehouseUpdateInput } from "@/features/warehouses/types"
 
-export function useWarehouses(page: number, limit = 10) {
+export function useWarehouses(keyword: string, page: number, limit = 10) {
   return useQuery({
-    queryKey: ["warehouses", page, limit],
-    queryFn: () => getWarehouses(page, limit),
+    queryKey: ["warehouses", keyword, page, limit],
+    queryFn: () => getWarehouses(keyword, page, limit),
   })
 }
 

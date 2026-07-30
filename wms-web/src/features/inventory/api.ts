@@ -4,16 +4,18 @@ import type {
   AvailableLocationItem,
   InventoryAdjustInput,
   InventoryHistoryItem,
+  InventoryHistoryTargetType,
   InventoryItem,
 } from "@/features/inventory/types"
 
 export async function getInventory(
   warehouseId: number | null,
+  keyword: string,
   page: number,
   limit: number
 ): Promise<ApiPageResponse<InventoryItem>> {
   const res = await api.get<ApiCommonResponse<ApiPageResponse<InventoryItem>>>("/inventory/list", {
-    params: { warehouseId: warehouseId ?? undefined, page, limit },
+    params: { warehouseId: warehouseId ?? undefined, keyword: keyword || undefined, page, limit },
   })
   return res.data.data
 }
@@ -42,12 +44,14 @@ export async function getAvailableLocations(
 
 export async function getInventoryHistory(
   warehouseId: number | null,
+  keyword: string,
+  targetType: InventoryHistoryTargetType | undefined,
   page: number,
   limit: number
 ): Promise<ApiPageResponse<InventoryHistoryItem>> {
   const res = await api.get<ApiCommonResponse<ApiPageResponse<InventoryHistoryItem>>>(
     "/inventory/history",
-    { params: { warehouseId: warehouseId ?? undefined, page, limit } }
+    { params: { warehouseId: warehouseId ?? undefined, keyword: keyword || undefined, targetType, page, limit } }
   )
   return res.data.data
 }

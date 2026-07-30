@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { PageHeader } from "@/components/common/PageHeader"
 import { SearchInput } from "@/components/common/SearchInput"
 import { DataTablePagination } from "@/components/common/DataTablePagination"
@@ -28,20 +28,18 @@ export function InventoryHistoryPage() {
     ALL_TYPES
   )
 
-  const { data, isLoading, isError } = useInventoryHistory(warehouseId, page, PAGE_SIZE)
+  useEffect(() => {
+    setPage(1)
+  }, [search, targetType, warehouseId])
 
-  const filteredItems = useMemo(() => {
-    const keyword = search.trim().toLowerCase()
-    return (data?.content ?? []).filter((item) => {
-      const matchesKeyword =
-        !keyword ||
-        item.productName.toLowerCase().includes(keyword) ||
-        item.productSkuCode.toLowerCase().includes(keyword) ||
-        item.locationCode.toLowerCase().includes(keyword)
-      const matchesType = targetType === ALL_TYPES || item.targetType === targetType
-      return matchesKeyword && matchesType
-    })
-  }, [data, search, targetType])
+  const { data, isLoading, isError } = useInventoryHistory(
+    warehouseId,
+    search,
+    targetType === ALL_TYPES ? undefined : targetType,
+    page,
+    PAGE_SIZE
+  )
+  const items = data?.content ?? []
 
   return (
     <div className="flex flex-col gap-4">
@@ -70,9 +68,9 @@ export function InventoryHistoryPage() {
 
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
-          <InventoryHistoryTable items={filteredItems} />
+          <InventoryHistoryTable items={items} />
 
-          {!isLoading && !isError && filteredItems.length === 0 && (
+          {!isLoading && !isError && items.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">
               {search || targetType !== ALL_TYPES ? "검색 결과가 없습니다." : "재고 변동 이력이 없습니다."}
             </p>

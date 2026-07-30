@@ -2,9 +2,13 @@ import { api } from "@/lib/axios"
 import type { ApiCommonResponse, ApiPageResponse } from "@/lib/apiTypes"
 import type { UserCreateInput, UserIssueResult, UserListItem } from "@/features/users/types"
 
-export async function getUsers(page: number, limit: number): Promise<ApiPageResponse<UserListItem>> {
+export async function getUsers(
+  keyword: string,
+  page: number,
+  limit: number
+): Promise<ApiPageResponse<UserListItem>> {
   const res = await api.get<ApiCommonResponse<ApiPageResponse<UserListItem>>>("/user/list", {
-    params: { page, limit },
+    params: { keyword: keyword || undefined, page, limit },
   })
   return res.data.data
 }

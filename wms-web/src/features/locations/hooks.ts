@@ -8,10 +8,10 @@ import {
 } from "@/features/locations/api"
 import type { LocationBulkCreateInput, LocationUpdateInput } from "@/features/locations/types"
 
-export function useLocations(warehouseId: number, page: number, limit = 10) {
+export function useLocations(warehouseId: number, keyword: string, page: number, limit = 10) {
   return useQuery({
-    queryKey: ["locations", warehouseId, page, limit],
-    queryFn: () => getLocations(warehouseId, page, limit),
+    queryKey: ["locations", warehouseId, keyword, page, limit],
+    queryFn: () => getLocations(warehouseId, keyword, page, limit),
     enabled: Number.isFinite(warehouseId),
   })
 }

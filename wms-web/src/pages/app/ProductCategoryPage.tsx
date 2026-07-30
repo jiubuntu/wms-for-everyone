@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { Plus } from "lucide-react"
 import { PageHeader } from "@/components/common/PageHeader"
 import { SearchInput } from "@/components/common/SearchInput"
@@ -18,16 +18,12 @@ export function ProductCategoryPage() {
   const [formTarget, setFormTarget] = useState<CommonCodeItem | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
 
-  const { data, isLoading, isError } = useCommonCodes("company", "PRODUCT_CATEGORY", page, PAGE_SIZE)
+  useEffect(() => {
+    setPage(1)
+  }, [search])
 
-  const filteredItems = useMemo(() => {
-    const keyword = search.trim().toLowerCase()
-    if (!keyword) return data?.content ?? []
-    return (data?.content ?? []).filter(
-      (item) =>
-        item.code.toLowerCase().includes(keyword) || item.name.toLowerCase().includes(keyword)
-    )
-  }, [data, search])
+  const { data, isLoading, isError } = useCommonCodes("company", "PRODUCT_CATEGORY", search, page, PAGE_SIZE)
+  const items = data?.content ?? []
 
   function handleCreate() {
     setFormTarget(null)
@@ -63,12 +59,12 @@ export function ProductCategoryPage() {
         <CardContent className="p-0">
           <CommonCodeTable
             scope="company"
-            items={filteredItems}
+            items={items}
             onEdit={handleEdit}
             showScopeColumn
           />
 
-          {!isLoading && !isError && filteredItems.length === 0 && (
+          {!isLoading && !isError && items.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">
               {search ? "검색 결과가 없습니다." : "등록된 카테고리가 없습니다."}
             </p>

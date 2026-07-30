@@ -8,10 +8,10 @@ import {
 } from "@/features/products/api"
 import type { ProductCreateInput, ProductUpdateInput } from "@/features/products/types"
 
-export function useProducts(page: number, limit = 10) {
+export function useProducts(keyword: string, page: number, limit = 10) {
   return useQuery({
-    queryKey: ["products", page, limit],
-    queryFn: () => getProducts(page, limit),
+    queryKey: ["products", keyword, page, limit],
+    queryFn: () => getProducts(keyword, page, limit),
   })
 }
 
