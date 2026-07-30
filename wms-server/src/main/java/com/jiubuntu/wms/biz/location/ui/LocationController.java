@@ -60,12 +60,13 @@ public class LocationController {
     public ResponseEntity<ApiCommonResponse<ApiPageResponse<LocationResponse>>> list(
             AuthPrincipal principal,
             @PathVariable Long warehouseId,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = PageConstants.DEFAULT_LIMIT) int limit
     ) {
         Page<LocationResult> results = locationService.list(
                 warehouseId, principal.getCompanyId(), principal.getRole(), principal.getWarehouseId(),
-                PageRequest.of(page - 1, limit));
+                keyword, PageRequest.of(page - 1, limit));
         Page<LocationResponse> mapped = results.map(LocationResponse::from);
 
         ApiCommonResponse<ApiPageResponse<LocationResponse>> body = ApiCommonResponse.success(ApiPageResponse.of(mapped));

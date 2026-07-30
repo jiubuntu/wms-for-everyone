@@ -48,10 +48,10 @@ public class WarehouseService {
         return warehouse;
     }
 
-    public Page<WarehouseResult> list(Long companyId, UserRole role, Long principalWarehouseId, Pageable pageable) {
+    public Page<WarehouseResult> list(Long companyId, UserRole role, Long principalWarehouseId, String keyword, Pageable pageable) {
         Page<Warehouse> warehouses = role == UserRole.WAREHOUSE_MANAGER
-                ? warehouseRepository.findActiveByCompanyAndId(companyId, principalWarehouseId, pageable)
-                : warehouseRepository.findActiveByCompany(companyId, pageable);
+                ? warehouseRepository.findActiveByCompanyAndId(companyId, principalWarehouseId, keyword, pageable)
+                : warehouseRepository.findActiveByCompany(companyId, keyword, pageable);
         return warehouses.map(this::toResult);
     }
 

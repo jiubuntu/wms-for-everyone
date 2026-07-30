@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,10 +30,10 @@ public class CustomWarehouseRepositoryImpl implements CustomWarehouseRepository 
     }
 
     @Override
-    public Page<Warehouse> findActiveByCompany(Long companyId, Pageable pageable) {
+    public Page<Warehouse> findActiveByCompany(Long companyId, String keyword, Pageable pageable) {
         List<Warehouse> content = queryFactory
                 .selectFrom(warehouse)
-                .where(warehouse.company.id.eq(companyId), activeEq())
+                .where(warehouse.company.id.eq(companyId), keywordMatches(keyword), activeEq())
                 .orderBy(warehouse.createdAt.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -41,21 +42,21 @@ public class CustomWarehouseRepositoryImpl implements CustomWarehouseRepository 
         Long total = queryFactory
                 .select(warehouse.count())
                 .from(warehouse)
-                .where(warehouse.company.id.eq(companyId), activeEq())
+                .where(warehouse.company.id.eq(companyId), keywordMatches(keyword), activeEq())
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0L);
     }
 
     @Override
-    public Page<Warehouse> findActiveByCompanyAndId(Long companyId, Long id, Pageable pageable) {
+    public Page<Warehouse> findActiveByCompanyAndId(Long companyId, Long id, String keyword, Pageable pageable) {
         if (id == null) {
             return new PageImpl<>(List.of(), pageable, 0L);
         }
 
         List<Warehouse> content = queryFactory
                 .selectFrom(warehouse)
-                .where(warehouse.company.id.eq(companyId), warehouse.id.eq(id), activeEq())
+                .where(warehouse.company.id.eq(companyId), warehouse.id.eq(id), keywordMatches(keyword), activeEq())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -63,10 +64,14 @@ public class CustomWarehouseRepositoryImpl implements CustomWarehouseRepository 
         Long total = queryFactory
                 .select(warehouse.count())
                 .from(warehouse)
-                .where(warehouse.company.id.eq(companyId), warehouse.id.eq(id), activeEq())
+                .where(warehouse.company.id.eq(companyId), warehouse.id.eq(id), keywordMatches(keyword), activeEq())
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0L);
+    }
+
+    private BooleanExpression keywordMatches(String keyword) {
+        return StringUtils.hasText(keyword) ? warehouse.name.containsIgnoreCase(keyword) : null;
     }
 
     @Override

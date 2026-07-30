@@ -11,9 +11,9 @@ public interface CustomWarehouseRepository {
 
     Optional<Warehouse> findActiveById(Long id);
 
-    Page<Warehouse> findActiveByCompany(Long companyId, Pageable pageable);
+    Page<Warehouse> findActiveByCompany(Long companyId, String keyword, Pageable pageable);
 
-    Page<Warehouse> findActiveByCompanyAndId(Long companyId, Long id, Pageable pageable);
+    Page<Warehouse> findActiveByCompanyAndId(Long companyId, Long id, String keyword, Pageable pageable);
 
     List<Warehouse> findAllActiveByCompany(Long companyId);
 

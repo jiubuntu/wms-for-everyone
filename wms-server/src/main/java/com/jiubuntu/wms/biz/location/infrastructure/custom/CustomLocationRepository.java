@@ -13,7 +13,7 @@ public interface CustomLocationRepository {
 
     Optional<Location> findActiveById(Long id);
 
-    Page<Location> findActiveByWarehouse(Long warehouseId, Pageable pageable);
+    Page<Location> findActiveByWarehouse(Long warehouseId, String keyword, Pageable pageable);
 
     List<Location> findAllActiveByWarehouse(Long warehouseId);
 

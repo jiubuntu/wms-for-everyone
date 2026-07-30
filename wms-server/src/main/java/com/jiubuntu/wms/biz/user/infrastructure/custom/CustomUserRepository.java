@@ -21,6 +21,6 @@ public interface CustomUserRepository {
 
     boolean existsActiveByWarehouseId(Long warehouseId);
 
-    Page<User> findActiveStaffByCompany(Long companyId, Long warehouseId, Pageable pageable);
+    Page<User> findActiveStaffByCompany(Long companyId, Long warehouseId, String keyword, Pageable pageable);
 
 }

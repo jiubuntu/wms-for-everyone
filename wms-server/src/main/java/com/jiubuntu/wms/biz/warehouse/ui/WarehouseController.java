@@ -46,11 +46,12 @@ public class WarehouseController {
     @GetMapping("/list")
     public ResponseEntity<ApiCommonResponse<ApiPageResponse<WarehouseResponse>>> list(
             AuthPrincipal principal,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = PageConstants.DEFAULT_LIMIT) int limit
     ) {
         Page<WarehouseResult> results = warehouseService.list(
-                principal.getCompanyId(), principal.getRole(), principal.getWarehouseId(), PageRequest.of(page - 1, limit));
+                principal.getCompanyId(), principal.getRole(), principal.getWarehouseId(), keyword, PageRequest.of(page - 1, limit));
 
         List<Long> warehouseIds = results.getContent().stream().map(WarehouseResult::getId).toList();
         Map<Long, Long> locationCounts = locationService.countActiveByWarehouseIds(warehouseIds);
