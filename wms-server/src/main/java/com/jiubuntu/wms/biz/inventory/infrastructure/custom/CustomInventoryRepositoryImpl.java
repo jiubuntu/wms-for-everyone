@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -85,7 +86,7 @@ public class CustomInventoryRepositoryImpl implements CustomInventoryRepository 
     }
 
     @Override
-    public Page<InventoryResult> findActiveByWarehouse(Long warehouseId, Pageable pageable) {
+    public Page<InventoryResult> findActiveByWarehouse(Long warehouseId, String keyword, Pageable pageable) {
         List<InventoryResult> content = queryFactory
                 .select(Projections.constructor(
                         InventoryResult.class,
@@ -107,7 +108,7 @@ public class CustomInventoryRepositoryImpl implements CustomInventoryRepository 
                 .join(inventory.location, location)
                 .join(inventory.product, product)
                 .join(product.baseUnit, baseUnit)
-                .where(location.warehouse.id.eq(warehouseId), activeEq())
+                .where(location.warehouse.id.eq(warehouseId), keywordMatches(keyword), activeEq())
                 .orderBy(location.code.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -117,10 +118,20 @@ public class CustomInventoryRepositoryImpl implements CustomInventoryRepository 
                 .select(inventory.count())
                 .from(inventory)
                 .join(inventory.location, location)
-                .where(location.warehouse.id.eq(warehouseId), activeEq())
+                .join(inventory.product, product)
+                .where(location.warehouse.id.eq(warehouseId), keywordMatches(keyword), activeEq())
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0L);
+    }
+
+    private BooleanExpression keywordMatches(String keyword) {
+        if (!StringUtils.hasText(keyword)) {
+            return null;
+        }
+        return product.name.containsIgnoreCase(keyword)
+                .or(product.skuCode.containsIgnoreCase(keyword))
+                .or(location.code.containsIgnoreCase(keyword));
     }
 
     @Override
