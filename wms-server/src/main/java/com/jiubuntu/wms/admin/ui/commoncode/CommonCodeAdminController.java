@@ -42,10 +42,11 @@ public class CommonCodeAdminController {
     public ResponseEntity<ApiCommonResponse<ApiPageResponse<CommonCodeResponse>>> list(
             AuthPrincipal principal,
             @RequestParam CommonCodeGroup groupCode,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = PageConstants.DEFAULT_LIMIT) int limit
     ) {
-        Page<CommonCodeResult> results = commonCodeAdminService.list(groupCode, PageRequest.of(page - 1, limit));
+        Page<CommonCodeResult> results = commonCodeAdminService.list(groupCode, keyword, PageRequest.of(page - 1, limit));
         Page<CommonCodeResponse> mapped = results.map(CommonCodeResponse::from);
 
         ApiCommonResponse<ApiPageResponse<CommonCodeResponse>> body = ApiCommonResponse.success(ApiPageResponse.of(mapped));

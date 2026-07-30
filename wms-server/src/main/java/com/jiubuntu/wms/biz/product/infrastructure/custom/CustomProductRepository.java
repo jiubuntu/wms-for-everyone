@@ -13,7 +13,7 @@ public interface CustomProductRepository {
 
     Optional<Product> findActiveById(Long id);
 
-    Page<Product> findActiveByCompany(Long companyId, Pageable pageable);
+    Page<Product> findActiveByCompany(Long companyId, String keyword, Pageable pageable);
 
     List<Product> findAllActiveByCompany(Long companyId);
 

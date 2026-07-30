@@ -28,8 +28,8 @@ public class ProductUnitService {
     private final ProductUnitValidator productUnitValidator;
     private final CompanyService companyService;
 
-    public Page<ProductUnitResult> list(Long companyId, Pageable pageable) {
-        return productUnitRepository.findActiveByCompany(companyId, pageable)
+    public Page<ProductUnitResult> list(Long companyId, String keyword, Pageable pageable) {
+        return productUnitRepository.findActiveByCompany(companyId, keyword, pageable)
                 .map(this::toResult);
     }
 

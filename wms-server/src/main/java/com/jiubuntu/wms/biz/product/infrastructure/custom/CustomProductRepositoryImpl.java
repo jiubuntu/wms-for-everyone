@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,10 +40,10 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
     }
 
     @Override
-    public Page<Product> findActiveByCompany(Long companyId, Pageable pageable) {
+    public Page<Product> findActiveByCompany(Long companyId, String keyword, Pageable pageable) {
         List<Product> content = queryFactory
                 .selectFrom(product)
-                .where(product.company.id.eq(companyId), activeEq())
+                .where(product.company.id.eq(companyId), keywordMatches(keyword), activeEq())
                 .orderBy(product.createdAt.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -51,10 +52,17 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
         Long total = queryFactory
                 .select(product.count())
                 .from(product)
-                .where(product.company.id.eq(companyId), activeEq())
+                .where(product.company.id.eq(companyId), keywordMatches(keyword), activeEq())
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0L);
+    }
+
+    private BooleanExpression keywordMatches(String keyword) {
+        if (!StringUtils.hasText(keyword)) {
+            return null;
+        }
+        return product.skuCode.containsIgnoreCase(keyword).or(product.name.containsIgnoreCase(keyword));
     }
 
     @Override

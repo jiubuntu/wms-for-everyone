@@ -22,8 +22,8 @@ public class CommonCodeAdminService {
 
     private final CommonCodeService commonCodeService;
 
-    public Page<CommonCodeResult> list(CommonCodeGroup groupCode, Pageable pageable) {
-        return commonCodeService.list(groupCode, null, pageable);
+    public Page<CommonCodeResult> list(CommonCodeGroup groupCode, String keyword, Pageable pageable) {
+        return commonCodeService.list(groupCode, null, keyword, pageable);
     }
 
     public List<CommonCodeResult> listAll(CommonCodeGroup groupCode) {

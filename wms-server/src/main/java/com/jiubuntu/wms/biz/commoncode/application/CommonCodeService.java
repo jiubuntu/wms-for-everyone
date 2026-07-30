@@ -30,8 +30,8 @@ public class CommonCodeService {
     private final CommonCodeValidator commonCodeValidator;
     private final CompanyService companyService;
 
-    public Page<CommonCodeResult> list(CommonCodeGroup groupCode, Long companyId, Pageable pageable) {
-        return commonCodeRepository.findActiveByGroupVisibleTo(groupCode, companyId, pageable)
+    public Page<CommonCodeResult> list(CommonCodeGroup groupCode, Long companyId, String keyword, Pageable pageable) {
+        return commonCodeRepository.findActiveByGroupVisibleTo(groupCode, companyId, keyword, pageable)
                 .map(this::toResult);
     }
 

@@ -14,7 +14,7 @@ public interface CustomCommonCodeRepository {
 
     Optional<CommonCode> findActiveById(Long id);
 
-    Page<CommonCode> findActiveByGroupVisibleTo(CommonCodeGroup groupCode, Long companyId, Pageable pageable);
+    Page<CommonCode> findActiveByGroupVisibleTo(CommonCodeGroup groupCode, Long companyId, String keyword, Pageable pageable);
 
     List<CommonCode> findActiveByGroupVisibleTo(CommonCodeGroup groupCode, Long companyId);
 
