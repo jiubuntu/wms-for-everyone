@@ -2,10 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createUser, getUsers, withdrawUser } from "@/features/users/api"
 import type { UserCreateInput } from "@/features/users/types"
 
-export function useUsers(page: number, limit = 10) {
+export function useUsers(keyword: string, page: number, limit = 10) {
   return useQuery({
-    queryKey: ["users", page, limit],
-    queryFn: () => getUsers(page, limit),
+    queryKey: ["users", keyword, page, limit],
+    queryFn: () => getUsers(keyword, page, limit),
   })
 }
 

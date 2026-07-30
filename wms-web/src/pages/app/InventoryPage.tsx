@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { PageHeader } from "@/components/common/PageHeader"
 import { SearchInput } from "@/components/common/SearchInput"
 import { DataTablePagination } from "@/components/common/DataTablePagination"
@@ -20,19 +20,13 @@ export function InventoryPage() {
   const [adjustTarget, setAdjustTarget] = useState<InventoryItem | null>(null)
   const [isAdjustOpen, setIsAdjustOpen] = useState(false)
 
-  const { data, isLoading, isError } = useInventory(warehouseId, page, PAGE_SIZE)
-  const flashingIds = useFlashingRows(data?.content ?? [], `${warehouseId ?? "none"}-${page}`)
+  useEffect(() => {
+    setPage(1)
+  }, [search, warehouseId])
 
-  const filteredItems = useMemo(() => {
-    const keyword = search.trim().toLowerCase()
-    if (!keyword) return data?.content ?? []
-    return (data?.content ?? []).filter(
-      (item) =>
-        item.productName.toLowerCase().includes(keyword) ||
-        item.productSkuCode.toLowerCase().includes(keyword) ||
-        item.locationCode.toLowerCase().includes(keyword)
-    )
-  }, [data, search])
+  const { data, isLoading, isError } = useInventory(warehouseId, search, page, PAGE_SIZE)
+  const flashingIds = useFlashingRows(data?.content ?? [], `${warehouseId ?? "none"}-${page}`)
+  const items = data?.content ?? []
 
   function handleAdjust(item: InventoryItem) {
     setAdjustTarget(item)
@@ -51,9 +45,9 @@ export function InventoryPage() {
 
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
-          <InventoryTable items={filteredItems} onAdjust={handleAdjust} flashingIds={flashingIds} />
+          <InventoryTable items={items} onAdjust={handleAdjust} flashingIds={flashingIds} />
 
-          {!isLoading && !isError && filteredItems.length === 0 && (
+          {!isLoading && !isError && items.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">
               {search ? "검색 결과가 없습니다." : "보유 중인 재고가 없습니다."}
             </p>

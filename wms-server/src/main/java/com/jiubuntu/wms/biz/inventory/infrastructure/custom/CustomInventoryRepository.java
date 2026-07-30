@@ -22,7 +22,7 @@ public interface CustomInventoryRepository {
 
     Optional<InventoryResult> findResultById(Long id);
 
-    Page<InventoryResult> findActiveByWarehouse(Long warehouseId, Pageable pageable);
+    Page<InventoryResult> findActiveByWarehouse(Long warehouseId, String keyword, Pageable pageable);
 
     List<AvailableLocationResult> findAvailableByWarehouseAndProduct(Long warehouseId, Long productId);
 

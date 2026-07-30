@@ -5,6 +5,7 @@ import com.jiubuntu.wms.biz.inventory.application.dto.command.InventoryAdjustCom
 import com.jiubuntu.wms.biz.inventory.application.dto.result.AvailableLocationResult;
 import com.jiubuntu.wms.biz.inventory.application.dto.result.InventoryHistoryResult;
 import com.jiubuntu.wms.biz.inventory.application.dto.result.InventoryResult;
+import com.jiubuntu.wms.biz.inventory.domain.InventoryHistoryTargetType;
 import com.jiubuntu.wms.biz.inventory.ui.payload.request.InventoryAdjustRequest;
 import com.jiubuntu.wms.biz.inventory.ui.payload.response.AvailableLocationResponse;
 import com.jiubuntu.wms.biz.inventory.ui.payload.response.InventoryHistoryResponse;
@@ -43,11 +44,12 @@ public class InventoryController {
     public ResponseEntity<ApiCommonResponse<ApiPageResponse<InventoryResponse>>> list(
             AuthPrincipal principal,
             @RequestParam(required = false) Long warehouseId,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = PageConstants.DEFAULT_LIMIT) int limit
     ) {
         Page<InventoryResult> results = inventoryService.list(
-                warehouseId, principal.getCompanyId(), principal.getRole(), principal.getWarehouseId(),
+                warehouseId, principal.getCompanyId(), principal.getRole(), principal.getWarehouseId(), keyword,
                 PageRequest.of(page - 1, limit));
         Page<InventoryResponse> mapped = results.map(InventoryResponse::from);
 
@@ -88,12 +90,14 @@ public class InventoryController {
     public ResponseEntity<ApiCommonResponse<ApiPageResponse<InventoryHistoryResponse>>> history(
             AuthPrincipal principal,
             @RequestParam(required = false) Long warehouseId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) InventoryHistoryTargetType targetType,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = PageConstants.DEFAULT_LIMIT) int limit
     ) {
         Page<InventoryHistoryResult> results = inventoryService.getHistory(
                 warehouseId, principal.getCompanyId(), principal.getRole(), principal.getWarehouseId(),
-                PageRequest.of(page - 1, limit));
+                keyword, targetType, PageRequest.of(page - 1, limit));
         Page<InventoryHistoryResponse> mapped = results.map(InventoryHistoryResponse::from);
 
         ApiCommonResponse<ApiPageResponse<InventoryHistoryResponse>> body = ApiCommonResponse.success(ApiPageResponse.of(mapped));

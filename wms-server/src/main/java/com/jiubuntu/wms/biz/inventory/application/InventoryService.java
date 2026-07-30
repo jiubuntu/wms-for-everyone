@@ -41,10 +41,10 @@ public class InventoryService {
     private final WarehouseService warehouseService;
 
     public Page<InventoryResult> list(Long warehouseId, Long companyId, UserRole role, Long principalWarehouseId,
-                                       Pageable pageable) {
+                                       String keyword, Pageable pageable) {
         Long resolvedWarehouseId = resolveWarehouseId(warehouseId, role, principalWarehouseId);
         warehouseService.getAccessible(resolvedWarehouseId, companyId, role, principalWarehouseId);
-        return inventoryRepository.findActiveByWarehouse(resolvedWarehouseId, pageable);
+        return inventoryRepository.findActiveByWarehouse(resolvedWarehouseId, keyword, pageable);
     }
 
     public List<AvailableLocationResult> getAvailableLocations(Long warehouseId, Long productId, Long companyId,
@@ -77,10 +77,11 @@ public class InventoryService {
     }
 
     public Page<InventoryHistoryResult> getHistory(Long warehouseId, Long companyId, UserRole role,
-                                                    Long principalWarehouseId, Pageable pageable) {
+                                                    Long principalWarehouseId, String keyword,
+                                                    InventoryHistoryTargetType targetType, Pageable pageable) {
         Long resolvedWarehouseId = resolveWarehouseId(warehouseId, role, principalWarehouseId);
         warehouseService.getAccessible(resolvedWarehouseId, companyId, role, principalWarehouseId);
-        return inventoryHistoryRepository.findByWarehouse(resolvedWarehouseId, pageable);
+        return inventoryHistoryRepository.findByWarehouse(resolvedWarehouseId, keyword, targetType, pageable);
     }
 
     @Transactional

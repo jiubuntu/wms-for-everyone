@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Plus } from "lucide-react"
 import { PageHeader } from "@/components/common/PageHeader"
 import { SearchInput } from "@/components/common/SearchInput"
@@ -20,7 +20,12 @@ export function ProductPage() {
   const [formTarget, setFormTarget] = useState<ProductItem | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
 
-  const { data, isLoading, isError } = useProducts(page, PAGE_SIZE)
+  useEffect(() => {
+    setPage(1)
+  }, [search])
+
+  const { data, isLoading, isError } = useProducts(search, page, PAGE_SIZE)
+  const items = data?.content ?? []
   const { data: categories } = useAllCommonCodes("company", "PRODUCT_CATEGORY")
   const { data: storageTypes } = useAllCommonCodes("company", "STORAGE_TYPE")
   const { data: units } = useAllProductUnits()
@@ -34,15 +39,6 @@ export function ProductPage() {
     [storageTypes]
   )
   const unitNameById = useMemo(() => new Map(units?.map((u) => [u.id, u.name]) ?? []), [units])
-
-  const filteredItems = useMemo(() => {
-    const keyword = search.trim().toLowerCase()
-    if (!keyword) return data?.content ?? []
-    return (data?.content ?? []).filter(
-      (item) =>
-        item.skuCode.toLowerCase().includes(keyword) || item.name.toLowerCase().includes(keyword)
-    )
-  }, [data, search])
 
   function handleCreate() {
     setFormTarget(null)
@@ -74,14 +70,14 @@ export function ProductPage() {
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
           <ProductTable
-            items={filteredItems}
+            items={items}
             categoryNameById={categoryNameById}
             storageTypeNameById={storageTypeNameById}
             unitNameById={unitNameById}
             onEdit={handleEdit}
           />
 
-          {!isLoading && !isError && filteredItems.length === 0 && (
+          {!isLoading && !isError && items.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">
               {search ? "검색 결과가 없습니다." : "등록된 상품이 없습니다."}
             </p>

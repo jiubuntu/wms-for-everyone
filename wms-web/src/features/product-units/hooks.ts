@@ -11,10 +11,10 @@ import type {
   ProductUnitUpdateInput,
 } from "@/features/product-units/types"
 
-export function useProductUnits(page: number, limit = 10) {
+export function useProductUnits(keyword: string, page: number, limit = 10) {
   return useQuery({
-    queryKey: ["product-units", page, limit],
-    queryFn: () => getProductUnits(page, limit),
+    queryKey: ["product-units", keyword, page, limit],
+    queryFn: () => getProductUnits(keyword, page, limit),
   })
 }
 

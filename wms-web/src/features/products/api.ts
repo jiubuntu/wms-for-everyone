@@ -7,11 +7,12 @@ import type {
 } from "@/features/products/types"
 
 export async function getProducts(
+  keyword: string,
   page: number,
   limit: number
 ): Promise<ApiPageResponse<ProductItem>> {
   const res = await api.get<ApiCommonResponse<ApiPageResponse<ProductItem>>>("/product/list", {
-    params: { page, limit },
+    params: { keyword: keyword || undefined, page, limit },
   })
   return res.data.data
 }

@@ -15,12 +15,13 @@ function basePath(scope: CommonCodeScope): string {
 export async function getCommonCodes(
   scope: CommonCodeScope,
   groupCode: CommonCodeGroup,
+  keyword: string,
   page: number,
   limit: number
 ): Promise<ApiPageResponse<CommonCodeItem>> {
   const res = await api.get<ApiCommonResponse<ApiPageResponse<CommonCodeItem>>>(
     `${basePath(scope)}/list`,
-    { params: { groupCode, page, limit } }
+    { params: { groupCode, keyword: keyword || undefined, page, limit } }
   )
   return res.data.data
 }

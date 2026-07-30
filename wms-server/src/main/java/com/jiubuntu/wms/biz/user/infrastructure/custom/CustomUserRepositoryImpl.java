@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -79,12 +80,15 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
     }
 
     @Override
-    public Page<User> findActiveStaffByCompany(Long companyId, Long warehouseId, Pageable pageable) {
+    public Page<User> findActiveStaffByCompany(Long companyId, Long warehouseId, String keyword, Pageable pageable) {
         BooleanExpression condition = user.company.id.eq(companyId)
                 .and(user.role.in(UserRole.WAREHOUSE_MANAGER, UserRole.WORKER))
                 .and(activeEq());
         if (warehouseId != null) {
             condition = condition.and(user.warehouse.id.eq(warehouseId));
+        }
+        if (StringUtils.hasText(keyword)) {
+            condition = condition.and(user.name.containsIgnoreCase(keyword).or(user.email.containsIgnoreCase(keyword)));
         }
 
         List<User> content = queryFactory

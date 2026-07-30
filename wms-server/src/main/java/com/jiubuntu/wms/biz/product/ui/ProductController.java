@@ -54,10 +54,11 @@ public class ProductController {
     @GetMapping("/list")
     public ResponseEntity<ApiCommonResponse<ApiPageResponse<ProductResponse>>> list(
             AuthPrincipal principal,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = PageConstants.DEFAULT_LIMIT) int limit
     ) {
-        Page<ProductResult> results = productService.list(principal.getCompanyId(), PageRequest.of(page - 1, limit));
+        Page<ProductResult> results = productService.list(principal.getCompanyId(), keyword, PageRequest.of(page - 1, limit));
         Page<ProductResponse> mapped = results.map(ProductResponse::from);
 
         ApiCommonResponse<ApiPageResponse<ProductResponse>> body = ApiCommonResponse.success(ApiPageResponse.of(mapped));

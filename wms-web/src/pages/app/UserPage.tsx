@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { isAxiosError } from "axios"
 import { Plus } from "lucide-react"
 import { PageHeader } from "@/components/common/PageHeader"
@@ -21,7 +21,12 @@ export function UserPage() {
   const [isIssueOpen, setIsIssueOpen] = useState(false)
   const [error, setError] = useState("")
 
-  const { data, isLoading, isError } = useUsers(page, PAGE_SIZE)
+  useEffect(() => {
+    setPage(1)
+  }, [search])
+
+  const { data, isLoading, isError } = useUsers(search, page, PAGE_SIZE)
+  const items = data?.content ?? []
   const withdrawMutation = useWithdrawUser()
 
   // 창고관리자는 담당 창고 작업자만 탈퇴 가능 — 다른 창고관리자는 기업관리자만 처리 가능 (docs/domains/users.md 비활성화 정책)
@@ -30,15 +35,6 @@ export function UserPage() {
     if (user?.role === "WAREHOUSE_MANAGER") return item.role === "WORKER"
     return true
   }
-
-  const filteredItems = useMemo(() => {
-    const keyword = search.trim().toLowerCase()
-    if (!keyword) return data?.content ?? []
-    return (data?.content ?? []).filter(
-      (item) =>
-        item.email.toLowerCase().includes(keyword) || item.name.toLowerCase().includes(keyword)
-    )
-  }, [data, search])
 
   async function handleWithdraw(item: UserListItem) {
     if (!window.confirm(`${item.name}(${item.email}) 계정을 탈퇴 처리하시겠습니까?`)) return
@@ -70,9 +66,9 @@ export function UserPage() {
 
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
-          <UserTable items={filteredItems} onWithdraw={handleWithdraw} canWithdraw={canWithdraw} />
+          <UserTable items={items} onWithdraw={handleWithdraw} canWithdraw={canWithdraw} />
 
-          {!isLoading && !isError && filteredItems.length === 0 && (
+          {!isLoading && !isError && items.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">
               {search ? "검색 결과가 없습니다." : "등록된 직원이 없습니다."}
             </p>

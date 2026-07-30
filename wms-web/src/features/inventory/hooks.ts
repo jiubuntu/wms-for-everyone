@@ -5,12 +5,12 @@ import {
   getInventory,
   getInventoryHistory,
 } from "@/features/inventory/api"
-import type { InventoryAdjustInput } from "@/features/inventory/types"
+import type { InventoryAdjustInput, InventoryHistoryTargetType } from "@/features/inventory/types"
 
-export function useInventory(warehouseId: number | null, page: number, limit = 10) {
+export function useInventory(warehouseId: number | null, keyword: string, page: number, limit = 10) {
   return useQuery({
-    queryKey: ["inventory", warehouseId, page, limit],
-    queryFn: () => getInventory(warehouseId, page, limit),
+    queryKey: ["inventory", warehouseId, keyword, page, limit],
+    queryFn: () => getInventory(warehouseId, keyword, page, limit),
     refetchInterval: 5000,
   })
 }
@@ -23,10 +23,16 @@ export function useAvailableLocations(warehouseId: number | null, productId: num
   })
 }
 
-export function useInventoryHistory(warehouseId: number | null, page: number, limit = 10) {
+export function useInventoryHistory(
+  warehouseId: number | null,
+  keyword: string,
+  targetType: InventoryHistoryTargetType | undefined,
+  page: number,
+  limit = 10
+) {
   return useQuery({
-    queryKey: ["inventory", "history", warehouseId, page, limit],
-    queryFn: () => getInventoryHistory(warehouseId, page, limit),
+    queryKey: ["inventory", "history", warehouseId, keyword, targetType, page, limit],
+    queryFn: () => getInventoryHistory(warehouseId, keyword, targetType, page, limit),
   })
 }
 

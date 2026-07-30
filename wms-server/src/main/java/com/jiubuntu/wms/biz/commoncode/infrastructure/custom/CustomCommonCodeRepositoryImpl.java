@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,12 +46,13 @@ public class CustomCommonCodeRepositoryImpl implements CustomCommonCodeRepositor
     }
 
     @Override
-    public Page<CommonCode> findActiveByGroupVisibleTo(CommonCodeGroup groupCode, Long companyId, Pageable pageable) {
+    public Page<CommonCode> findActiveByGroupVisibleTo(CommonCodeGroup groupCode, Long companyId, String keyword, Pageable pageable) {
         List<CommonCode> content = queryFactory
                 .selectFrom(commonCode)
                 .where(
                         commonCode.groupCode.eq(groupCode),
                         companyScopeEq(companyId),
+                        keywordMatches(keyword),
                         activeEq()
                 )
                 .orderBy(commonCode.sortOrder.asc())
@@ -64,6 +66,7 @@ public class CustomCommonCodeRepositoryImpl implements CustomCommonCodeRepositor
                 .where(
                         commonCode.groupCode.eq(groupCode),
                         companyScopeEq(companyId),
+                        keywordMatches(keyword),
                         activeEq()
                 )
                 .fetchOne();
@@ -82,6 +85,13 @@ public class CustomCommonCodeRepositoryImpl implements CustomCommonCodeRepositor
                 )
                 .orderBy(commonCode.sortOrder.asc())
                 .fetch();
+    }
+
+    private BooleanExpression keywordMatches(String keyword) {
+        if (!StringUtils.hasText(keyword)) {
+            return null;
+        }
+        return commonCode.code.containsIgnoreCase(keyword).or(commonCode.name.containsIgnoreCase(keyword));
     }
 
     private BooleanExpression companyEq(Long companyId) {

@@ -42,11 +42,12 @@ public class UserController {
     @GetMapping("/list")
     public ResponseEntity<ApiCommonResponse<ApiPageResponse<UserListResponse>>> list(
             AuthPrincipal principal,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = PageConstants.DEFAULT_LIMIT) int limit
     ) {
         Page<UserListResult> results = userService.list(
-                principal.getCompanyId(), principal.getRole(), principal.getWarehouseId(), PageRequest.of(page - 1, limit));
+                principal.getCompanyId(), principal.getRole(), principal.getWarehouseId(), keyword, PageRequest.of(page - 1, limit));
         Page<UserListResponse> mapped = results.map(UserListResponse::from);
 
         ApiCommonResponse<ApiPageResponse<UserListResponse>> body = ApiCommonResponse.success(ApiPageResponse.of(mapped));

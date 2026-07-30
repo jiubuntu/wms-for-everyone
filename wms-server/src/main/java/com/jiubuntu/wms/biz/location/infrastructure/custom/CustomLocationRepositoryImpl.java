@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,10 +34,10 @@ public class CustomLocationRepositoryImpl implements CustomLocationRepository {
     }
 
     @Override
-    public Page<Location> findActiveByWarehouse(Long warehouseId, Pageable pageable) {
+    public Page<Location> findActiveByWarehouse(Long warehouseId, String keyword, Pageable pageable) {
         List<Location> content = queryFactory
                 .selectFrom(location)
-                .where(location.warehouse.id.eq(warehouseId), activeEq())
+                .where(location.warehouse.id.eq(warehouseId), keywordMatches(keyword), activeEq())
                 .orderBy(location.createdAt.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -45,10 +46,14 @@ public class CustomLocationRepositoryImpl implements CustomLocationRepository {
         Long total = queryFactory
                 .select(location.count())
                 .from(location)
-                .where(location.warehouse.id.eq(warehouseId), activeEq())
+                .where(location.warehouse.id.eq(warehouseId), keywordMatches(keyword), activeEq())
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0L);
+    }
+
+    private BooleanExpression keywordMatches(String keyword) {
+        return StringUtils.hasText(keyword) ? location.code.containsIgnoreCase(keyword) : null;
     }
 
     @Override

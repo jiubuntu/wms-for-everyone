@@ -56,8 +56,8 @@ public class CompanyService {
                 .orElseThrow(() -> new CommonException(ErrorCode.COMPANY_NOT_FOUND));
     }
 
-    public Page<CompanyResult> findPendingList(Pageable pageable) {
-        return companyRepository.findPendingList(pageable);
+    public Page<CompanyResult> findPendingList(String keyword, Pageable pageable) {
+        return companyRepository.findPendingList(keyword, pageable);
     }
 
     public String getBusinessLicenseFileUrl(Long companyId) {

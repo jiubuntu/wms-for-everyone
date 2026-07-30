@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import dayjs from "dayjs"
 import { Eye } from "lucide-react"
@@ -23,17 +23,12 @@ const PAGE_SIZE = 10
 export function CompanyApprovalListPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
-  const { data, isLoading, isError } = usePendingCompanies(page, PAGE_SIZE)
+  useEffect(() => {
+    setPage(1)
+  }, [search])
 
-  const filteredCompanies = useMemo(() => {
-    const keyword = search.trim().toLowerCase()
-    if (!keyword) return data?.content ?? []
-    return (data?.content ?? []).filter(
-      (company) =>
-        company.name.toLowerCase().includes(keyword) ||
-        company.businessNumber.toLowerCase().includes(keyword)
-    )
-  }, [data, search])
+  const { data, isLoading, isError } = usePendingCompanies(search, page, PAGE_SIZE)
+  const companies = data?.content ?? []
 
   return (
     <div className="flex flex-col gap-4">
@@ -67,7 +62,7 @@ export function CompanyApprovalListPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCompanies.map((company) => (
+              {companies.map((company) => (
                 <TableRow key={company.id}>
                   <TableCell className="font-medium">{company.name}</TableCell>
                   <TableCell>{company.businessNumber}</TableCell>
@@ -92,7 +87,7 @@ export function CompanyApprovalListPage() {
             </TableBody>
           </Table>
 
-          {!isLoading && !isError && filteredCompanies.length === 0 && (
+          {!isLoading && !isError && companies.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">
               {search
                 ? "검색 결과가 없습니다."

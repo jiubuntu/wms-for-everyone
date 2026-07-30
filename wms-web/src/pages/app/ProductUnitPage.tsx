@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { Plus } from "lucide-react"
 import { PageHeader } from "@/components/common/PageHeader"
 import { SearchInput } from "@/components/common/SearchInput"
@@ -18,13 +18,12 @@ export function ProductUnitPage() {
   const [formTarget, setFormTarget] = useState<ProductUnitItem | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
 
-  const { data, isLoading, isError } = useProductUnits(page, PAGE_SIZE)
+  useEffect(() => {
+    setPage(1)
+  }, [search])
 
-  const filteredItems = useMemo(() => {
-    const keyword = search.trim().toLowerCase()
-    if (!keyword) return data?.content ?? []
-    return (data?.content ?? []).filter((item) => item.name.toLowerCase().includes(keyword))
-  }, [data, search])
+  const { data, isLoading, isError } = useProductUnits(search, page, PAGE_SIZE)
+  const items = data?.content ?? []
 
   function handleCreate() {
     setFormTarget(null)
@@ -58,9 +57,9 @@ export function ProductUnitPage() {
 
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
-          <ProductUnitTable items={filteredItems} onEdit={handleEdit} />
+          <ProductUnitTable items={items} onEdit={handleEdit} />
 
-          {!isLoading && !isError && filteredItems.length === 0 && (
+          {!isLoading && !isError && items.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">
               {search ? "검색 결과가 없습니다." : "등록된 단위가 없습니다."}
             </p>

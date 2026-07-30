@@ -7,11 +7,12 @@ import type {
 } from "@/features/warehouses/types"
 
 export async function getWarehouses(
+  keyword: string,
   page: number,
   limit: number
 ): Promise<ApiPageResponse<WarehouseItem>> {
   const res = await api.get<ApiCommonResponse<ApiPageResponse<WarehouseItem>>>("/warehouse/list", {
-    params: { page, limit },
+    params: { keyword: keyword || undefined, page, limit },
   })
   return res.data.data
 }

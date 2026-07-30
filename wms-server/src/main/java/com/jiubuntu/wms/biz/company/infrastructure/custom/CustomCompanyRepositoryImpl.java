@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +43,7 @@ public class CustomCompanyRepositoryImpl implements CustomCompanyRepository {
     }
 
     @Override
-    public Page<CompanyResult> findPendingList(Pageable pageable) {
+    public Page<CompanyResult> findPendingList(String keyword, Pageable pageable) {
         List<CompanyResult> content = queryFactory
                 .select(Projections.constructor(
                         CompanyResult.class,
@@ -53,7 +54,7 @@ public class CustomCompanyRepositoryImpl implements CustomCompanyRepository {
                         company.createdAt
                 ))
                 .from(company)
-                .where(company.status.eq(CompanyStatus.PENDING), activeEq())
+                .where(company.status.eq(CompanyStatus.PENDING), keywordMatches(keyword), activeEq())
                 .orderBy(company.createdAt.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -62,10 +63,17 @@ public class CustomCompanyRepositoryImpl implements CustomCompanyRepository {
         Long total = queryFactory
                 .select(company.count())
                 .from(company)
-                .where(company.status.eq(CompanyStatus.PENDING), activeEq())
+                .where(company.status.eq(CompanyStatus.PENDING), keywordMatches(keyword), activeEq())
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0L);
+    }
+
+    private BooleanExpression keywordMatches(String keyword) {
+        if (!StringUtils.hasText(keyword)) {
+            return null;
+        }
+        return company.name.containsIgnoreCase(keyword).or(company.businessNumber.containsIgnoreCase(keyword));
     }
 
     private BooleanExpression activeEq() {

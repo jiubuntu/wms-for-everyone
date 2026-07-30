@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { Plus } from "lucide-react"
 import { PageHeader } from "@/components/common/PageHeader"
 import { SearchInput } from "@/components/common/SearchInput"
@@ -26,16 +26,12 @@ export function CommonCodePage() {
   const [formTarget, setFormTarget] = useState<CommonCodeItem | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
 
-  const { data, isLoading, isError } = useCommonCodes("admin", groupCode, page, PAGE_SIZE)
+  useEffect(() => {
+    setPage(1)
+  }, [search])
 
-  const filteredItems = useMemo(() => {
-    const keyword = search.trim().toLowerCase()
-    if (!keyword) return data?.content ?? []
-    return (data?.content ?? []).filter(
-      (item) =>
-        item.code.toLowerCase().includes(keyword) || item.name.toLowerCase().includes(keyword)
-    )
-  }, [data, search])
+  const { data, isLoading, isError } = useCommonCodes("admin", groupCode, search, page, PAGE_SIZE)
+  const items = data?.content ?? []
 
   function handleGroupChange(value: string) {
     setGroupCode(value as CommonCodeGroup)
@@ -85,9 +81,9 @@ export function CommonCodePage() {
 
       <Card className="gap-0 py-0">
         <CardContent className="p-0">
-          <CommonCodeTable scope="admin" items={filteredItems} onEdit={handleEdit} />
+          <CommonCodeTable scope="admin" items={items} onEdit={handleEdit} />
 
-          {!isLoading && !isError && filteredItems.length === 0 && (
+          {!isLoading && !isError && items.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">
               {search ? "검색 결과가 없습니다." : "등록된 코드가 없습니다."}
             </p>

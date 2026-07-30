@@ -35,8 +35,8 @@ public class ProductService {
     private final CommonCodeService commonCodeService;
     private final ProductUnitService productUnitService;
 
-    public Page<ProductResult> list(Long companyId, Pageable pageable) {
-        return productRepository.findActiveByCompany(companyId, pageable)
+    public Page<ProductResult> list(Long companyId, String keyword, Pageable pageable) {
+        return productRepository.findActiveByCompany(companyId, keyword, pageable)
                 .map(this::toResult);
     }
 

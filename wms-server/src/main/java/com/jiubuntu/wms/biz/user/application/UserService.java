@@ -88,9 +88,9 @@ public class UserService {
         return new UserIssueResult(saved, temporaryPassword);
     }
 
-    public Page<UserListResult> list(Long companyId, UserRole role, Long principalWarehouseId, Pageable pageable) {
+    public Page<UserListResult> list(Long companyId, UserRole role, Long principalWarehouseId, String keyword, Pageable pageable) {
         Long warehouseId = role == UserRole.WAREHOUSE_MANAGER ? principalWarehouseId : null;
-        return userRepository.findActiveStaffByCompany(companyId, warehouseId, pageable)
+        return userRepository.findActiveStaffByCompany(companyId, warehouseId, keyword, pageable)
                 .map(this::toListResult);
     }
 

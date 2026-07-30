@@ -37,9 +37,9 @@ public class LocationService {
     private final CommonCodeService commonCodeService;
 
     public Page<LocationResult> list(Long warehouseId, Long companyId, UserRole role, Long principalWarehouseId,
-                                      Pageable pageable) {
+                                      String keyword, Pageable pageable) {
         warehouseService.getAccessible(warehouseId, companyId, role, principalWarehouseId);
-        return locationRepository.findActiveByWarehouse(warehouseId, pageable).map(this::toResult);
+        return locationRepository.findActiveByWarehouse(warehouseId, keyword, pageable).map(this::toResult);
     }
 
     public List<LocationResult> listAll(Long warehouseId, Long companyId, UserRole role, Long principalWarehouseId) {

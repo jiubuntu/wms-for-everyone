@@ -3,12 +3,13 @@ import type { ApiCommonResponse, ApiPageResponse } from "@/lib/apiTypes"
 import type { CompanyDetail, CompanyListItem, CompanyStatus } from "@/features/company-admin/types"
 
 export async function getPendingCompanies(
+  keyword: string,
   page: number,
   limit: number
 ): Promise<ApiPageResponse<CompanyListItem>> {
   const res = await api.get<ApiCommonResponse<ApiPageResponse<CompanyListItem>>>(
     "/admin/company/list",
-    { params: { page, limit } }
+    { params: { keyword: keyword || undefined, page, limit } }
   )
   return res.data.data
 }

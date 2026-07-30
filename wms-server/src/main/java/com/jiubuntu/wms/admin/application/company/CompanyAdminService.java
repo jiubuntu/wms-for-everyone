@@ -18,8 +18,8 @@ public class CompanyAdminService {
     private final CompanyService companyService;
     private final UserService userService;
 
-    public Page<CompanyResult> findPendingList(Pageable pageable) {
-        return companyService.findPendingList(pageable);
+    public Page<CompanyResult> findPendingList(String keyword, Pageable pageable) {
+        return companyService.findPendingList(keyword, pageable);
     }
 
     public Company getDetail(Long companyId) {

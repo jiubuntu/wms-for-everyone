@@ -146,13 +146,13 @@ class UserServiceTest {
     @DisplayName("기업관리자가 직원 목록을 조회하면 담당 창고 제한 없이 전사 범위로 조회한다")
     void list_companyAdmin_queriesWithoutWarehouseScope() {
         Pageable pageable = PageRequest.of(0, 10);
-        when(userRepository.findActiveStaffByCompany(eq(1L), isNull(), eq(pageable)))
+        when(userRepository.findActiveStaffByCompany(eq(1L), isNull(), isNull(), eq(pageable)))
                 .thenReturn(new PageImpl<>(List.of()));
 
-        Page<UserListResult> results = userService.list(1L, UserRole.COMPANY_ADMIN, null, pageable);
+        Page<UserListResult> results = userService.list(1L, UserRole.COMPANY_ADMIN, null, null, pageable);
 
         assertThat(results.getContent()).isEmpty();
-        verify(userRepository).findActiveStaffByCompany(1L, null, pageable);
+        verify(userRepository).findActiveStaffByCompany(1L, null, null, pageable);
     }
 
     @Test
@@ -164,16 +164,16 @@ class UserServiceTest {
         User worker = new User(company, warehouse, "worker@test.com", "encoded-password",
                 "김작업", "010-1111-2222", UserRole.WORKER, UserStatus.ACTIVE, false);
         ReflectionTestUtils.setField(worker, "id", 300L);
-        when(userRepository.findActiveStaffByCompany(eq(1L), eq(10L), eq(pageable)))
+        when(userRepository.findActiveStaffByCompany(eq(1L), eq(10L), isNull(), eq(pageable)))
                 .thenReturn(new PageImpl<>(List.of(worker)));
 
-        Page<UserListResult> results = userService.list(1L, UserRole.WAREHOUSE_MANAGER, 10L, pageable);
+        Page<UserListResult> results = userService.list(1L, UserRole.WAREHOUSE_MANAGER, 10L, null, pageable);
 
         assertThat(results.getContent()).hasSize(1);
         UserListResult result = results.getContent().get(0);
         assertThat(result.getWarehouseId()).isEqualTo(10L);
         assertThat(result.getWarehouseName()).isEqualTo("테스트창고");
-        verify(userRepository).findActiveStaffByCompany(1L, 10L, pageable);
+        verify(userRepository).findActiveStaffByCompany(1L, 10L, null, pageable);
     }
 
 }
