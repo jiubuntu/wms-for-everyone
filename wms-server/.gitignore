@@ -37,11 +37,11 @@ out/
 .vscode/
 
 ### Secrets / local config ###
+application-*.*
 application-local.properties
 application-local.yml
 application-secret.properties
 application-secret.yml
-src/test/resources/application.properties
 .env
 .env.*
 !.env.example

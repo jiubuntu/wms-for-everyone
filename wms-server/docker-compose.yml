@@ -7,8 +7,18 @@ services:
     volumes:
       - wms-redis-data:/data
 
-  # postgres:
-  #   PostgreSQL은 현재 로컬 설치본을 사용 중이며, 추후 이 compose로 전환 예정.
+  postgres:
+    image: postgres:17-alpine
+    container_name: wms-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - wms-postgres-data:/var/lib/postgresql/data
 
 volumes:
   wms-redis-data:
+  wms-postgres-data:
