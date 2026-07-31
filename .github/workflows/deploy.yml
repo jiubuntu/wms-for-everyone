@@ -1,0 +1,63 @@
+name: Deploy
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  REGISTRY: ghcr.io
+  SERVER_IMAGE: ghcr.io/${{ github.repository_owner }}/wms-server
+  WEB_IMAGE: ghcr.io/${{ github.repository_owner }}/wms-web
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: wms-server 이미지 빌드/푸시
+        uses: docker/build-push-action@v6
+        with:
+          context: ./wms-server
+          push: true
+          tags: |
+            ${{ env.SERVER_IMAGE }}:${{ github.ref_name }}
+            ${{ env.SERVER_IMAGE }}:latest
+
+      - name: wms-web 이미지 빌드/푸시
+        uses: docker/build-push-action@v6
+        with:
+          context: ./wms-web
+          push: true
+          build-args: |
+            VITE_API_BASE_URL=/api
+          tags: |
+            ${{ env.WEB_IMAGE }}:${{ github.ref_name }}
+            ${{ env.WEB_IMAGE }}:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/wms
+            export IMAGE_TAG=${{ github.ref_name }}
+            docker-compose -f docker-compose.prod.yml --env-file .env.prod pull
+            docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d

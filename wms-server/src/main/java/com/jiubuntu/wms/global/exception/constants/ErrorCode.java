@@ -1,0 +1,89 @@
+package com.jiubuntu.wms.global.exception.constants;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
+@AllArgsConstructor
+public enum ErrorCode {
+
+    BAD_REQUEST(HttpStatus.BAD_REQUEST.value(), "0001", "요청 파라미터가 올바르지 않습니다."),
+    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(), "0002", "파일 업로드에 실패했습니다."),
+    FORBIDDEN(HttpStatus.FORBIDDEN.value(), "0003", "접근 권한이 없습니다."),
+    EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(), "0004", "이메일 발송에 실패했습니다."),
+    IDEMPOTENCY_KEY_REQUIRED(HttpStatus.BAD_REQUEST.value(), "0005", "Idempotency-Key 헤더가 필요합니다."),
+    IDEMPOTENCY_REQUEST_IN_PROGRESS(HttpStatus.CONFLICT.value(), "0006", "이전 요청이 아직 처리 중입니다. 잠시 후 다시 시도해주세요."),
+    IDEMPOTENCY_REQUEST_MISMATCH(HttpStatus.CONFLICT.value(), "0007", "이전 요청과 내용이 달라 처리할 수 없습니다. 새로고침 후 다시 시도해주세요."),
+
+    EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0101", "이미 가입된 이메일입니다."),
+    BUSINESS_NUMBER_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0102", "이미 등록된 사업자등록번호입니다."),
+    PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST.value(), "0103", "비밀번호가 일치하지 않습니다."),
+    UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST.value(), "0104", "지원하지 않는 파일 형식입니다."),
+    FILE_TOO_LARGE(HttpStatus.BAD_REQUEST.value(), "0105", "파일 용량이 너무 큽니다."),
+
+    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED.value(), "0201", "이메일 또는 비밀번호가 올바르지 않습니다."),
+    ACCOUNT_LOCKED(HttpStatus.UNAUTHORIZED.value(), "0202", "계정이 잠겨 있습니다. 잠시 후 다시 시도해주세요."),
+    ACCOUNT_NOT_ACTIVE(HttpStatus.FORBIDDEN.value(), "0203", "아직 사용할 수 없는 계정입니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED.value(), "0204", "유효하지 않은 리프레시 토큰입니다."),
+    EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED.value(), "0205", "만료된 리프레시 토큰입니다."),
+    INVALID_PASSWORD_RESET_TOKEN(HttpStatus.UNAUTHORIZED.value(), "0206", "유효하지 않은 비밀번호 재설정 링크입니다."),
+    EXPIRED_PASSWORD_RESET_TOKEN(HttpStatus.UNAUTHORIZED.value(), "0207", "만료된 비밀번호 재설정 링크입니다."),
+
+    COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0301", "존재하지 않는 기업입니다."),
+    COMPANY_FILE_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0302", "존재하지 않는 첨부파일입니다."),
+    COMPANY_NOT_PENDING(HttpStatus.BAD_REQUEST.value(), "0303", "승인 대기 상태의 기업이 아닙니다."),
+
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0401", "존재하지 않는 사용자입니다."),
+    WAREHOUSE_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0402", "존재하지 않는 창고입니다."),
+    COMPANY_SCOPE_VIOLATION(HttpStatus.FORBIDDEN.value(), "0404", "소속 기업 범위를 벗어난 요청입니다."),
+    WAREHOUSE_SCOPE_VIOLATION(HttpStatus.FORBIDDEN.value(), "0405", "담당 창고 범위를 벗어난 요청입니다."),
+    LAST_COMPANY_ADMIN_CANNOT_WITHDRAW(HttpStatus.BAD_REQUEST.value(), "0406", "기업 내 유일한 기업관리자는 탈퇴할 수 없습니다."),
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST.value(), "0407", "현재 비밀번호가 일치하지 않습니다."),
+    WAREHOUSE_HAS_ASSIGNED_STAFF(HttpStatus.BAD_REQUEST.value(), "0408", "재고가 있거나 담당자가 배정된 창고는 비활성화할 수 없습니다."),
+
+    COMMON_CODE_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0501", "존재하지 않는 공통 코드입니다."),
+    COMMON_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0502", "이미 등록된 코드입니다."),
+    COMMON_CODE_GROUP_NOT_CUSTOMIZABLE(HttpStatus.BAD_REQUEST.value(), "0503", "회사에서 직접 추가할 수 없는 코드 그룹입니다."),
+
+    PRODUCT_UNIT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0601", "존재하지 않는 상품 단위입니다."),
+    PRODUCT_UNIT_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0602", "이미 등록된 단위입니다."),
+
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0701", "존재하지 않는 상품입니다."),
+    PRODUCT_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0702", "이미 등록된 SKU 코드입니다."),
+    PRODUCT_SUB_UNIT_CONVERSION_MISMATCH(HttpStatus.BAD_REQUEST.value(), "0703", "보조 단위와 변환율은 함께 입력해야 합니다."),
+
+    LOCATION_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0801", "존재하지 않는 위치입니다."),
+    LOCATION_ALREADY_EXISTS(HttpStatus.CONFLICT.value(), "0802", "이미 등록된 위치 코드가 포함되어 있습니다."),
+    LOCATION_INVALID_RANGE(HttpStatus.BAD_REQUEST.value(), "0803", "행/열 범위와 단 수를 올바르게 입력해주세요."),
+
+    INVENTORY_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "0901", "존재하지 않는 재고입니다."),
+    INSUFFICIENT_AVAILABLE_QUANTITY(HttpStatus.BAD_REQUEST.value(), "0902", "가용재고가 부족합니다."),
+
+    TRANSFER_SAME_LOCATION(HttpStatus.BAD_REQUEST.value(), "1001", "출발 위치와 도착 위치는 달라야 합니다."),
+    TRANSFER_LOCATION_DISABLED(HttpStatus.BAD_REQUEST.value(), "1002", "비활성화된 위치로는 이동할 수 없습니다."),
+
+    OUTBOUND_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "1101", "존재하지 않는 출고입니다."),
+    OUTBOUND_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST.value(), "1102", "이미 확정된 출고입니다."),
+    OUTBOUND_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST.value(), "1103", "이미 취소된 출고입니다."),
+    OUTBOUND_ALLOCATION_MISMATCH(HttpStatus.BAD_REQUEST.value(), "1104", "할당한 위치별 수량 합계가 출고 수량과 일치하지 않습니다."),
+    OUTBOUND_INVALID_UNIT(HttpStatus.BAD_REQUEST.value(), "1105", "상품에 등록되지 않은 단위입니다."),
+    OUTBOUND_CONCURRENT_UPDATE_CONFLICT(HttpStatus.CONFLICT.value(), "1106", "다른 요청과 재고 처리가 겹쳐 실패했습니다. 다시 시도해주세요."),
+
+    INBOUND_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "1201", "존재하지 않는 입고입니다."),
+    INBOUND_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST.value(), "1202", "이미 확정된 입고입니다."),
+    INBOUND_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST.value(), "1203", "이미 취소된 입고입니다."),
+    INBOUND_LOCATION_SUM_MISMATCH(HttpStatus.BAD_REQUEST.value(), "1204", "배치한 위치별 수량 합계가 상품 라인의 수량과 일치하지 않습니다."),
+    INBOUND_NOT_FULLY_PLACED(HttpStatus.BAD_REQUEST.value(), "1205", "위치 배치가 끝나지 않은 상품 라인이 있습니다."),
+    INBOUND_INVALID_UNIT(HttpStatus.BAD_REQUEST.value(), "1206", "상품에 등록되지 않은 단위입니다."),
+    INBOUND_CONCURRENT_UPDATE_CONFLICT(HttpStatus.CONFLICT.value(), "1207", "다른 요청과 재고 처리가 겹쳐 실패했습니다. 다시 시도해주세요."),
+    INBOUND_LOT_INFO_REQUIRED(HttpStatus.BAD_REQUEST.value(), "1208", "LOT 관리 상품은 로트번호·제조일자·유통기한을 입력해야 합니다."),
+
+    ;
+
+    private final int httpCode;
+    private final String code;
+    private final String message;
+
+
+}
