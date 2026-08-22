@@ -54,6 +54,10 @@ public class SecurityConfig {
                                 "/api/auth/password/reset-confirm"
                         ).permitAll()
                         .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/prometheus"
+                        ).permitAll()
+                        .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
