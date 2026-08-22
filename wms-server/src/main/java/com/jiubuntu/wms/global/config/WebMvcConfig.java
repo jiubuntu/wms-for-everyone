@@ -5,6 +5,7 @@ import com.jiubuntu.wms.global.idempotency.IdempotencyFilter;
 import com.jiubuntu.wms.global.infrastructure.IdempotencyKeyStore;
 import com.jiubuntu.wms.global.security.resolver.AuthPrincipalArgumentResolver;
 import com.jiubuntu.wms.global.security.interceptor.SecureInterceptor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,9 +30,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public FilterRegistrationBean<IdempotencyFilter> idempotencyFilter(RequestMappingHandlerMapping handlerMapping,
-                                                                         IdempotencyKeyStore idempotencyKeyStore,
-                                                                         ObjectMapper objectMapper) {
+    public FilterRegistrationBean<IdempotencyFilter> idempotencyFilter(
+            @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping handlerMapping,
+            IdempotencyKeyStore idempotencyKeyStore,
+            ObjectMapper objectMapper) {
         FilterRegistrationBean<IdempotencyFilter> registration = new FilterRegistrationBean<>(
                 new IdempotencyFilter(handlerMapping, idempotencyKeyStore, objectMapper));
         registration.addUrlPatterns("/api/*");
