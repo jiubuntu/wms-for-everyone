@@ -280,8 +280,8 @@ class OutboundServiceTest {
         when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
         when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
                 .thenReturn(List.of(allocationAtHigher, allocationAtLower));
-        when(inventoryService.getActiveByLocationProductLot(20L, 5L, null)).thenReturn(inventoryAtHigher);
-        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventoryAtLower);
+        when(inventoryService.findActiveByLocationIdInAndProductIdIn(any(), any()))
+                .thenReturn(List.of(inventoryAtHigher, inventoryAtLower));
         stubDetailLookup(500L, 700L, warehouse);
 
         OutboundActionCommand command = OutboundActionCommand.builder()
@@ -405,7 +405,7 @@ class OutboundServiceTest {
         when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
         when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
                 .thenReturn(List.of(allocation));
-        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventory);
+        when(inventoryService.findActiveByLocationIdInAndProductIdIn(any(), any())).thenReturn(List.of(inventory));
         when(inventoryService.confirmReservation(eq(inventory), eq(10), eq(warehouse), any(), eq(500L), eq(999L)))
                 .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L))
                 .thenReturn(inventory);
@@ -445,7 +445,7 @@ class OutboundServiceTest {
         when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
         when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
                 .thenReturn(List.of(allocation));
-        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventory);
+        when(inventoryService.findActiveByLocationIdInAndProductIdIn(any(), any())).thenReturn(List.of(inventory));
         when(inventoryService.confirmReservation(eq(inventory), eq(10), eq(warehouse), any(), eq(500L), eq(999L)))
                 .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L));
 
@@ -485,7 +485,7 @@ class OutboundServiceTest {
         when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
         when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
                 .thenReturn(List.of(allocation));
-        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventory);
+        when(inventoryService.findActiveByLocationIdInAndProductIdIn(any(), any())).thenReturn(List.of(inventory));
         when(inventoryService.releaseReservation(inventory, 10, 999L))
                 .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L))
                 .thenReturn(inventory);
@@ -524,7 +524,7 @@ class OutboundServiceTest {
         when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
         when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
                 .thenReturn(List.of(allocation));
-        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventory);
+        when(inventoryService.findActiveByLocationIdInAndProductIdIn(any(), any())).thenReturn(List.of(inventory));
         when(inventoryService.releaseReservation(inventory, 10, 999L))
                 .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L));
 

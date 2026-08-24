@@ -58,6 +58,15 @@ public class CustomInventoryRepositoryImpl implements CustomInventoryRepository 
     }
 
     @Override
+    public List<Inventory> findActiveByLocationIdInAndProductIdIn(Collection<Long> locationIds, Collection<Long> productIds) {
+        return queryFactory.selectFrom(inventory)
+                .where(inventory.location.id.in(locationIds),
+                        inventory.product.id.in(productIds),
+                        activeEq())
+                .fetch();
+    }
+
+    @Override
     public Optional<InventoryResult> findResultById(Long id) {
         InventoryResult result = queryFactory
                 .select(Projections.constructor(

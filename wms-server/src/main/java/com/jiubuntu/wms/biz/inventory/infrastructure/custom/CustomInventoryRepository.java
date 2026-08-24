@@ -20,6 +20,8 @@ public interface CustomInventoryRepository {
 
     Optional<Inventory> findActiveByLocationAndProductAndLotNumber(Long locationId, Long productId, String lotNumber);
 
+    List<Inventory> findActiveByLocationIdInAndProductIdIn(Collection<Long> locationIds, Collection<Long> productIds);
+
     Optional<InventoryResult> findResultById(Long id);
 
     Page<InventoryResult> findActiveByWarehouse(Long warehouseId, String keyword, Pageable pageable);

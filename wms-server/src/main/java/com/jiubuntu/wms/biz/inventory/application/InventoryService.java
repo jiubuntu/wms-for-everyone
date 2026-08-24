@@ -108,6 +108,13 @@ public class InventoryService {
     }
 
     /**
+     * location_id/product_id 조합의 후보 재고를 한 번에 가져온다
+     */
+    public List<Inventory> findActiveByLocationIdInAndProductIdIn(Collection<Long> locationIds, Collection<Long> productIds) {
+        return inventoryRepository.findActiveByLocationIdInAndProductIdIn(locationIds, productIds);
+    }
+
+    /**
      * 유효기간 임박 순(FEFO)으로 정렬된, 가용재고가 남은 재고 목록. 출고 FEFO 자동 할당에서 앞에서부터 소진한다.
      */
     public List<Inventory> findAvailableForAllocation(Long warehouseId, Long productId) {

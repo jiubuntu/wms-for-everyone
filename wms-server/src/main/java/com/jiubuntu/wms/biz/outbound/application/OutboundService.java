@@ -49,6 +49,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -211,9 +212,9 @@ public class OutboundService {
 
         List<OutboundReservedAllocation> reserved = loadReservedAllocations(outbound.getId());
         reserved.sort(Comparator.comparing(allocation -> allocation.getLocation().getId()));
+        List<Inventory> candidates = loadInventoryCandidates(reserved);
         for (OutboundReservedAllocation allocation : reserved) {
-            Inventory inventory = inventoryService.getActiveByLocationProductLot(
-                    allocation.getLocation().getId(), allocation.getProductId(), allocation.getLotNumber());
+            Inventory inventory = matchInventory(candidates, allocation);
             inventoryService.confirmReservation(inventory, allocation.getQuantity(), warehouse,
                     InventoryHistoryTargetType.OUTBOUND, outbound.getId(), command.getActorId());
         }
@@ -251,9 +252,9 @@ public class OutboundService {
 
         List<OutboundReservedAllocation> reserved = loadReservedAllocations(outbound.getId());
         reserved.sort(Comparator.comparing(allocation -> allocation.getLocation().getId()));
+        List<Inventory> candidates = loadInventoryCandidates(reserved);
         for (OutboundReservedAllocation allocation : reserved) {
-            Inventory inventory = inventoryService.getActiveByLocationProductLot(
-                    allocation.getLocation().getId(), allocation.getProductId(), allocation.getLotNumber());
+            Inventory inventory = matchInventory(candidates, allocation);
             inventoryService.releaseReservation(inventory, allocation.getQuantity(), command.getActorId());
         }
 
@@ -291,6 +292,24 @@ public class OutboundService {
                     itemLocation.getLocation(), itemLocation.getLotNumber(), productId, itemLocation.getQuantity()));
         }
         return reserved;
+    }
+
+    /**
+     * allocation마다 개별 조회하는 대신, location_id/product_id 조합으로 후보 재고를 한 번에 가져온다.
+     */
+    private List<Inventory> loadInventoryCandidates(List<OutboundReservedAllocation> reserved) {
+        List<Long> locationIds = reserved.stream().map(allocation -> allocation.getLocation().getId()).distinct().toList();
+        List<Long> productIds = reserved.stream().map(OutboundReservedAllocation::getProductId).distinct().toList();
+        return inventoryService.findActiveByLocationIdInAndProductIdIn(locationIds, productIds);
+    }
+
+    private Inventory matchInventory(List<Inventory> candidates, OutboundReservedAllocation allocation) {
+        return candidates.stream()
+                .filter(candidate -> candidate.getLocation().getId().equals(allocation.getLocation().getId())
+                        && candidate.getProduct().getId().equals(allocation.getProductId())
+                        && Objects.equals(candidate.getLotNumber(), allocation.getLotNumber()))
+                .findFirst()
+                .orElseThrow(() -> new CommonException(ErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY));
     }
 
     private OutboundResult assembleResult(OutboundHeaderResult header) {
