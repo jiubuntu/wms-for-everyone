@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -161,18 +162,26 @@ public class OutboundService {
         outbound.assignCreator(command.getCreatedBy());
         outbound = outboundRepository.save(outbound);
 
+        Set<Long> productIds = command.getItems().stream().map(OutboundItemCommand::getProductId).collect(Collectors.toSet());
+        Set<Long> unitIds = command.getItems().stream().map(OutboundItemCommand::getUnitId).collect(Collectors.toSet());
+        Map<Long, Product> productsById = productService.getAllAccessible(productIds, command.getCompanyId());
+        Map<Long, ProductUnit> unitsById = productUnitService.getAllAccessible(unitIds, command.getCompanyId());
+        Map<Long, List<Inventory>> fefoCandidatesByProductId =
+                inventoryService.findAvailableForAllocation(command.getWarehouseId(), productIds);
+
         List<OutboundPendingReservation> pendingReservations = new ArrayList<>();
         for (OutboundItemCommand itemCommand : command.getItems()) {
-            Product product = productService.getAccessible(itemCommand.getProductId(), command.getCompanyId());
-            ProductUnit unit = productUnitService.getAccessible(itemCommand.getUnitId(), command.getCompanyId());
+            Product product = productsById.get(itemCommand.getProductId());
+            ProductUnit unit = unitsById.get(itemCommand.getUnitId());
             outboundValidator.validateUnit(product, unit);
 
             OutboundItem item = new OutboundItem(outbound, product, unit, itemCommand.getQuantity(), itemCommand.getAllocationType());
             item.assignCreator(command.getCreatedBy());
             item = outboundItemRepository.save(item);
 
+            List<Inventory> fefoCandidates = fefoCandidatesByProductId.getOrDefault(product.getId(), List.of());
             List<OutboundAllocationPlan> plans = outboundAllocationPlanner.plan(command.getWarehouseId(), product, unit,
-                    itemCommand.getQuantity(), itemCommand.getAllocationType(), itemCommand.getAllocations());
+                    itemCommand.getQuantity(), itemCommand.getAllocationType(), itemCommand.getAllocations(), fefoCandidates);
 
             for (OutboundAllocationPlan plan : plans) {
                 pendingReservations.add(new OutboundPendingReservation(
