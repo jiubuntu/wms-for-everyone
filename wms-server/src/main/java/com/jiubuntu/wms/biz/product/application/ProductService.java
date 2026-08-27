@@ -22,7 +22,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -112,6 +115,22 @@ public class ProductService {
         Product product = getActiveById(id);
         productValidator.validateScope(product, companyId);
         return product;
+    }
+
+    /**
+     * item 개수만큼 getAccessible()을 반복 호출하는 대신, 요청된 id 전체를 한 번에 조회한다.
+     */
+    public Map<Long, Product> getAllAccessible(Collection<Long> ids, Long companyId) {
+        Map<Long, Product> productsById = productRepository.findAllActiveByIdIn(ids).stream()
+                .collect(Collectors.toMap(Product::getId, product -> product));
+        for (Long id : ids) {
+            Product product = productsById.get(id);
+            if (product == null) {
+                throw new CommonException(ErrorCode.PRODUCT_NOT_FOUND);
+            }
+            productValidator.validateScope(product, companyId);
+        }
+        return productsById;
     }
 
     private Product getActiveById(Long id) {
