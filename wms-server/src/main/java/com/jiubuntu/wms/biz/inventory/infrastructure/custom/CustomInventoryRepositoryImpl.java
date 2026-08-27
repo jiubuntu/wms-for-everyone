@@ -177,6 +177,18 @@ public class CustomInventoryRepositoryImpl implements CustomInventoryRepository 
     }
 
     @Override
+    public List<Inventory> findActiveAvailableForAllocationIn(Long warehouseId, Collection<Long> productIds) {
+        return queryFactory.selectFrom(inventory)
+                .join(inventory.location, location).fetchJoin()
+                .where(location.warehouse.id.eq(warehouseId),
+                        inventory.product.id.in(productIds),
+                        inventory.quantity.subtract(inventory.reservedQuantity).gt(0),
+                        activeEq())
+                .orderBy(inventory.expiryDate.asc().nullsLast())
+                .fetch();
+    }
+
+    @Override
     public List<InventoryExpiringRow> findActiveExpiringSoon(Long warehouseId, LocalDate from, LocalDate to, int limit) {
         return queryFactory
                 .select(Projections.constructor(

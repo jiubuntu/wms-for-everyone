@@ -30,6 +30,13 @@ public interface CustomInventoryRepository {
 
     List<Inventory> findActiveAvailableForAllocation(Long warehouseId, Long productId);
 
+    /**
+     * item 개수(정확히는 distinct 상품 개수)만큼 findActiveAvailableForAllocation()을 반복 호출하는 대신,
+     * 요청에 포함된 상품 id 전체의 후보를 한 번에 조회한다. 유효기간 오름차순 정렬은 그대로 유지되어
+     * 호출측에서 상품별로 묶어도 각 그룹 내 순서(FEFO)가 보존된다.
+     */
+    List<Inventory> findActiveAvailableForAllocationIn(Long warehouseId, Collection<Long> productIds);
+
     List<InventoryExpiringRow> findActiveExpiringSoon(Long warehouseId, LocalDate from, LocalDate to, int limit);
 
     long countActiveExpiringSoon(Long warehouseId, LocalDate from, LocalDate to);
