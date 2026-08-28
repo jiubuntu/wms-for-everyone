@@ -58,6 +58,15 @@ public class CustomInventoryRepositoryImpl implements CustomInventoryRepository 
     }
 
     @Override
+    public List<Inventory> findActiveByLocationIdInAndProductIdIn(Collection<Long> locationIds, Collection<Long> productIds) {
+        return queryFactory.selectFrom(inventory)
+                .where(inventory.location.id.in(locationIds),
+                        inventory.product.id.in(productIds),
+                        activeEq())
+                .fetch();
+    }
+
+    @Override
     public Optional<InventoryResult> findResultById(Long id) {
         InventoryResult result = queryFactory
                 .select(Projections.constructor(
@@ -161,6 +170,18 @@ public class CustomInventoryRepositoryImpl implements CustomInventoryRepository 
                 .join(inventory.location, location).fetchJoin()
                 .where(location.warehouse.id.eq(warehouseId),
                         inventory.product.id.eq(productId),
+                        inventory.quantity.subtract(inventory.reservedQuantity).gt(0),
+                        activeEq())
+                .orderBy(inventory.expiryDate.asc().nullsLast())
+                .fetch();
+    }
+
+    @Override
+    public List<Inventory> findActiveAvailableForAllocationIn(Long warehouseId, Collection<Long> productIds) {
+        return queryFactory.selectFrom(inventory)
+                .join(inventory.location, location).fetchJoin()
+                .where(location.warehouse.id.eq(warehouseId),
+                        inventory.product.id.in(productIds),
                         inventory.quantity.subtract(inventory.reservedQuantity).gt(0),
                         activeEq())
                 .orderBy(inventory.expiryDate.asc().nullsLast())

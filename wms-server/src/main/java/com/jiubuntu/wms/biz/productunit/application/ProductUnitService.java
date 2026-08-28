@@ -16,8 +16,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -75,6 +78,22 @@ public class ProductUnitService {
             throw new CommonException(ErrorCode.PRODUCT_UNIT_NOT_FOUND);
         }
         return productUnit;
+    }
+
+    /**
+     * item 개수만큼 getAccessible()을 반복 호출하는 대신, 요청된 id 전체를 한 번에 조회한다.
+     */
+    public Map<Long, ProductUnit> getAllAccessible(Collection<Long> ids, Long companyId) {
+        Map<Long, ProductUnit> unitsById = productUnitRepository.findAllActiveByIdIn(ids).stream()
+                .collect(Collectors.toMap(ProductUnit::getId, unit -> unit));
+        for (Long id : ids) {
+            ProductUnit unit = unitsById.get(id);
+            Long ownerId = unit != null && unit.getCompany() != null ? unit.getCompany().getId() : null;
+            if (unit == null || !Objects.equals(ownerId, companyId)) {
+                throw new CommonException(ErrorCode.PRODUCT_UNIT_NOT_FOUND);
+            }
+        }
+        return unitsById;
     }
 
     private ProductUnit getActiveById(Long id) {

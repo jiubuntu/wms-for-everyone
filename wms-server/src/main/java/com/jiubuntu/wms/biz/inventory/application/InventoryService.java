@@ -27,8 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -108,10 +110,27 @@ public class InventoryService {
     }
 
     /**
+     * location_id/product_id 조합의 후보 재고를 한 번에 가져온다
+     */
+    public List<Inventory> findActiveByLocationIdInAndProductIdIn(Collection<Long> locationIds, Collection<Long> productIds) {
+        return inventoryRepository.findActiveByLocationIdInAndProductIdIn(locationIds, productIds);
+    }
+
+    /**
      * 유효기간 임박 순(FEFO)으로 정렬된, 가용재고가 남은 재고 목록. 출고 FEFO 자동 할당에서 앞에서부터 소진한다.
      */
     public List<Inventory> findAvailableForAllocation(Long warehouseId, Long productId) {
         return inventoryRepository.findActiveAvailableForAllocation(warehouseId, productId);
+    }
+
+    /**
+     * item(정확히는 distinct 상품) 개수만큼 findAvailableForAllocation()을 반복 호출하는 대신,
+     * 상품 id 전체의 FEFO 후보를 한 번에 조회해 상품별로 묶어 돌려준다. 원 쿼리가 유효기간 오름차순으로
+     * 정렬돼 있어, 그룹핑 후에도 상품별 리스트 안의 순서(FEFO)가 그대로 유지된다.
+     */
+    public Map<Long, List<Inventory>> findAvailableForAllocation(Long warehouseId, Collection<Long> productIds) {
+        return inventoryRepository.findActiveAvailableForAllocationIn(warehouseId, productIds).stream()
+                .collect(Collectors.groupingBy(candidate -> candidate.getProduct().getId(), LinkedHashMap::new, Collectors.toList()));
     }
 
     @Transactional

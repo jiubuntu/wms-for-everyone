@@ -43,7 +43,9 @@ import org.springframework.transaction.TransactionStatus;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -153,8 +155,8 @@ class OutboundServiceTest {
         Inventory inventoryAtLower = inventoryOf(lowerLocation, product, "LOT-B", LocalDate.of(2026, 6, 1), 20, 0);
 
         when(warehouseService.getAccessible(100L, 1L, UserRole.COMPANY_ADMIN, null)).thenReturn(warehouse);
-        when(productService.getAccessible(5L, 1L)).thenReturn(product);
-        when(productUnitService.getAccessible(1L, 1L)).thenReturn(baseUnit);
+        when(productService.getAllAccessible(Set.of(5L), 1L)).thenReturn(Map.of(5L, product));
+        when(productUnitService.getAllAccessible(Set.of(1L), 1L)).thenReturn(Map.of(1L, baseUnit));
         when(outboundRepository.save(any(Outbound.class))).thenAnswer(invocation -> {
             Outbound saved = invocation.getArgument(0);
             ReflectionTestUtils.setField(saved, "id", 500L);
@@ -166,7 +168,7 @@ class OutboundServiceTest {
             return saved;
         });
         // 플래너는 FEFO 소진 순서(higher 먼저)대로 반환하지만, 예약 반영은 location_id 순(lower 먼저)이어야 한다
-        when(outboundAllocationPlanner.plan(eq(100L), eq(product), eq(baseUnit), eq(30), eq(AllocationType.FEFO), any()))
+        when(outboundAllocationPlanner.plan(eq(100L), eq(product), eq(baseUnit), eq(30), eq(AllocationType.FEFO), any(), any()))
                 .thenReturn(List.of(
                         new OutboundAllocationPlan(higherLocation, "LOT-A", inventoryAtHigher, 20),
                         new OutboundAllocationPlan(lowerLocation, "LOT-B", inventoryAtLower, 10)));
@@ -198,8 +200,8 @@ class OutboundServiceTest {
         Product product = productWithId(5L, baseUnit);
 
         when(warehouseService.getAccessible(100L, 1L, UserRole.COMPANY_ADMIN, null)).thenReturn(warehouse);
-        when(productService.getAccessible(5L, 1L)).thenReturn(product);
-        when(productUnitService.getAccessible(1L, 1L)).thenReturn(baseUnit);
+        when(productService.getAllAccessible(Set.of(5L), 1L)).thenReturn(Map.of(5L, product));
+        when(productUnitService.getAllAccessible(Set.of(1L), 1L)).thenReturn(Map.of(1L, baseUnit));
         when(outboundRepository.save(any(Outbound.class))).thenAnswer(invocation -> {
             Outbound saved = invocation.getArgument(0);
             ReflectionTestUtils.setField(saved, "id", 500L);
@@ -210,7 +212,7 @@ class OutboundServiceTest {
             ReflectionTestUtils.setField(saved, "id", 700L);
             return saved;
         });
-        when(outboundAllocationPlanner.plan(eq(100L), eq(product), eq(baseUnit), eq(30), eq(AllocationType.FEFO), any()))
+        when(outboundAllocationPlanner.plan(eq(100L), eq(product), eq(baseUnit), eq(30), eq(AllocationType.FEFO), any(), any()))
                 .thenThrow(new CommonException(ErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY));
 
         OutboundRegisterCommand command = OutboundRegisterCommand.builder()
@@ -280,8 +282,8 @@ class OutboundServiceTest {
         when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
         when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
                 .thenReturn(List.of(allocationAtHigher, allocationAtLower));
-        when(inventoryService.getActiveByLocationProductLot(20L, 5L, null)).thenReturn(inventoryAtHigher);
-        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventoryAtLower);
+        when(inventoryService.findActiveByLocationIdInAndProductIdIn(any(), any()))
+                .thenReturn(List.of(inventoryAtHigher, inventoryAtLower));
         stubDetailLookup(500L, 700L, warehouse);
 
         OutboundActionCommand command = OutboundActionCommand.builder()
@@ -307,8 +309,8 @@ class OutboundServiceTest {
         Inventory inventory = inventoryOf(location, product, "LOT-A", LocalDate.of(2026, 1, 1), 20, 0);
 
         when(warehouseService.getAccessible(100L, 1L, UserRole.COMPANY_ADMIN, null)).thenReturn(warehouse);
-        when(productService.getAccessible(5L, 1L)).thenReturn(product);
-        when(productUnitService.getAccessible(1L, 1L)).thenReturn(baseUnit);
+        when(productService.getAllAccessible(Set.of(5L), 1L)).thenReturn(Map.of(5L, product));
+        when(productUnitService.getAllAccessible(Set.of(1L), 1L)).thenReturn(Map.of(1L, baseUnit));
         when(outboundRepository.save(any(Outbound.class))).thenAnswer(invocation -> {
             Outbound saved = invocation.getArgument(0);
             ReflectionTestUtils.setField(saved, "id", 500L);
@@ -319,7 +321,7 @@ class OutboundServiceTest {
             ReflectionTestUtils.setField(saved, "id", 700L);
             return saved;
         });
-        when(outboundAllocationPlanner.plan(eq(100L), eq(product), eq(baseUnit), eq(10), eq(AllocationType.FEFO), any()))
+        when(outboundAllocationPlanner.plan(eq(100L), eq(product), eq(baseUnit), eq(10), eq(AllocationType.FEFO), any(), any()))
                 .thenReturn(List.of(new OutboundAllocationPlan(location, "LOT-A", inventory, 10)));
         when(inventoryService.reserve(any(Inventory.class), anyInt(), anyLong()))
                 .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L))
@@ -351,8 +353,8 @@ class OutboundServiceTest {
         Inventory inventory = inventoryOf(location, product, "LOT-A", LocalDate.of(2026, 1, 1), 20, 0);
 
         when(warehouseService.getAccessible(100L, 1L, UserRole.COMPANY_ADMIN, null)).thenReturn(warehouse);
-        when(productService.getAccessible(5L, 1L)).thenReturn(product);
-        when(productUnitService.getAccessible(1L, 1L)).thenReturn(baseUnit);
+        when(productService.getAllAccessible(Set.of(5L), 1L)).thenReturn(Map.of(5L, product));
+        when(productUnitService.getAllAccessible(Set.of(1L), 1L)).thenReturn(Map.of(1L, baseUnit));
         when(outboundRepository.save(any(Outbound.class))).thenAnswer(invocation -> {
             Outbound saved = invocation.getArgument(0);
             ReflectionTestUtils.setField(saved, "id", 500L);
@@ -363,7 +365,7 @@ class OutboundServiceTest {
             ReflectionTestUtils.setField(saved, "id", 700L);
             return saved;
         });
-        when(outboundAllocationPlanner.plan(eq(100L), eq(product), eq(baseUnit), eq(10), eq(AllocationType.FEFO), any()))
+        when(outboundAllocationPlanner.plan(eq(100L), eq(product), eq(baseUnit), eq(10), eq(AllocationType.FEFO), any(), any()))
                 .thenReturn(List.of(new OutboundAllocationPlan(location, "LOT-A", inventory, 10)));
         when(inventoryService.reserve(any(Inventory.class), anyInt(), anyLong()))
                 .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L));
@@ -405,7 +407,7 @@ class OutboundServiceTest {
         when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
         when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
                 .thenReturn(List.of(allocation));
-        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventory);
+        when(inventoryService.findActiveByLocationIdInAndProductIdIn(any(), any())).thenReturn(List.of(inventory));
         when(inventoryService.confirmReservation(eq(inventory), eq(10), eq(warehouse), any(), eq(500L), eq(999L)))
                 .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L))
                 .thenReturn(inventory);
@@ -445,7 +447,7 @@ class OutboundServiceTest {
         when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
         when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
                 .thenReturn(List.of(allocation));
-        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventory);
+        when(inventoryService.findActiveByLocationIdInAndProductIdIn(any(), any())).thenReturn(List.of(inventory));
         when(inventoryService.confirmReservation(eq(inventory), eq(10), eq(warehouse), any(), eq(500L), eq(999L)))
                 .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L));
 
@@ -485,7 +487,7 @@ class OutboundServiceTest {
         when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
         when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
                 .thenReturn(List.of(allocation));
-        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventory);
+        when(inventoryService.findActiveByLocationIdInAndProductIdIn(any(), any())).thenReturn(List.of(inventory));
         when(inventoryService.releaseReservation(inventory, 10, 999L))
                 .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L))
                 .thenReturn(inventory);
@@ -524,7 +526,7 @@ class OutboundServiceTest {
         when(outboundItemRepository.findByOutboundIdAndActiveTrue(500L)).thenReturn(List.of(item));
         when(outboundItemLocationRepository.findByOutboundItemIdInAndActiveTrue(List.of(700L)))
                 .thenReturn(List.of(allocation));
-        when(inventoryService.getActiveByLocationProductLot(10L, 5L, null)).thenReturn(inventory);
+        when(inventoryService.findActiveByLocationIdInAndProductIdIn(any(), any())).thenReturn(List.of(inventory));
         when(inventoryService.releaseReservation(inventory, 10, 999L))
                 .thenThrow(new ObjectOptimisticLockingFailureException(Inventory.class, 1L));
 
