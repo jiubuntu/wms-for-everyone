@@ -31,16 +31,21 @@ public class OutboundAllocationPlanner {
     private final LocationService locationService;
     private final OutboundValidator outboundValidator;
 
+    /**
+     * FEFO 후보(fefoCandidates)는 호출측(OutboundService)이 요청 전체 상품에 대해 미리 배치로 조회해
+     * 전달한다 — item마다 이 메서드가 직접 재고를 조회하면 item 개수만큼 쿼리가 반복되기 때문.
+     * MANUAL 할당은 로케이션 지정이 있어 배치화 대상이 아니라 그대로 둔다.
+     */
     public List<OutboundAllocationPlan> plan(Long warehouseId, Product product, ProductUnit unit, int quantity,
-                                              AllocationType allocationType, List<OutboundAllocationCommand> allocations) {
+                                              AllocationType allocationType, List<OutboundAllocationCommand> allocations,
+                                              List<Inventory> fefoCandidates) {
         int baseQuantity = toBaseQuantity(product, unit, quantity);
         return allocationType == AllocationType.FEFO
-                ? allocateFefo(warehouseId, product, baseQuantity)
+                ? allocateFefo(fefoCandidates, baseQuantity)
                 : allocateManual(warehouseId, product, allocations, baseQuantity);
     }
 
-    private List<OutboundAllocationPlan> allocateFefo(Long warehouseId, Product product, int requiredBaseQuantity) {
-        List<Inventory> candidates = inventoryService.findAvailableForAllocation(warehouseId, product.getId());
+    private List<OutboundAllocationPlan> allocateFefo(List<Inventory> candidates, int requiredBaseQuantity) {
         List<OutboundAllocationPlan> plans = new ArrayList<>();
         int remaining = requiredBaseQuantity;
         for (Inventory candidate : candidates) {

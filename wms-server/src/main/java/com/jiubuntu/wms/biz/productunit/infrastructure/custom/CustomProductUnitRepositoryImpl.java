@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +38,13 @@ public class CustomProductUnitRepositoryImpl implements CustomProductUnitReposit
                         .where(productUnit.id.eq(id), activeEq())
                         .fetchOne()
         );
+    }
+
+    @Override
+    public List<ProductUnit> findAllActiveByIdIn(Collection<Long> ids) {
+        return queryFactory.selectFrom(productUnit)
+                .where(productUnit.id.in(ids), activeEq())
+                .fetch();
     }
 
     @Override

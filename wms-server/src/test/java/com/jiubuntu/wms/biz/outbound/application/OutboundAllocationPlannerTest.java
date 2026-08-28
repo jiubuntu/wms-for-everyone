@@ -75,10 +75,8 @@ class OutboundAllocationPlannerTest {
         Inventory early = inventoryOf(earlyLocation, product, "LOT-EARLY", LocalDate.of(2026, 1, 1), 20);
         Inventory late = inventoryOf(lateLocation, product, "LOT-LATE", LocalDate.of(2026, 6, 1), 20);
 
-        when(inventoryService.findAvailableForAllocation(100L, 5L)).thenReturn(List.of(early, late));
-
         List<OutboundAllocationPlan> plans = outboundAllocationPlanner.plan(
-                100L, product, baseUnit, 30, AllocationType.FEFO, List.of());
+                100L, product, baseUnit, 30, AllocationType.FEFO, List.of(), List.of(early, late));
 
         assertThat(plans).hasSize(2);
         assertThat(plans.get(0).getInventory()).isEqualTo(early);
@@ -95,9 +93,8 @@ class OutboundAllocationPlannerTest {
         Location location = locationWithId(10L);
         Inventory candidate = inventoryOf(location, product, null, null, 10);
 
-        when(inventoryService.findAvailableForAllocation(100L, 5L)).thenReturn(List.of(candidate));
-
-        assertThatThrownBy(() -> outboundAllocationPlanner.plan(100L, product, baseUnit, 30, AllocationType.FEFO, List.of()))
+        assertThatThrownBy(() -> outboundAllocationPlanner.plan(
+                100L, product, baseUnit, 30, AllocationType.FEFO, List.of(), List.of(candidate)))
                 .isInstanceOf(CommonException.class)
                 .extracting(e -> ((CommonException) e).getErrorCode())
                 .isEqualTo(ErrorCode.INSUFFICIENT_AVAILABLE_QUANTITY);
@@ -116,7 +113,7 @@ class OutboundAllocationPlannerTest {
 
         List<OutboundAllocationCommand> allocations = List.of(new OutboundAllocationCommand(10L, "LOT-1", 15));
         List<OutboundAllocationPlan> plans = outboundAllocationPlanner.plan(
-                100L, product, baseUnit, 15, AllocationType.MANUAL, allocations);
+                100L, product, baseUnit, 15, AllocationType.MANUAL, allocations, List.of());
 
         assertThat(plans).hasSize(1);
         assertThat(plans.get(0).getInventory()).isEqualTo(inventory);
@@ -138,7 +135,8 @@ class OutboundAllocationPlannerTest {
 
         List<OutboundAllocationCommand> allocations = List.of(new OutboundAllocationCommand(10L, "LOT-1", 10));
 
-        assertThatThrownBy(() -> outboundAllocationPlanner.plan(100L, product, baseUnit, 15, AllocationType.MANUAL, allocations))
+        assertThatThrownBy(() -> outboundAllocationPlanner.plan(
+                100L, product, baseUnit, 15, AllocationType.MANUAL, allocations, List.of()))
                 .isInstanceOf(CommonException.class)
                 .extracting(e -> ((CommonException) e).getErrorCode())
                 .isEqualTo(ErrorCode.OUTBOUND_ALLOCATION_MISMATCH);
@@ -153,11 +151,9 @@ class OutboundAllocationPlannerTest {
         Location location = locationWithId(10L);
         Inventory candidate = inventoryOf(location, product, null, null, 150);
 
-        when(inventoryService.findAvailableForAllocation(100L, 5L)).thenReturn(List.of(candidate));
-
         // 보조 단위(subUnit) 5박스 x 변환율 24 = 기본 단위 120개
         List<OutboundAllocationPlan> plans = outboundAllocationPlanner.plan(
-                100L, product, subUnit, 5, AllocationType.FEFO, List.of());
+                100L, product, subUnit, 5, AllocationType.FEFO, List.of(), List.of(candidate));
 
         assertThat(plans).hasSize(1);
         assertThat(plans.get(0).getQuantity()).isEqualTo(120);
